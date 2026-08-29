@@ -82,6 +82,13 @@ export function runValidator(opts: {
   execFileSync("java", args, { stdio: "inherit", timeout: 10 * 60 * 1000 });
 }
 
+function requireIgDir(dir: string): string {
+  if (!fs.existsSync(dir) || fs.readdirSync(dir).length === 0) {
+    throw new Error(`SUSHI IG missing at ${dir}; run pnpm exec sushi fhir/r4 and fhir/r5 first`);
+  }
+  return dir;
+}
+
 export function validateReleaseFhir(opts: {
   releaseDir: string;
   jar: string;
@@ -91,14 +98,16 @@ export function validateReleaseFhir(opts: {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "omc-fhir-"));
   const r4 = path.join(opts.releaseDir, "fhir-r4", "Medication.ndjson");
   const r5 = path.join(opts.releaseDir, "fhir-r5", "MedicinalProductDefinition.ndjson");
+  let ran = 0;
   if (fs.existsSync(r4)) {
     const files = materialiseNdjson(r4, path.join(tmp, "r4"), max);
     runValidator({
       jar: opts.jar,
       files,
       version: "4.0.1",
-      igDir: repoPath("fhir/r4/fsh-generated/resources"),
+      igDir: requireIgDir(repoPath("fhir/r4/fsh-generated/resources")),
     });
+    ran += 1;
   }
   if (fs.existsSync(r5)) {
     const files = materialiseNdjson(r5, path.join(tmp, "r5"), max);
@@ -106,7 +115,11 @@ export function validateReleaseFhir(opts: {
       jar: opts.jar,
       files,
       version: "5.0.0",
-      igDir: repoPath("fhir/r5/fsh-generated/resources"),
+      igDir: requireIgDir(repoPath("fhir/r5/fsh-generated/resources")),
     });
+    ran += 1;
+  }
+  if (ran === 0) {
+    throw new Error(`No FHIR NDJSON under ${opts.releaseDir} (expected fhir-r4/Medication.ndjson and/or fhir-r5/MedicinalProductDefinition.ndjson)`);
   }
 }

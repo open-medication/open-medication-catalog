@@ -71,6 +71,11 @@ jobs:
             exit 0
           fi
           exit "$code"
+      - name: Compile FHIR IGs
+        if: steps.exists.outputs.exists == 'false' && steps.build.outputs.not_yet != 'true'
+        run: |
+          pnpm exec sushi fhir/r4
+          pnpm exec sushi fhir/r5
       - name: Java FHIR validate
         if: steps.exists.outputs.exists == 'false' && steps.build.outputs.not_yet != 'true'
         run: pnpm omc fhir-validate --dir "output/${{ matrix.artifact }}/release" --max 25
