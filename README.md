@@ -5,12 +5,13 @@ Open-source generator that turns authoritative national medicinal-product datase
 **Software licence:** Apache-2.0 (this repository). **Generated datasets are not Apache-2.0**; each release carries upstream terms in `manifest.json` and `licensing/`.
 
 Canonical FHIR base (immutable once published): `https://fhir.openmedicationcatalog.org`  
-Public IG/package publication is gated until that domain is controlled and resolves over HTTPS.
+Public IG/package publication is gated until `https://fhir.openmedicationcatalog.org` resolves over HTTPS.
 
 GitHub: [open-medication/open-medication-catalog](https://github.com/open-medication/open-medication-catalog)
 
 Latest-artifact index (not GitHub `/releases/latest`):
-`https://open-medication.github.io/open-medication-catalog/catalog.json`
+[`https://openmedicationcatalog.org/catalog.json`](https://openmedicationcatalog.org/catalog.json)
+(GitHub Pages alias: `https://open-medication.github.io/open-medication-catalog/catalog.json`)
 
 ## Country tracker
 
@@ -51,7 +52,7 @@ Live Swissmedic (no credentials), archive-first:
 pnpm omc build ch-base --month 2026.09
 ```
 
-If `OGD_202609.ZIP` is not published yet, the command exits successfully as **not yet available**.
+If `OGD_202609.zip` is not published yet, the command exits successfully as **not yet available**.
 
 ## Architecture
 

@@ -12,7 +12,7 @@ attributionRequired: true
 credentialsRequired: false
 required: true
 parserSchemaVersion: "0.1.0"
-archiveUrlTemplate: "https://ogd.swissmedic.cloud/ogd-arzneimittel/Archiv/OGD_{YYYYMM}.ZIP"
+archiveUrlTemplate: "https://ogd.swissmedic.cloud/ogd-arzneimittel/Archiv/OGD_{YYYYMM}.zip"
 fallbackUrl: "https://ogd.swissmedic.cloud/ogd-arzneimittel/Daten/OGD.zip"
 xsdDir: xsd
 terms:

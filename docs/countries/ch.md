@@ -36,4 +36,4 @@ Published as Swissmedic `ROUTE_ADMIN` coding + label. EDQM system is not asserte
 
 ## Reproducibility
 
-`ch-base` attaches the exact `OGD_YYYYMM.ZIP`. Release zips are binary-reproducible (fixed timestamps/order/compression). Raw Refdata ZIP is **not** redistributed.
+`ch-base` attaches the exact `OGD_YYYYMM.zip`. Release zips are binary-reproducible (fixed timestamps/order/compression). Raw Refdata ZIP is **not** redistributed.

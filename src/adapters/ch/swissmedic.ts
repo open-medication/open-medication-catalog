@@ -89,21 +89,31 @@ export class SwissmedicAdapter implements Adapter {
       };
     }
 
-    const archiveName = `OGD_${ctx.archiveMonth}.ZIP`;
-    const archiveUrl = `https://ogd.swissmedic.cloud/ogd-arzneimittel/Archiv/${archiveName}`;
-    let buf: Buffer;
-    let uri = archiveUrl;
-    try {
-      buf = await fetchBinary(archiveUrl);
-    } catch (err) {
-      if (err instanceof HttpStatusError && (err.status === 404 || err.status === 403)) {
-        throw new SourceNotYetAvailableError(
-          `Swissmedic archive ${archiveName} is not yet available (${err.status})`,
-        );
+    const candidates = swissmedicArchiveCandidates(ctx.archiveMonth);
+    let buf: Buffer | undefined;
+    let uri = candidates[0]!.url;
+    let lastMissing: HttpStatusError | undefined;
+    for (const candidate of candidates) {
+      try {
+        buf = await fetchBinary(candidate.url);
+        uri = candidate.url;
+        break;
+      } catch (err) {
+        if (err instanceof HttpStatusError && (err.status === 404 || err.status === 403)) {
+          lastMissing = err;
+          continue;
+        }
+        throw err;
       }
-      throw err;
+    }
+    if (!buf) {
+      const names = candidates.map((c) => c.name).join(" / ");
+      throw new SourceNotYetAvailableError(
+        `Swissmedic archive ${names} is not yet available (${lastMissing?.status ?? "missing"})`,
+      );
     }
     if (!fileSignatureOk(buf, "zip")) throw new Error("Swissmedic archive is not a ZIP");
+    const archiveName = path.basename(uri);
     const archiveCopy = path.join(work, archiveName);
     fs.writeFileSync(archiveCopy, buf);
     const dest = path.join(work, "extracted");
@@ -484,6 +494,14 @@ export class SwissmedicAdapter implements Adapter {
 
 export class SourceNotYetAvailableError extends Error {
   readonly notYetAvailable = true;
+}
+
+/** Swissmedic's docs use `.ZIP`; the live archive directory uses `.zip`. Try both. */
+export function swissmedicArchiveCandidates(archiveMonth: string): { name: string; url: string }[] {
+  return [".zip", ".ZIP"].map((ext) => {
+    const name = `OGD_${archiveMonth}${ext}`;
+    return { name, url: `https://ogd.swissmedic.cloud/ogd-arzneimittel/Archiv/${name}` };
+  });
 }
 
 export function assertPackageCodeUniqueWithinAuth(packages: Package[]): void {
