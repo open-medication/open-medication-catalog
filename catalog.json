@@ -1,10 +1,10 @@
 {
   "artifacts": {
     "ch-base": {
-      "latest": "2026.08",
-      "tag": "ch-base-2026.08",
-      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-base-2026.08",
-      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-base-2026.08/manifest.json"
+      "latest": "2026.07",
+      "tag": "ch-base-2026.07",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-base-2026.07",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-base-2026.07/manifest.json"
     }
   }
 }
