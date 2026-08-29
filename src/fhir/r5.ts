@@ -1,6 +1,6 @@
 import { FHIR_CANONICAL_BASE } from "../constants.js";
 import type { Catalogue } from "../canonical/types.js";
-import { jsonLine } from "./serialize.js";
+import { jsonLine, parseFhirDecimal } from "./serialize.js";
 
 export const R5_MPD_PROFILE = `${FHIR_CANONICAL_BASE}/StructureDefinition/OpenMedicinalProductDefinition`;
 export const R5_PPD_PROFILE = `${FHIR_CANONICAL_BASE}/StructureDefinition/OpenPackagedProductDefinition`;
@@ -66,25 +66,7 @@ export function exportR5(catalogue: Catalogue, releaseLabel: string): Record<str
           role: { coding: [i.role], text: i.role.display },
           substance: {
             code: { concept: { text: i.name } },
-            strength: i.strength.structured
-              ? [
-                  {
-                    presentationRatio: {
-                      numerator: {
-                        value: Number(i.strength.numeratorValue),
-                        unit: i.strength.numeratorUnit?.code,
-                      },
-                      denominator: {
-                        value: Number(i.strength.denominatorValue),
-                        unit: i.strength.denominatorUnit?.code,
-                      },
-                    },
-                    text: i.strength.text,
-                  },
-                ]
-              : i.strength.text
-                ? [{ text: i.strength.text }]
-                : undefined,
+            strength: ingredientStrength(i.strength),
           },
           extension: commonExt(mp.jurisdiction, mp.identityAuthority, releaseLabel),
         }),
@@ -108,14 +90,7 @@ export function exportR5(catalogue: Catalogue, releaseLabel: string): Record<str
         name: pkg.description,
         description: pkg.description,
         packageFor: [{ reference: `MedicinalProductDefinition/${pkg.medicinalProductId}` }],
-        containedItemQuantity: pkg.quantity.structured
-          ? [
-              {
-                value: Number(pkg.quantity.value),
-                unit: pkg.quantity.unit?.display ?? pkg.quantity.unit?.code,
-              },
-            ]
-          : undefined,
+        containedItemQuantity: fhirQuantity(pkg.quantity.structured ? pkg.quantity.value : undefined, pkg.quantity.unit?.display ?? pkg.quantity.unit?.code),
         marketingStatus: pkg.marketingStatus
           ? [{ status: { coding: [pkg.marketingStatus] } }]
           : undefined,
@@ -148,6 +123,36 @@ export function exportR5(catalogue: Catalogue, releaseLabel: string): Record<str
     "Ingredient.ndjson": ing.join(""),
     "Organization.ndjson": orgs.join(""),
   };
+}
+
+function fhirQuantity(value: string | undefined, unit?: string): { value: number; unit?: string }[] | undefined {
+  const n = parseFhirDecimal(value);
+  if (n === undefined) return undefined;
+  return [{ value: n, unit }];
+}
+
+function ingredientStrength(strength: {
+  structured: boolean;
+  numeratorValue?: string;
+  numeratorUnit?: { code?: string };
+  denominatorValue?: string;
+  denominatorUnit?: { code?: string };
+  text?: string;
+}): unknown {
+  const numerator = strength.structured ? parseFhirDecimal(strength.numeratorValue) : undefined;
+  const denominator = strength.structured ? parseFhirDecimal(strength.denominatorValue) : undefined;
+  if (numerator !== undefined) {
+    return [
+      {
+        presentationRatio: {
+          numerator: { value: numerator, unit: strength.numeratorUnit?.code },
+          denominator: { value: denominator ?? 1, unit: strength.denominatorUnit?.code },
+        },
+        text: strength.text,
+      },
+    ];
+  }
+  return strength.text ? [{ text: strength.text }] : undefined;
 }
 
 function commonExt(jurisdiction: string, identityAuthority: string, release: string) {

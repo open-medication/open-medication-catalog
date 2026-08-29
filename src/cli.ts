@@ -4,6 +4,8 @@ import { build } from "./pipeline/build.js";
 import { searchPackages } from "./sqlite/writer.js";
 import { isOfficialArtifactId } from "./artifacts.js";
 import { SourceNotYetAvailableError } from "./adapters/ch/swissmedic.js";
+import { rebuildCatalogFromGithubReleases } from "./pipeline/packager.js";
+import fs from "node:fs";
 import path from "node:path";
 
 const program = new Command();
@@ -56,6 +58,9 @@ program
       publishOfficial: opts.publish,
     });
     if (result.notYetAvailable) {
+      const markerDir = opts.out ?? path.resolve("output", target);
+      fs.mkdirSync(markerDir, { recursive: true });
+      fs.writeFileSync(path.join(markerDir, ".not-yet-available"), "not yet available\n");
       console.log("not yet available");
       process.exitCode = 0;
       return;
@@ -116,6 +121,15 @@ program
   .action((db: string, query: string) => {
     const rows = searchPackages(db, query);
     console.log(JSON.stringify(rows, null, 2));
+  });
+
+program
+  .command("catalog")
+  .description("Rebuild pages/catalog.json from published GitHub Releases (all official artifacts)")
+  .option("--write <path>", "output path", "pages/catalog.json")
+  .action(async (opts: { write: string }) => {
+    const doc = await rebuildCatalogFromGithubReleases(path.resolve(opts.write));
+    console.log(`wrote ${opts.write} artifacts=${Object.keys(doc.artifacts).join(",") || "(none)"}`);
   });
 
 program.parseAsync(process.argv).catch((err: unknown) => {

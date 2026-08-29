@@ -1,6 +1,6 @@
 import { FHIR_CANONICAL_BASE } from "../constants.js";
 import type { Catalogue, Package } from "../canonical/types.js";
-import { stableJson, jsonLine } from "./serialize.js";
+import { stableJson, jsonLine, parseFhirDecimal } from "./serialize.js";
 
 export const R4_PROFILE = `${FHIR_CANONICAL_BASE}/StructureDefinition/OpenMedicationPackage`;
 
@@ -58,28 +58,17 @@ export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<str
       form: mp?.doseForm
         ? { coding: [mp.doseForm], text: mp.doseForm.display ?? mp.doseForm.code }
         : undefined,
-      amount: pkg.quantity.structured
-        ? {
-            numerator: { value: Number(pkg.quantity.value), unit: pkg.quantity.unit?.display ?? pkg.quantity.unit?.code },
-            denominator: { value: 1 },
-          }
-        : undefined,
+      amount: fhirRatio(pkg.quantity.structured ? pkg.quantity.value : undefined, pkg.quantity.unit?.display ?? pkg.quantity.unit?.code, "1"),
       ingredient: mp?.ingredients
         .filter((i) => i.role.code === "WIRKS" || i.role.code === "WIIS" || i.role.code === "WIZUS")
         .map((i) => ({
           itemCodeableConcept: { text: i.name, coding: i.role ? [i.role] : undefined },
-          strength: i.strength.structured
-            ? {
-                numerator: {
-                  value: Number(i.strength.numeratorValue),
-                  unit: i.strength.numeratorUnit?.code,
-                },
-                denominator: {
-                  value: Number(i.strength.denominatorValue),
-                  unit: i.strength.denominatorUnit?.code,
-                },
-              }
-            : undefined,
+          strength: fhirRatio(
+            i.strength.structured ? i.strength.numeratorValue : undefined,
+            i.strength.numeratorUnit?.code,
+            i.strength.structured ? i.strength.denominatorValue : undefined,
+            i.strength.denominatorUnit?.code,
+          ),
         })),
       extension: [
         ext("jurisdiction", pkg.jurisdiction),
@@ -109,6 +98,21 @@ export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<str
   return {
     "Medication.ndjson": medications.join(""),
     "Organization.ndjson": orgs.join(""),
+  };
+}
+
+function fhirRatio(
+  numerator: string | undefined,
+  numeratorUnit: string | undefined,
+  denominator?: string,
+  denominatorUnit?: string,
+): { numerator: { value: number; unit?: string }; denominator: { value: number; unit?: string } } | undefined {
+  const n = parseFhirDecimal(numerator);
+  if (n === undefined) return undefined;
+  const d = parseFhirDecimal(denominator ?? "1") ?? 1;
+  return {
+    numerator: { value: n, unit: numeratorUnit },
+    denominator: { value: d, unit: denominatorUnit },
   };
 }
 

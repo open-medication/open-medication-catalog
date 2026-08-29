@@ -3,6 +3,7 @@ import path from "node:path";
 import type { Catalogue } from "../canonical/types.js";
 import { FHIR_CANONICAL_BASE } from "../constants.js";
 import { GITHUB_REPO } from "../constants.js";
+import { OFFICIAL_ARTIFACT_IDS } from "../artifacts.js";
 import { exportR4 } from "../fhir/r4.js";
 import { exportR5 } from "../fhir/r5.js";
 import { writeSqlite } from "../sqlite/writer.js";
@@ -101,26 +102,96 @@ export async function writeRelease(input: PackagerInput): Promise<{ zipPath: str
   return { zipPath, sha256: sha256(fs.readFileSync(zipPath)) };
 }
 
-export function updateCatalogJson(
-  catalogPath: string,
-  artifactId: string,
-  releaseLabel: string,
-): void {
-  let doc: { artifacts: Record<string, { latest: string; tag: string; url: string; manifest: string }> } = {
-    artifacts: {},
-  };
-  if (fs.existsSync(catalogPath)) {
-    doc = JSON.parse(fs.readFileSync(catalogPath, "utf8")) as typeof doc;
-  }
+export interface CatalogArtifact {
+  latest: string;
+  tag: string;
+  url: string;
+  manifest: string;
+}
+
+export interface CatalogDoc {
+  artifacts: Record<string, CatalogArtifact>;
+}
+
+const RELEASE_TAG = /^([a-z0-9-]+)-(\d{4}\.\d{2})$/;
+
+export function catalogEntry(artifactId: string, releaseLabel: string): CatalogArtifact {
   const tag = `${artifactId}-${releaseLabel}`;
   const base = `https://github.com/${GITHUB_REPO}/releases`;
-  doc.artifacts[artifactId] = {
+  return {
     latest: releaseLabel,
     tag,
     url: `${base}/tag/${tag}`,
     manifest: `${base}/download/${tag}/manifest.json`,
   };
+}
+
+/** Latest YYYY.MM per official artifact from GitHub release tags. */
+export function catalogFromReleaseTags(tags: string[]): CatalogDoc {
+  const latest = new Map<string, string>();
+  const allowed = new Set<string>(OFFICIAL_ARTIFACT_IDS);
+  for (const tag of tags) {
+    const m = tag.match(RELEASE_TAG);
+    if (!m) continue;
+    const id = m[1]!;
+    const month = m[2]!;
+    if (!allowed.has(id)) continue;
+    const prev = latest.get(id);
+    if (!prev || month > prev) latest.set(id, month);
+  }
+  const artifacts: Record<string, CatalogArtifact> = {};
+  for (const [id, month] of [...latest.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    artifacts[id] = catalogEntry(id, month);
+  }
+  return { artifacts };
+}
+
+export async function fetchGithubReleaseTags(): Promise<string[]> {
+  const tags: string[] = [];
+  for (let page = 1; page <= 10; page++) {
+    const url = `https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=100&page=${page}`;
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github+json",
+      "User-Agent": "open-medication-catalog",
+    };
+    const token = process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN;
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const res = await fetch(url, { headers });
+    if (!res.ok) {
+      throw new Error(`GitHub releases list failed: ${res.status} ${res.statusText}`);
+    }
+    const batch = (await res.json()) as { tag_name: string; draft?: boolean; prerelease?: boolean }[];
+    if (batch.length === 0) break;
+    for (const r of batch) {
+      if (r.draft || r.prerelease) continue;
+      tags.push(r.tag_name);
+    }
+    if (batch.length < 100) break;
+  }
+  return tags;
+}
+
+export async function rebuildCatalogFromGithubReleases(catalogPath: string): Promise<CatalogDoc> {
+  const doc = catalogFromReleaseTags(await fetchGithubReleaseTags());
+  writeCatalogJson(catalogPath, doc);
+  return doc;
+}
+
+export function writeCatalogJson(catalogPath: string, doc: CatalogDoc): void {
   fs.mkdirSync(path.dirname(catalogPath), { recursive: true });
   fs.writeFileSync(catalogPath, `${JSON.stringify(doc, null, 2)}\n`);
+}
+
+export function updateCatalogJson(
+  catalogPath: string,
+  artifactId: string,
+  releaseLabel: string,
+): void {
+  let doc: CatalogDoc = { artifacts: {} };
+  if (fs.existsSync(catalogPath)) {
+    doc = JSON.parse(fs.readFileSync(catalogPath, "utf8")) as CatalogDoc;
+  }
+  doc.artifacts[artifactId] = catalogEntry(artifactId, releaseLabel);
+  writeCatalogJson(catalogPath, doc);
 }
 
