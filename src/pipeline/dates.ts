@@ -1,4 +1,4 @@
-/** Data release 2026.09 is built from Swissmedic archive OGD_202609.ZIP (as-of previous month-end). */
+/** Data release 2026.09 is built from Swissmedic archive OGD_202609.zip (as-of previous month-end). */
 
 export interface ReleaseCalendar {
   /** e.g. 2026.09 */

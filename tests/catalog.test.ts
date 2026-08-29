@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseFhirDecimal, jsonLine } from "../src/fhir/serialize.js";
 import { catalogFromReleaseTags } from "../src/pipeline/packager.js";
+import { swissmedicArchiveCandidates } from "../src/adapters/ch/swissmedic.js";
 
 describe("parseFhirDecimal", () => {
   it("accepts Swissmedic comma decimals", () => {
@@ -32,5 +33,14 @@ describe("catalogFromReleaseTags", () => {
     expect(doc.artifacts["ch-base"]?.tag).toBe("ch-base-2026.09");
     expect(doc.artifacts["ch-enriched"]?.latest).toBe("2026.08");
     expect(doc.artifacts["ch-enriched"]?.tag).toBe("ch-enriched-2026.08");
+  });
+});
+
+describe("swissmedic archive URLs", () => {
+  it("tries lowercase .zip before .ZIP", () => {
+    const [lower, upper] = swissmedicArchiveCandidates("202607");
+    expect(lower?.name).toBe("OGD_202607.zip");
+    expect(upper?.name).toBe("OGD_202607.ZIP");
+    expect(lower?.url).toContain("/Archiv/OGD_202607.zip");
   });
 });
