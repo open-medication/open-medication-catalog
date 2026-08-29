@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema targetNamespace="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
+	<xsd:element name="SMC_Sequenz" type="OGD_Sequenz"/>
+	<xsd:complexType name="OGD_Sequenz">
+		<xsd:sequence>
+			<xsd:element name="SEQUENZ" minOccurs="0" maxOccurs="unbounded" type="SEQUENZ"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="SEQUENZ">
+		<xsd:sequence>
+			<xsd:element name="ZULASSUNGSNUMMER" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Zulassungsnummer</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Numéro d’autorisation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Numero di omologazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Authorisation number</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SEQUENZNUMMER" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Dosisstärke Nummer</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Numéro de dosage</xsd:documentation>
+					<xsd:documentation xml:lang="it">Numero di dosaggio</xsd:documentation>
+					<xsd:documentation xml:lang="en">Dosage strength number</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ZULASSUNGSSTATUS" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Zulassungsstatus</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Statut d’autorisation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Stato di omologazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Authorisation status</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="WIDERRUF_VERZICHT_DATUM">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Widerrufsdatum</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Date de révocation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Data di revoca</xsd:documentation>
+					<xsd:documentation xml:lang="en">Revocation date</xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:union>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:date"/>
+						</xsd:simpleType>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:length value="0"/>
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:union>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="SEQUENZNAME" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Dosisstärke Name</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Nom du dosage</xsd:documentation>
+					<xsd:documentation xml:lang="it">Nome dosaggio</xsd:documentation>
+					<xsd:documentation xml:lang="en">Dosage strength name</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ZULASSUNGSART" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Zulassungsart</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Type d’autorisation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Tipo di omologazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Authorisation type</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="BASIS_SEQUENZNUMMER" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Basis Dosisstärke</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Numéro de Dosage de base</xsd:documentation>
+					<xsd:documentation xml:lang="it">Dosaggio di base</xsd:documentation>
+					<xsd:documentation xml:lang="en">Basic dosage strength</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ANWENDUNGSGEBIET" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Anwendungsgebiet</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Champ d’application</xsd:documentation>
+					<xsd:documentation xml:lang="it">Settore di applicazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Indication</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="DECLA_HMV4" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Wenn leer, Deklaration nach neuem Recht (ab 1.1.2019). Wenn X nach altem Recht</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Valeur vide, Déclaration selon la nouvelle loi du 1.1.2019. Value «X» selon la vielle loi</xsd:documentation>
+					<xsd:documentation xml:lang="it">Se vuoto, allora dichiarazione secondo la nuova legge (dalla 1.1.2019). Se “X” secondo la vecchia legge</xsd:documentation>
+					<xsd:documentation xml:lang="en">If empty, declaration by the new law (from 1.1.2019). If “X” by the old law</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

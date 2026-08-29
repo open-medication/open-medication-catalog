@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
+	<xsd:element name="SMC_Praeparat" type="OGD_Praeparat"/>
+	<xsd:simpleType name="OptionalDate">
+		<xsd:union>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:date"/>
+			</xsd:simpleType>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:length value="0"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:union>
+	</xsd:simpleType>
+	<xsd:complexType name="OGD_Praeparat">
+		<xsd:sequence>
+			<xsd:element name="PRAEPARAT" minOccurs="0" maxOccurs="unbounded" type="PRAEPARAT"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="PRAEPARAT">
+		<xsd:sequence>
+			<xsd:element name="VERWENDUNG" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">HAM für Humanarzneimittel, TAM für Tierarzneimittel</xsd:documentation>
+					<xsd:documentation xml:lang="fr">HAM pour les médicaments à usage humain, TAM pour les médicaments à usage vétérinaire</xsd:documentation>
+					<xsd:documentation xml:lang="it">HAM per medicamenti per uso umano, TAM per medicamenti veterinari</xsd:documentation>
+					<xsd:documentation xml:lang="en">HAM for human medicinal products, TAM for veterinary medicinal products</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ZULASSUNGSNUMMER" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Zulassungsnummer</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Numéro d’autorisation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Numero di omologazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Authorisation number</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="PRAEPARATENAME" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Arzneimittelname</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Dénomination du médicament</xsd:documentation>
+					<xsd:documentation xml:lang="it">Nome del medicamento</xsd:documentation>
+					<xsd:documentation xml:lang="en">Name of medicinal product</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ARZNEIFORM" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Arzneiform Code</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Code de la forme galénique</xsd:documentation>
+					<xsd:documentation xml:lang="it">Codice della forma farmaceutica</xsd:documentation>
+					<xsd:documentation xml:lang="en">Dosage form code</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ATC_CODE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">ATC-Code</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Code ATC</xsd:documentation>
+					<xsd:documentation xml:lang="it">Codice ATC</xsd:documentation>
+					<xsd:documentation xml:lang="en">ATC code</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="HEILMITTEL_CODE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Heilmittelcode</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Catégorie du médicament</xsd:documentation>
+					<xsd:documentation xml:lang="it">Codice agente terapeutico</xsd:documentation>
+					<xsd:documentation xml:lang="en">Therapeutic products code</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ZULASSUNGSSTATUS" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Fall: Status</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Cas : statut</xsd:documentation>
+					<xsd:documentation xml:lang="it">Caso: stato</xsd:documentation>
+					<xsd:documentation xml:lang="en">Case: Status</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ZULASSUNGSKATEGORIE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Zulassungskategorie</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Catégorie d’autorisation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Categoria per l’omologazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Authorisation category</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ZULASSUNGSINHABERIN" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Zulassungsinhaberin</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Titulaire de l’autorisation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Titolare dell’omologazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Marketing authorisation holder</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ERSTZULASSUNGSDATUM" type="OptionalDate">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Zulassungsdatum</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Date de l’autorisation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Data di omologazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Authorisation date</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="BASIS_ZULASSUNGSNUMMER" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Basis-Zulassungsnummer</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Numéro de l’autorisation de base</xsd:documentation>
+					<xsd:documentation xml:lang="it">Numero di omologazione di base</xsd:documentation>
+					<xsd:documentation xml:lang="en">Basic authorisation number</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ABGABEKATEGORIE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Abgabekategorie</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Catégorie de remise</xsd:documentation>
+					<xsd:documentation xml:lang="it">Categoria di dispensazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Supply category</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="IT_NUMMER" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">IT Nummer</xsd:documentation>
+					<xsd:documentation xml:lang="fr">No IT</xsd:documentation>
+					<xsd:documentation xml:lang="it">Numero IT</xsd:documentation>
+					<xsd:documentation xml:lang="en">IT number</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ANWENDUNGSGEBIET" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Anwendungsgebiet</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Champ d’application</xsd:documentation>
+					<xsd:documentation xml:lang="it">Settore di applicazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Indication</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ABLAUFDATUM" type="OptionalDate">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Ablaufdatum</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Date d’échéance</xsd:documentation>
+					<xsd:documentation xml:lang="it">Data di scadenza</xsd:documentation>
+					<xsd:documentation xml:lang="en">Expiry date</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="CHARGENFREIGABE_PFLICHT" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Chargenfreigabe Pflicht</xsd:documentation>
+					<xsd:documentation xml:lang="fr">obligation de libération des lots</xsd:documentation>
+					<xsd:documentation xml:lang="it">La libération des lots est obligatoire</xsd:documentation>
+					<xsd:documentation xml:lang="en">batch release obligation</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="EINZELEINFUHR_BEWILLIG_PFLICHT" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Einzeleinfuhr Bewilligungspflicht</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Obligation d’obtention d’une autorisation d’importation à l’unité</xsd:documentation>
+					<xsd:documentation xml:lang="it">Obbligo di autorizzazione importazione singola</xsd:documentation>
+					<xsd:documentation xml:lang="en">single import duty</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

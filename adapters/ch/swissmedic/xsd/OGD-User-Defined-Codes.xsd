@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema targetNamespace="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
+	<xsd:element name="SMC_Udc" type="OGD_Udc"/>
+	<xsd:complexType name="OGD_Udc">
+		<xsd:sequence>
+			<xsd:element name="UDC" minOccurs="0" maxOccurs="unbounded" type="UDC"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="UDC">
+		<xsd:sequence>
+			<xsd:element name="SYSTEM_CODE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Characterfeld der Länge 10</xsd:documentation>
+					<xsd:documentation xml:lang="fr"></xsd:documentation>
+					<xsd:documentation xml:lang="it">Campo di caratteri della lunghezza 10</xsd:documentation>
+					<xsd:documentation xml:lang="en">Character field with length 10</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="USER_DEFINED_CODE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">UDC Name (Tabellenname)</xsd:documentation>
+					<xsd:documentation xml:lang="fr"></xsd:documentation>
+					<xsd:documentation xml:lang="it">Nome UDC (nome tabella)</xsd:documentation>
+					<xsd:documentation xml:lang="en">UDC name (table name)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="CODE_VALUE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">UDC Wert Swissmedic</xsd:documentation>
+					<xsd:documentation xml:lang="fr"></xsd:documentation>
+					<xsd:documentation xml:lang="it">Valore UDC Swissmedic</xsd:documentation>
+					<xsd:documentation xml:lang="en">UDC value Swissmedic</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SPRACH_CODE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Sprachenschlüssel</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Language code</xsd:documentation>
+					<xsd:documentation xml:lang="it">Codice lingua</xsd:documentation>
+					<xsd:documentation xml:lang="en"></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="BESCHREIBUNG_1" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">UDC Beschreibung 1</xsd:documentation>
+					<xsd:documentation xml:lang="fr">UDC description 1</xsd:documentation>
+					<xsd:documentation xml:lang="it">Descrizione UDC 1</xsd:documentation>
+					<xsd:documentation xml:lang="en"></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="BESCHREIBUNG_2" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">UDC Beschreibung 2</xsd:documentation>
+					<xsd:documentation xml:lang="fr">UDC description 2</xsd:documentation>
+					<xsd:documentation xml:lang="it">Descrizione UDC 2</xsd:documentation>
+					<xsd:documentation xml:lang="en"></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="BESCHREIBUNG_LANG" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">UDC Beschreibung 3</xsd:documentation>
+					<xsd:documentation xml:lang="fr">UDC description 3</xsd:documentation>
+					<xsd:documentation xml:lang="it">Descrizione UDC 3</xsd:documentation>
+					<xsd:documentation xml:lang="en"></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

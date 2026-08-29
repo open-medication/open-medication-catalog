@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fhir.openmedicationcatalog.org/canonical/0.1.0/catalogue.schema.json",
+  "title": "OMC canonical catalogue 0.1.0",
+  "type": "object",
+  "required": ["schemaVersion", "artifactId", "jurisdiction", "productGroups", "medicinalProducts", "packages"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "artifactId": { "type": "string" },
+    "jurisdiction": { "type": "string" },
+    "productGroups": { "type": "array" },
+    "medicinalProducts": { "type": "array" },
+    "packages": { "type": "array" }
+  }
+}

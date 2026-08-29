@@ -1,0 +1,17 @@
+node_modules/
+dist/
+output/
+.omc-cache/
+*.jar
+.DS_Store
+coverage/
+fhir/*/fsh-generated/
+fhir/*/output/
+fhir/*/temp/
+fhir/*/input-cache/
+*.tsbuildinfo
+.idea/
+.vscode/
+.env
+.env.*
+!.env.example

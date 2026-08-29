@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema targetNamespace="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
+	<xsd:element name="SMC_Packung" type="OGD_Packung"/>
+	<xsd:complexType name="OGD_Packung">
+		<xsd:sequence>
+			<xsd:element name="PACKUNG" minOccurs="0" maxOccurs="unbounded" type="PACKUNG"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="PACKUNG">
+		<xsd:sequence>
+			<xsd:element name="ZULASSUNGSNUMMER" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Zulassungsnummer (Primärschlüssel in Datei 'OGD-Praeparate.xml')</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Numéro d’autorisation (Clé primaire dans le fichier 'OGD-Praeparate.xml')</xsd:documentation>
+					<xsd:documentation xml:lang="it">Numero di omologazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Authorisation number (Primary Key in file 'OGD-Praeparate.xml')</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SEQUENZNUMMER" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Dosisstärke Nummer</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Numéro de dosage</xsd:documentation>
+					<xsd:documentation xml:lang="it">Numero di dosaggio</xsd:documentation>
+					<xsd:documentation xml:lang="en">Dosage strength number</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="PACKUNGSCODE" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Packungscode</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Code d’emballage</xsd:documentation>
+					<xsd:documentation xml:lang="it">Codice confezione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Pack code</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ZULASSUNGSSTATUS" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Zulassungsstatus</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Statut d’autorisation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Stato di omologazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Authorisation status</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="BEMERKUNG_FREITEXT" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Packungsbeschreibung</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Description de l’emballage</xsd:documentation>
+					<xsd:documentation xml:lang="it">Descrizione della confezione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Pack description</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="PACKUNGSGROESSE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Packungsgrösse</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Conditionnement</xsd:documentation>
+					<xsd:documentation xml:lang="it">Formato della confezione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Pack size</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="PACKUNGSEINHEIT" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Packungseinheit</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Unité de conditionnement</xsd:documentation>
+					<xsd:documentation xml:lang="it">Unità di imballaggio</xsd:documentation>
+					<xsd:documentation xml:lang="en">Package unit</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="WIDERRUF_VERZICHT_DATUM">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Widerrufsdatum</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Date de révocation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Data di revoca</xsd:documentation>
+					<xsd:documentation xml:lang="en">Revocation date</xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:union>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:date"/>
+						</xsd:simpleType>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:length value="0"/>
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:union>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="BTM_CODE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">BTM-Verzeichnis</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Tableau des stupéfiants</xsd:documentation>
+					<xsd:documentation xml:lang="it">Elenchi degli stupefacenti</xsd:documentation>
+					<xsd:documentation xml:lang="en">Narcotics list</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ABGABEKATEGORIE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Abgabekategorie zur Packung</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Catégorie de livraison au pack</xsd:documentation>
+					<xsd:documentation xml:lang="it">Categoria di consegna</xsd:documentation>
+					<xsd:documentation xml:lang="en">delivery category to the pack</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="PACKUNGSTYP" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Packungstyp</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Package type</xsd:documentation>
+					<xsd:documentation xml:lang="it">Tipo di pacchetto</xsd:documentation>
+					<xsd:documentation xml:lang="en">Package type</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

@@ -1,0 +1,89 @@
+# Swissmedic OGD field mapping. Unknown fields must not be silently ignored.
+sourceId: swissmedic
+files:
+  OGD-Praeparate.XML:
+    VERWENDUNG: mapped
+    ZULASSUNGSNUMMER: mapped
+    PRAEPARATENAME: mapped
+    ARZNEIFORM: mapped
+    ATC_CODE: mapped
+    HEILMITTEL_CODE: retained-as-metadata
+    ZULASSUNGSSTATUS: mapped
+    ZULASSUNGSKATEGORIE: retained-as-metadata
+    ZULASSUNGSINHABERIN: mapped
+    ERSTZULASSUNGSDATUM: mapped
+    BASIS_ZULASSUNGSNUMMER: retained-as-metadata
+    ABGABEKATEGORIE: retained-as-metadata
+    IT_NUMMER: retained-as-metadata
+    ANWENDUNGSGEBIET: retained-as-metadata
+    ABLAUFDATUM: mapped
+    CHARGENFREIGABE_PFLICHT: retained-as-metadata
+    EINZELEINFUHR_BEWILLIG_PFLICHT: retained-as-metadata
+  OGD-Sequenzen.XML:
+    ZULASSUNGSNUMMER: mapped
+    SEQUENZNUMMER: mapped
+    ZULASSUNGSSTATUS: mapped
+    WIDERRUF_VERZICHT_DATUM: mapped
+    SEQUENZNAME: mapped
+    ZULASSUNGSART: retained-as-metadata
+    BASIS_SEQUENZNUMMER: retained-as-metadata
+    ANWENDUNGSGEBIET: retained-as-metadata
+    DECLA_HMV4: retained-as-metadata
+  OGD-Packungen.XML:
+    ZULASSUNGSNUMMER: mapped
+    SEQUENZNUMMER: mapped
+    PACKUNGSCODE: mapped
+    ZULASSUNGSSTATUS: mapped
+    BEMERKUNG_FREITEXT: mapped
+    PACKUNGSGROESSE: mapped
+    PACKUNGSEINHEIT: mapped
+    WIDERRUF_VERZICHT_DATUM: mapped
+    BTM_CODE: retained-as-metadata
+    ABGABEKATEGORIE: retained-as-metadata
+    PACKUNGSTYP: mapped
+  OGD-Deklarationen.XML:
+    ZULASSUNGSNUMMER: mapped
+    SEQUENZNUMMER: mapped
+    KOMPONENTENNUMMER: mapped
+    KOMPONENTE: mapped
+    ZEILENNUMMER: mapped
+    SORTIERUNG_ZEILENNUMMER: mapped
+    ZEILENTYP: mapped
+    STOFF_ID: mapped
+    STOFFKATEGORIE: mapped
+    MENGE: mapped
+    MENGEN_EINHEIT: mapped
+    DEKLARATIONSART: mapped
+  OGD-Adressen.XML:
+    PARTNER_NR: mapped
+    FIRMENNAME: mapped
+    ADRESSZEILE_1: retained-as-metadata
+    ADRESSZEILE_2: retained-as-metadata
+    LAND_CODE: retained-as-metadata
+    PLZ: retained-as-metadata
+    ORT: retained-as-metadata
+    SPRACH_CODE: retained-as-metadata
+    KANTON: retained-as-metadata
+  OGD-User-Defined-Codes.XML:
+    SYSTEM_CODE: mapped
+    USER_DEFINED_CODE: mapped
+    CODE_VALUE: mapped
+    SPRACH_CODE: mapped
+    BESCHREIBUNG_1: mapped
+    BESCHREIBUNG_2: mapped
+    BESCHREIBUNG_LANG: mapped
+  OGD-Export-Datum.XML:
+    EXPORT_DATUM: mapped
+  OGD-ATC-Codes.XML:
+    ATC_CODE: mapped
+    ATC_INDIKATIONS_BESCHREIBUNG: mapped
+  OGD-Applikationsarten pro Sequenz.XML:
+    ZULASSUNGSNUMMER: mapped
+    SEQUENZNUMMER: mapped
+    APPLIKATIONSART_CODE: mapped
+  OGD-Stoff-Synonyme.XML:
+    STOFF_ID: mapped
+    SYNONYM_CODE: mapped
+    LAUFENDE_NR: retained-as-metadata
+    STOFFSYNONYM: mapped
+    QUELLE: retained-as-metadata

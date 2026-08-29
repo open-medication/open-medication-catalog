@@ -1,0 +1,17 @@
+id: org.openmedicationcatalog.r5
+canonical: https://fhir.openmedicationcatalog.org
+name: OpenMedicationCatalogR5
+title: Open Medication Catalogue R5
+status: draft
+version: 0.1.0
+fhirVersion: 5.0.0
+copyrightYear: 2026+
+releaseLabel: ci-build
+publisher:
+  name: Open Medication Catalogue
+  url: https://github.com/open-medication/open-medication-catalog
+jurisdiction: urn:iso:std:iso:3166#CH
+description: IDMP-aligned (not ISO-certified) R5 Medication Definition profiles. MedicinalProduct maps to MedicinalProductDefinition. Public publication is gated on fhir.openmedicationcatalog.org.
+menu:
+  Home: index.html
+  Profiles: artifacts.html
