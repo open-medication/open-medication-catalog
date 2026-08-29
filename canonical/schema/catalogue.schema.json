@@ -1,15 +1,362 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fhir.openmedicationcatalog.org/canonical/0.1.0/catalogue.schema.json",
-  "title": "OMC canonical catalogue 0.1.0",
+  "title": "Catalogue",
+  "description": "OMC canonical catalogue 0.1.0. JSON Schema is the source of truth; TypeScript types are generated from this file.",
   "type": "object",
-  "required": ["schemaVersion", "artifactId", "jurisdiction", "productGroups", "medicinalProducts", "packages"],
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "artifactId",
+    "jurisdiction",
+    "generatorVersion",
+    "productGroups",
+    "medicinalProducts",
+    "packages",
+    "organizations",
+    "authorizations",
+    "substances",
+    "reimbursements",
+    "sourceSnapshots",
+    "mappingCoverage"
+  ],
   "properties": {
     "schemaVersion": { "const": "0.1.0" },
-    "artifactId": { "type": "string" },
-    "jurisdiction": { "type": "string" },
-    "productGroups": { "type": "array" },
-    "medicinalProducts": { "type": "array" },
-    "packages": { "type": "array" }
+    "artifactId": { "type": "string", "minLength": 1 },
+    "release": { "type": "string" },
+    "jurisdiction": { "type": "string", "minLength": 1 },
+    "generatorVersion": { "type": "string", "minLength": 1 },
+    "productGroups": { "type": "array", "items": { "$ref": "#/$defs/ProductGroup" } },
+    "medicinalProducts": { "type": "array", "items": { "$ref": "#/$defs/MedicinalProduct" } },
+    "packages": { "type": "array", "items": { "$ref": "#/$defs/Package" } },
+    "organizations": { "type": "array", "items": { "$ref": "#/$defs/Organization" } },
+    "authorizations": { "type": "array", "items": { "$ref": "#/$defs/Authorization" } },
+    "substances": { "type": "array", "items": { "$ref": "#/$defs/Substance" } },
+    "reimbursements": { "type": "array", "items": { "$ref": "#/$defs/Reimbursement" } },
+    "sourceSnapshots": { "type": "array", "items": { "$ref": "#/$defs/SourceSnapshot" } },
+    "mappingCoverage": { "type": "array", "items": { "$ref": "#/$defs/MappingCoverageReport" } }
+  },
+  "$defs": {
+    "EntityId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "UUIDv5 canonical id. Stored as a string; never coerced to a number."
+    },
+    "AuthorityKey": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Authority business key. Identifiers are strings always (001 stays 001)."
+    },
+    "CodedValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "code"],
+      "properties": {
+        "system": { "type": "string", "minLength": 1 },
+        "code": { "type": "string", "minLength": 1 },
+        "display": { "type": "string" }
+      }
+    },
+    "FieldProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceId", "snapshotId"],
+      "properties": {
+        "sourceId": { "type": "string", "minLength": 1 },
+        "snapshotId": { "type": "string", "minLength": 1 },
+        "originalField": { "type": "string" }
+      }
+    },
+    "Identifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "value"],
+      "properties": {
+        "system": { "type": "string", "minLength": 1 },
+        "value": { "type": "string", "minLength": 1 },
+        "use": { "type": "string", "enum": ["official", "usual", "secondary"] }
+      }
+    },
+    "SourceSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sourceId", "identityAuthority", "retrievedAt", "sha256", "uri"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "sourceId": { "type": "string", "minLength": 1 },
+        "identityAuthority": { "type": "string", "minLength": 1 },
+        "retrievedAt": { "type": "string", "minLength": 1 },
+        "sourceEffectiveDate": { "type": "string" },
+        "sha256": { "type": "string", "minLength": 1 },
+        "uri": { "type": "string", "minLength": 1 },
+        "termsReviewedAt": { "type": "string" },
+        "termsChecksum": { "type": "string" }
+      }
+    },
+    "SourceRecordRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceId", "snapshotId", "recordKey"],
+      "properties": {
+        "sourceId": { "type": "string", "minLength": 1 },
+        "snapshotId": { "type": "string", "minLength": 1 },
+        "recordKey": { "type": "string", "minLength": 1 },
+        "checksum": { "type": "string" }
+      }
+    },
+    "LocalizedName": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1 },
+        "language": { "type": "string" }
+      }
+    },
+    "StringMap": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "Organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "jurisdiction", "identityAuthority", "authorityKey", "name", "role", "identifiers", "sourceRecords"],
+      "properties": {
+        "id": { "$ref": "#/$defs/EntityId" },
+        "jurisdiction": { "type": "string", "minLength": 1 },
+        "identityAuthority": { "type": "string", "minLength": 1 },
+        "authorityKey": { "$ref": "#/$defs/AuthorityKey" },
+        "name": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "enum": ["marketing-authorisation-holder", "manufacturer", "supplier"] },
+        "identifiers": { "type": "array", "items": { "$ref": "#/$defs/Identifier" } },
+        "sourceRecords": { "type": "array", "items": { "$ref": "#/$defs/SourceRecordRef" } }
+      }
+    },
+    "ProductGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "jurisdiction", "identityAuthority", "authorityKey", "names", "regulatoryStatus", "identifiers", "sourceRecords"],
+      "properties": {
+        "id": { "$ref": "#/$defs/EntityId" },
+        "jurisdiction": { "type": "string", "minLength": 1 },
+        "identityAuthority": { "type": "string", "minLength": 1 },
+        "authorityKey": { "$ref": "#/$defs/AuthorityKey" },
+        "names": { "type": "array", "items": { "$ref": "#/$defs/LocalizedName" } },
+        "atc": { "$ref": "#/$defs/CodedValue" },
+        "regulatoryStatus": { "$ref": "#/$defs/CodedValue" },
+        "authorizationHolderId": { "$ref": "#/$defs/EntityId" },
+        "validityStart": { "type": "string" },
+        "validityEnd": { "type": "string" },
+        "identifiers": { "type": "array", "items": { "$ref": "#/$defs/Identifier" } },
+        "sourceRecords": { "type": "array", "items": { "$ref": "#/$defs/SourceRecordRef" } },
+        "metadata": { "$ref": "#/$defs/StringMap" }
+      }
+    },
+    "DeclarationRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "componentNumber", "rowNumber", "rowType", "sourceText"],
+      "properties": {
+        "id": { "$ref": "#/$defs/EntityId" },
+        "componentNumber": { "type": "string" },
+        "componentName": { "type": "string" },
+        "rowNumber": { "type": "string" },
+        "sortOrder": { "type": "string" },
+        "rowType": { "type": "string" },
+        "substanceId": { "$ref": "#/$defs/EntityId" },
+        "sourceSubstanceId": { "type": "string" },
+        "substanceName": { "type": "string" },
+        "roleCode": { "$ref": "#/$defs/CodedValue" },
+        "quantity": { "type": "string" },
+        "quantityUnit": { "$ref": "#/$defs/CodedValue" },
+        "declarationFormat": { "type": "string" },
+        "sourceText": { "type": "string" }
+      }
+    },
+    "Strength": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["structured"],
+      "properties": {
+        "numeratorValue": { "type": "string" },
+        "numeratorUnit": { "$ref": "#/$defs/CodedValue" },
+        "denominatorValue": { "type": "string" },
+        "denominatorUnit": { "$ref": "#/$defs/CodedValue" },
+        "text": { "type": "string" },
+        "structured": { "type": "boolean" }
+      }
+    },
+    "Ingredient": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "declarationRowId", "name", "role", "strength"],
+      "properties": {
+        "id": { "$ref": "#/$defs/EntityId" },
+        "declarationRowId": { "$ref": "#/$defs/EntityId" },
+        "name": { "type": "string", "minLength": 1 },
+        "role": { "$ref": "#/$defs/CodedValue" },
+        "strength": { "$ref": "#/$defs/Strength" }
+      }
+    },
+    "MedicinalProduct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "jurisdiction",
+        "identityAuthority",
+        "authorityKey",
+        "names",
+        "routes",
+        "regulatoryStatus",
+        "identifiers",
+        "declarationRows",
+        "ingredients",
+        "sourceRecords"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/EntityId" },
+        "jurisdiction": { "type": "string", "minLength": 1 },
+        "identityAuthority": { "type": "string", "minLength": 1 },
+        "authorityKey": { "$ref": "#/$defs/AuthorityKey" },
+        "productGroupId": { "$ref": "#/$defs/EntityId" },
+        "names": { "type": "array", "items": { "$ref": "#/$defs/LocalizedName" } },
+        "doseForm": { "$ref": "#/$defs/CodedValue" },
+        "routes": { "type": "array", "items": { "$ref": "#/$defs/CodedValue" } },
+        "regulatoryStatus": { "$ref": "#/$defs/CodedValue" },
+        "authorizationId": { "$ref": "#/$defs/EntityId" },
+        "identifiers": { "type": "array", "items": { "$ref": "#/$defs/Identifier" } },
+        "declarationRows": { "type": "array", "items": { "$ref": "#/$defs/DeclarationRow" } },
+        "ingredients": { "type": "array", "items": { "$ref": "#/$defs/Ingredient" } },
+        "sourceRecords": { "type": "array", "items": { "$ref": "#/$defs/SourceRecordRef" } },
+        "metadata": { "$ref": "#/$defs/StringMap" }
+      }
+    },
+    "PackageQuantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["structured"],
+      "properties": {
+        "value": { "type": "string" },
+        "unit": { "$ref": "#/$defs/CodedValue" },
+        "structured": { "type": "boolean" }
+      }
+    },
+    "FieldProvenanceMap": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/FieldProvenance" }
+    },
+    "Package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "jurisdiction",
+        "identityAuthority",
+        "authorityKey",
+        "medicinalProductId",
+        "description",
+        "quantity",
+        "regulatoryStatus",
+        "identifiers",
+        "fieldProvenance",
+        "sourceRecords"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/EntityId" },
+        "jurisdiction": { "type": "string", "minLength": 1 },
+        "identityAuthority": { "type": "string", "minLength": 1 },
+        "authorityKey": { "$ref": "#/$defs/AuthorityKey" },
+        "medicinalProductId": { "$ref": "#/$defs/EntityId" },
+        "productGroupId": { "$ref": "#/$defs/EntityId" },
+        "description": { "type": "string" },
+        "quantity": { "$ref": "#/$defs/PackageQuantity" },
+        "packageType": { "$ref": "#/$defs/CodedValue" },
+        "regulatoryStatus": { "$ref": "#/$defs/CodedValue" },
+        "marketingStatus": { "$ref": "#/$defs/CodedValue" },
+        "reimbursementStatus": { "$ref": "#/$defs/CodedValue" },
+        "gtin": { "type": "string" },
+        "identifiers": { "type": "array", "items": { "$ref": "#/$defs/Identifier" } },
+        "fieldProvenance": { "$ref": "#/$defs/FieldProvenanceMap" },
+        "sourceRecords": { "type": "array", "items": { "$ref": "#/$defs/SourceRecordRef" } },
+        "metadata": { "$ref": "#/$defs/StringMap" }
+      }
+    },
+    "Authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "jurisdiction", "identityAuthority", "authorityKey", "status", "medicinalProductIds", "identifiers", "sourceRecords"],
+      "properties": {
+        "id": { "$ref": "#/$defs/EntityId" },
+        "jurisdiction": { "type": "string", "minLength": 1 },
+        "identityAuthority": { "type": "string", "minLength": 1 },
+        "authorityKey": { "$ref": "#/$defs/AuthorityKey" },
+        "holderId": { "$ref": "#/$defs/EntityId" },
+        "status": { "$ref": "#/$defs/CodedValue" },
+        "medicinalProductIds": { "type": "array", "items": { "$ref": "#/$defs/EntityId" } },
+        "identifiers": { "type": "array", "items": { "$ref": "#/$defs/Identifier" } },
+        "sourceRecords": { "type": "array", "items": { "$ref": "#/$defs/SourceRecordRef" } }
+      }
+    },
+    "Substance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "identityAuthority", "authorityKey", "name", "identifiers"],
+      "properties": {
+        "id": { "$ref": "#/$defs/EntityId" },
+        "identityAuthority": { "type": "string", "minLength": 1 },
+        "authorityKey": { "$ref": "#/$defs/AuthorityKey" },
+        "name": { "type": "string", "minLength": 1 },
+        "identifiers": { "type": "array", "items": { "$ref": "#/$defs/Identifier" } }
+      }
+    },
+    "Reimbursement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["packageId", "status", "fieldProvenance"],
+      "properties": {
+        "packageId": { "$ref": "#/$defs/EntityId" },
+        "status": { "$ref": "#/$defs/CodedValue" },
+        "price": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "currency"],
+          "properties": {
+            "value": { "type": "string" },
+            "currency": { "type": "string" }
+          }
+        },
+        "limitations": { "type": "string" },
+        "validFrom": { "type": "string" },
+        "validTo": { "type": "string" },
+        "fieldProvenance": { "$ref": "#/$defs/FieldProvenance" }
+      }
+    },
+    "MappingClass": {
+      "type": "string",
+      "enum": ["mapped", "intentionally-ignored", "retained-as-metadata", "unknown"]
+    },
+    "MappingCoverageReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceId", "fields", "unknownFields"],
+      "properties": {
+        "sourceId": { "type": "string", "minLength": 1 },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "classification", "count"],
+            "properties": {
+              "name": { "type": "string" },
+              "classification": { "$ref": "#/$defs/MappingClass" },
+              "count": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "unknownFields": { "type": "array", "items": { "type": "string" } }
+      }
+    }
   }
 }

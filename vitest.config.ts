@@ -5,5 +5,8 @@ export default defineConfig({
     include: ["tests/**/*.test.ts"],
     testTimeout: 60_000,
     hookTimeout: 60_000,
+    env: {
+      OMC_SKIP_TERMS: "1",
+    },
   },
 });

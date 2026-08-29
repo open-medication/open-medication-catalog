@@ -10,4 +10,4 @@ Upstream data is **not** Apache-2.0:
 | Refdata | allowed | derived fields; not the credential-gated ZIP | required if fields unchanged |
 | BAG SL | review-required | review-required | TBD |
 
-Terms pages are checksummed. A material change blocks redistribution of that source until `terms.reviewedAt` is updated.
+Terms pages are checksummed (`adapters/ch/*/terms.snapshot.txt` and `terms.checksum` in each `source.yaml`). A material change blocks official redistribution until `terms.reviewedAt` and the snapshot are updated.

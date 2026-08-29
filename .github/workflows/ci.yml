@@ -15,11 +15,30 @@ jobs:
         with:
           node-version: "22"
           cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
       - run: pnpm install --frozen-lockfile
       - run: pnpm rebuild:native
       - run: pnpm typecheck
+      - name: Generated types match JSON Schema
+        run: |
+          pnpm gen:types
+          git diff --exit-code src/canonical/generated.ts
       - run: pnpm test
       - run: pnpm exec sushi fhir/r4
       - run: pnpm exec sushi fhir/r5
       - name: Fixture official build
+        env:
+          OMC_SKIP_TERMS: "1"
         run: pnpm omc build ch-base --input fixtures/ch/swissmedic/OGD_FIXTURE.zip --month 2026.08 --out /tmp/omc-ci
+      - name: Cache HL7 validator
+        uses: actions/cache@v4
+        with:
+          path: tooling/validator_cli.jar
+          key: validator-cli-${{ hashFiles('tooling/pins.json') }}
+      - name: Java FHIR validate fixture
+        run: pnpm omc fhir-validate --dir /tmp/omc-ci/release --max 10
+      - name: Terms snapshots still match live pages
+        run: pnpm omc terms

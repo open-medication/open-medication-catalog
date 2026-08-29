@@ -5,6 +5,8 @@ import { searchPackages } from "./sqlite/writer.js";
 import { isOfficialArtifactId } from "./artifacts.js";
 import { SourceNotYetAvailableError } from "./adapters/ch/swissmedic.js";
 import { rebuildCatalogFromGithubReleases } from "./pipeline/packager.js";
+import { checkAllTerms } from "./pipeline/terms.js";
+import { ensureValidatorJar, validateReleaseFhir } from "./pipeline/validator.js";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -130,6 +132,34 @@ program
   .action(async (opts: { write: string }) => {
     const doc = await rebuildCatalogFromGithubReleases(path.resolve(opts.write));
     console.log(`wrote ${opts.write} artifacts=${Object.keys(doc.artifacts).join(",") || "(none)"}`);
+  });
+
+program
+  .command("terms")
+  .description("Compare live terms pages to committed snapshots; exit 1 on material change")
+  .action(async () => {
+    const rows = await checkAllTerms();
+    for (const t of rows) {
+      const state = t.fetchError ? `fetch-error ${t.fetchError}` : t.changed ? "CHANGED" : "ok";
+      console.log(`${t.sourceId}\t${state}\tstored=${t.storedChecksum ?? "-"}\tlive=${t.currentChecksum ?? "-"}`);
+    }
+    if (rows.some((t) => t.changed || t.fetchError || !t.storedChecksum)) {
+      process.exitCode = 1;
+    }
+  });
+
+program
+  .command("fhir-validate")
+  .description("Run the pinned HL7 Java validator over a release directory")
+  .requiredOption("--dir <path>", "release directory containing fhir-r4/ and fhir-r5/")
+  .option("--max <n>", "max resources per NDJSON file", "20")
+  .action(async (opts: { dir: string; max: string }) => {
+    const jar = await ensureValidatorJar();
+    validateReleaseFhir({
+      releaseDir: path.resolve(opts.dir),
+      jar,
+      maxResources: Number(opts.max),
+    });
   });
 
 program.parseAsync(process.argv).catch((err: unknown) => {
