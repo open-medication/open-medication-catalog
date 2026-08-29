@@ -1,0 +1,107 @@
+name: monthly-release
+on:
+  schedule:
+    # Daily 07:00 UTC on days 7–14
+    - cron: "0 7 7-14 * *"
+  workflow_dispatch:
+    inputs:
+      artifact:
+        description: "ch-base or ch-enriched"
+        default: "ch-base"
+      month:
+        description: "YYYY.MM (default current UTC month)"
+        required: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        artifact: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.artifact || 'ch-base')) || fromJSON('["ch-base","ch-enriched"]') }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm rebuild:native
+      - name: Skip if GitHub Release already exists
+        id: exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MONTH="${{ github.event.inputs.month }}"
+          if [ -z "$MONTH" ]; then MONTH="$(date -u +%Y.%m)"; fi
+          echo "month=$MONTH" >> "$GITHUB_OUTPUT"
+          TAG="${{ matrix.artifact }}-$MONTH"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build artifact
+        if: steps.exists.outputs.exists == 'false'
+        id: build
+        env:
+          REFDATA_API_KEY: ${{ secrets.REFDATA_API_KEY }}
+        run: |
+          LOG="${{ runner.temp }}/omc-build.log"
+          set +e
+          pnpm omc build ${{ matrix.artifact }} --month "${{ steps.exists.outputs.month }}" --out "output/${{ matrix.artifact }}" 2>&1 | tee "$LOG"
+          code=${PIPESTATUS[0]}
+          set -e
+          if grep -q "not yet available" "$LOG" || [ -f "output/${{ matrix.artifact }}/.not-yet-available" ]; then
+            echo "not_yet=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          exit "$code"
+      - name: Publish GitHub Release
+        if: steps.exists.outputs.exists == 'false' && steps.build.outputs.not_yet != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.exists.outputs.tag }}"
+          ZIP=$(ls output/${{ matrix.artifact }}/*.zip 2>/dev/null | head -n 1)
+          if [ ! -f "$ZIP" ]; then
+            echo "No zip produced after a successful build"
+            exit 1
+          fi
+          gh release create "$TAG" "$ZIP" "output/${{ matrix.artifact }}/release/manifest.json" \
+            --title "$TAG" \
+            --notes "Open Medication Catalogue $TAG"
+
+  catalog:
+    needs: release
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Rebuild catalog.json from GitHub Releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm omc catalog --write pages/catalog.json
+      - name: Publish catalog.json on Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages
+          keep_files: true

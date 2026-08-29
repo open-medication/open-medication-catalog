@@ -1,0 +1,23 @@
+# Official artifact recipes. Composition is data, not CLI flags.
+# `omc build <id>` is the only path that may publish under these identities.
+# Custom `omc build CH --source ...` is local/experimental and cannot be published
+# as ch-base or ch-enriched.
+schemaVersion: "1"
+artifacts:
+  ch-base:
+    jurisdiction: CH
+    requiredSources:
+      - swissmedic
+    attachRawSources:
+      - swissmedic
+  ch-enriched:
+    jurisdiction: CH
+    requiredSources:
+      - swissmedic
+      - refdata
+      # bag is added only after redistribution terms are recorded.
+    attachRawSources:
+      - swissmedic
+  # Future (not this delivery):
+  # global-base:
+  #   requiredArtifacts: [ch-base, fr-base, no-base, ca-base, us-base]

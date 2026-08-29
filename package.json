@@ -1,0 +1,49 @@
+{
+  "name": "open-medication-catalogue",
+  "version": "0.1.0",
+  "description": "Open Medication Catalogue: authoritative national medicinal-product data → validated SQLite and FHIR releases",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "omc": "./dist/cli.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.15.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/open-medication/open-medication-catalog.git"
+  },
+  "scripts": {
+    "omc": "tsx src/cli.ts",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "rebuild:native": "npm --prefix node_modules/better-sqlite3 run install",
+    "sushi:r4": "sushi fhir/r4",
+    "sushi:r5": "sushi fhir/r5"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "better-sqlite3": "^12.2.0",
+    "commander": "^14.0.0",
+    "fast-xml-parser": "^5.2.5",
+    "jszip": "^3.10.1",
+    "uuid": "^11.1.0",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.3.0",
+    "fsh-sushi": "3.20.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["better-sqlite3", "esbuild"]
+  }
+}

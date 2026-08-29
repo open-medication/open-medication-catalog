@@ -1,0 +1,23 @@
+country: CH
+sourceId: refdata
+identityAuthority: swissmedic
+authority: Stiftung Refdata
+dataset: Article Refdatabase
+sourceType: enrichment
+jurisdiction: CH
+updateFrequency: daily
+commercialUse: allowed
+redistribution: allowed
+attributionRequired: true
+credentialsRequired: true
+required: false
+parserSchemaVersion: "0.1.0"
+downloadUrl: "https://api.refdata.ch/articles/2.0/Refdata.Articles.zip"
+terms:
+  url: "https://www.refdata.ch/de/artikel/abfrage/artikel-refdatabase-gtin"
+  reviewedAt: "2026-08-28"
+  notes: "Unrestricted use with attribution when reused fields remain unchanged. Raw ZIP is not redistributed."
+releasePolicy:
+  public: true
+  required: false
+  redistributeRaw: false

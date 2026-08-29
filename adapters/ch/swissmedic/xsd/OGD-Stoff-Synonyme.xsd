@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema targetNamespace="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
+	<xsd:element name="SMC_Synonyme" type="OGD_Synonyme"/>
+	<xsd:complexType name="OGD_Synonyme">
+		<xsd:sequence>
+			<xsd:element name="SYNONYME" minOccurs="0" maxOccurs="unbounded" type="SYNONYME"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="SYNONYME">
+		<xsd:sequence>
+			<xsd:element name="STOFF_ID" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Stoff Guid</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Identifiant global unique de la substance</xsd:documentation>
+					<xsd:documentation xml:lang="it">GUID sostanza</xsd:documentation>
+					<xsd:documentation xml:lang="en">Substance GUID</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SYNONYM_CODE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Synonym Typ</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Type de synonyme</xsd:documentation>
+					<xsd:documentation xml:lang="it">Tipo di sinonimo</xsd:documentation>
+					<xsd:documentation xml:lang="en">Synonym type only “LN”</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="LAUFENDE_NR" type="xsd:Integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Synonym Nummer</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Numéro de synonyme</xsd:documentation>
+					<xsd:documentation xml:lang="it">Numero sinonimo</xsd:documentation>
+					<xsd:documentation xml:lang="en">Synonym number</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="STOFFSYNONYM" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Stoffname</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Nom de la substance</xsd:documentation>
+					<xsd:documentation xml:lang="it">Nome sostanza</xsd:documentation>
+					<xsd:documentation xml:lang="en">Substance name</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="QUELLE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Quelle</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Source</xsd:documentation>
+					<xsd:documentation xml:lang="it">Fonte</xsd:documentation>
+					<xsd:documentation xml:lang="en">Source</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

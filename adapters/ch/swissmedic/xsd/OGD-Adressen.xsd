@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema targetNamespace="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
+	<xsd:element name="SMC_Adressen" type="OGD_Adressen"/>
+	<xsd:complexType name="ADRESSEN">
+		<xsd:sequence>
+			<xsd:element name="PARTNER_NR" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Geschäftspartnernummer</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Numéro de partenaire commercial</xsd:documentation>
+					<xsd:documentation xml:lang="it">Numero del partner commerciale</xsd:documentation>
+					<xsd:documentation xml:lang="en">Business partner number</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="FIRMENNAME" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Name der Organisation</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Nom de l’organisation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Nome dell’organizzazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Name of the organisation</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ADRESSZEILE_1" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Strasse der Organisation</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Rue de l’organisation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Via dell’organizzazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Street of the organisation</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ADRESSZEILE_2" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Postfach</xsd:documentation>
+					<xsd:documentation xml:lang="fr">boite postale</xsd:documentation>
+					<xsd:documentation xml:lang="it">Casella postale</xsd:documentation>
+					<xsd:documentation xml:lang="en">Post office box</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="LAND_CODE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Länderschlüssel</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Code pays</xsd:documentation>
+					<xsd:documentation xml:lang="it">Codice Paese</xsd:documentation>
+					<xsd:documentation xml:lang="en">Country code</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="PLZ" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Postleitzahl des Orts</xsd:documentation>
+					<xsd:documentation xml:lang="fr">NPA du lieu</xsd:documentation>
+					<xsd:documentation xml:lang="it">Numero postale di avviamento della località</xsd:documentation>
+					<xsd:documentation xml:lang="en">Post code of the location</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ORT" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Ort</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Lieu</xsd:documentation>
+					<xsd:documentation xml:lang="it">Località</xsd:documentation>
+					<xsd:documentation xml:lang="en">Town/city</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SPRACH_CODE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Sprachenschlüssel</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Code langue</xsd:documentation>
+					<xsd:documentation xml:lang="it">Codice lingua</xsd:documentation>
+					<xsd:documentation xml:lang="en">Language code</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="KANTON" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Kanton bei Land CH sonst Bundesland oder Region</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Canton si le pays est la Suisse (CH) Si non : pays ou région</xsd:documentation>
+					<xsd:documentation xml:lang="it">Cantone se il Paese è CH oppure Stato federato o regione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Canton for country CH otherwise federal state or region</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="OGD_Adressen">
+		<xsd:sequence>
+			<xsd:element name="ADRESSEN" minOccurs="0" maxOccurs="unbounded" type="ADRESSEN"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

@@ -1,0 +1,17 @@
+id: org.openmedicationcatalog.r4
+canonical: https://fhir.openmedicationcatalog.org
+name: OpenMedicationCatalogR4
+title: Open Medication Catalogue R4
+status: draft
+version: 0.1.0
+fhirVersion: 4.0.1
+copyrightYear: 2026+
+releaseLabel: ci-build
+publisher:
+  name: Open Medication Catalogue
+  url: https://github.com/open-medication/open-medication-catalog
+jurisdiction: urn:iso:std:iso:3166#CH
+description: FHIR R4 profiles for OMC package-centric Medication resources. Public package publication is gated on control of fhir.openmedicationcatalog.org.
+menu:
+  Home: index.html
+  Profiles: artifacts.html

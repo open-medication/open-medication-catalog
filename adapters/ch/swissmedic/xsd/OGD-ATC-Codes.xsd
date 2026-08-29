@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema targetNamespace="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
+	<xsd:element name="SMC_Atc" type="OGD_Atc"/>
+	<xsd:complexType name="ATC">
+		<xsd:sequence>
+			<xsd:element name="ATC_CODE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">ATC-Code</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Code ATC</xsd:documentation>
+					<xsd:documentation xml:lang="it">Codice ATC</xsd:documentation>
+					<xsd:documentation xml:lang="en">ATC code</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ATC_INDIKATIONS_BESCHREIBUNG" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">ATC-Code Beschreibung</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Description du code ATC</xsd:documentation>
+					<xsd:documentation xml:lang="it">Descrizione codice ATC</xsd:documentation>
+					<xsd:documentation xml:lang="en">ATC code description</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="OGD_Atc">
+		<xsd:sequence>
+			<xsd:element name="ATC" minOccurs="0" maxOccurs="unbounded" type="ATC"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

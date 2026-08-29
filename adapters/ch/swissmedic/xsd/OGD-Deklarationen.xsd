@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema targetNamespace="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
+	<xsd:element name="SMC_Deklaration" type="OGD_Deklaration"/>
+	<xsd:complexType name="DEKLARATION">
+		<xsd:sequence>
+			<xsd:element name="ZULASSUNGSNUMMER" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Zulassungsnummer</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Numéro d’autorisation</xsd:documentation>
+					<xsd:documentation xml:lang="it">Numero di omologazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Authorisation number</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SEQUENZNUMMER" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Dosisstärke Nummer</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Numéro de dosage</xsd:documentation>
+					<xsd:documentation xml:lang="it">Numero di dosaggio</xsd:documentation>
+					<xsd:documentation xml:lang="en">Dosage strength number</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="KOMPONENTENNUMMER" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Komponente</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Composant</xsd:documentation>
+					<xsd:documentation xml:lang="it">Componente</xsd:documentation>
+					<xsd:documentation xml:lang="en">Component</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="KOMPONENTE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Komponentenname</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Nom du composant</xsd:documentation>
+					<xsd:documentation xml:lang="it">Nome componente</xsd:documentation>
+					<xsd:documentation xml:lang="en">Component name</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ZEILENNUMMER" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Deklarationszeile</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Ligne de déclaration</xsd:documentation>
+					<xsd:documentation xml:lang="it">Riga dichiarazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Declaration row</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SORTIERUNG_ZEILENNUMMER" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Sortierreihenfolge</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Ordre de tri</xsd:documentation>
+					<xsd:documentation xml:lang="it">Sequenza di classificazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Sort order</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ZEILENTYP" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Deklarationstyp</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Type de déclaration</xsd:documentation>
+					<xsd:documentation xml:lang="it">Tipo di dichiarazione</xsd:documentation>
+					<xsd:documentation xml:lang="en">Declaration format</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="STOFF_ID" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Stoff Guid</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Identifiant global unique de la substance</xsd:documentation>
+					<xsd:documentation xml:lang="it">GUID sostanza</xsd:documentation>
+					<xsd:documentation xml:lang="en">Substance GUID</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="STOFFKATEGORIE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Stoffkategorie</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Catégorie de substance</xsd:documentation>
+					<xsd:documentation xml:lang="it">Categoria di sostanza</xsd:documentation>
+					<xsd:documentation xml:lang="en">Substance category</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="MENGE" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Menge nur wenn «Deklarationsart = 1»</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Quantité seulement en cas de type de déclaration = «1» </xsd:documentation>
+					<xsd:documentation xml:lang="it">Quantità solo tipo di dichiarazione «1»</xsd:documentation>
+					<xsd:documentation xml:lang="en">Quantity only by Declaration type = «1»</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="MENGEN_EINHEIT" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Einheit nur wenn «Deklarationsart = 1»</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Unité seulement en cas de type de déclaration = «1»</xsd:documentation>
+					<xsd:documentation xml:lang="it">Unità solo tipo di dichiarazione «1»</xsd:documentation>
+					<xsd:documentation xml:lang="en">Unit only by Declaration type = «1»</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="DEKLARATIONSART" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Deklarationsart «1» oder «2»</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Type de déclaration «1» ou «2»</xsd:documentation>
+					<xsd:documentation xml:lang="it">Tipo di dichiarazione «1» oder «2»</xsd:documentation>
+					<xsd:documentation xml:lang="en">Declaration type «1» or «2»</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="OGD_Deklaration">
+		<xsd:sequence>
+			<xsd:element name="DEKLARATION" minOccurs="0" maxOccurs="unbounded" type="DEKLARATION"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

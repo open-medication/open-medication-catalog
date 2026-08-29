@@ -1,0 +1,25 @@
+country: CH
+sourceId: swissmedic
+identityAuthority: swissmedic
+authority: Swissmedic
+dataset: ZL172 OGD authorised medicines
+sourceType: regulatory
+jurisdiction: CH
+updateFrequency: monthly
+commercialUse: allowed
+redistribution: allowed
+attributionRequired: true
+credentialsRequired: false
+required: true
+parserSchemaVersion: "0.1.0"
+archiveUrlTemplate: "https://ogd.swissmedic.cloud/ogd-arzneimittel/Archiv/OGD_{YYYYMM}.ZIP"
+fallbackUrl: "https://ogd.swissmedic.cloud/ogd-arzneimittel/Daten/OGD.zip"
+xsdDir: xsd
+terms:
+  url: "https://opendata.swiss/en/terms-of-use#terms_open"
+  datasetUrl: "https://opendata.swiss/en/dataset/daten-von-human-und-tierarzneimitteln"
+  reviewedAt: "2026-08-28"
+  notes: "opendata.swiss terms_open — commercial use and redistribution allowed; attribution recorded."
+releasePolicy:
+  public: true
+  required: true

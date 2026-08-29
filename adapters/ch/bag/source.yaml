@@ -1,0 +1,23 @@
+country: CH
+sourceId: bag
+identityAuthority: bag
+authority: Federal Office of Public Health (BAG/FOPH)
+dataset: Spezialitätenliste (CH EPL FHIR R5)
+sourceType: enrichment
+jurisdiction: CH
+updateFrequency: monthly
+commercialUse: review-required
+redistribution: review-required
+attributionRequired: true
+credentialsRequired: false
+required: false
+parserSchemaVersion: "0.1.0"
+pinnedIg: "ch.fhir.ig.ch-epl#1.0.1"
+pinnedProfilePrefix: "http://fhir.ch/ig/ch-epl/"
+terms:
+  url: "https://sl.bag.admin.ch/resources/current-and-archived-data"
+  reviewedAt: "2026-08-28"
+  notes: "Public redistribution of BAG-derived fields is gated until terms are recorded. Adapter is implemented but not in the ch-enriched recipe."
+releasePolicy:
+  public: false
+  required: false

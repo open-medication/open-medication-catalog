@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema targetNamespace="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://ccsap.bit.admin.ch/SWISSMEDIC/LIMS_HMIT_KHZ" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
+	<xsd:element name="SMC_Datum" type="OGD_Datum"/>
+	<xsd:complexType name="DATUM">
+		<xsd:sequence>
+			<xsd:element name="EXPORT_DATUM" type="xsd:date">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">Stichtag der Daten</xsd:documentation>
+					<xsd:documentation xml:lang="fr">Date d’extraction des données</xsd:documentation>
+					<xsd:documentation xml:lang="it">Date d'échéance des données</xsd:documentation>
+					<xsd:documentation xml:lang="en">Deadline of the data</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="OGD_Datum">
+		<xsd:sequence>
+			<xsd:element name="DATUM" minOccurs="0" maxOccurs="unbounded" type="DATUM"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

@@ -1,0 +1,13 @@
+{
+  "sushi": "3.20.1",
+  "validator": {
+    "version": "6.9.12",
+    "url": "https://github.com/hapifhir/org.hl7.fhir.core/releases/download/6.9.12/validator_cli.jar",
+    "sha256": "PENDING_FIRST_DOWNLOAD"
+  },
+  "fhirR4": "4.0.1",
+  "fhirR5": "5.0.0",
+  "chEpl": "1.0.1",
+  "node": "22",
+  "pnpm": "10.15.0"
+}
