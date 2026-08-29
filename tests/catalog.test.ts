@@ -13,6 +13,11 @@ describe("parseFhirDecimal", () => {
     expect(Number("1,5")).toBeNaN();
     expect(jsonLine({ value: parseFhirDecimal("1,5") })).toBe('{"value":1.5}\n');
   });
+
+  it("returns undefined for invalid input", () => {
+    expect(parseFhirDecimal("1,5,0")).toBeUndefined();
+    expect(parseFhirDecimal("")).toBeUndefined();
+  });
 });
 
 describe("catalogFromReleaseTags", () => {

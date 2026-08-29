@@ -141,12 +141,12 @@ function ingredientStrength(strength: {
 }): unknown {
   const numerator = strength.structured ? parseFhirDecimal(strength.numeratorValue) : undefined;
   const denominator = strength.structured ? parseFhirDecimal(strength.denominatorValue) : undefined;
-  if (numerator !== undefined) {
+  if (numerator !== undefined && denominator !== undefined) {
     return [
       {
         presentationRatio: {
           numerator: { value: numerator, unit: strength.numeratorUnit?.code },
-          denominator: { value: denominator ?? 1, unit: strength.denominatorUnit?.code },
+          denominator: { value: denominator, unit: strength.denominatorUnit?.code },
         },
         text: strength.text,
       },
