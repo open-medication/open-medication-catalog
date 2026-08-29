@@ -1,9 +1,30 @@
+import { createRequire } from "node:module";
+import fs from "node:fs";
 import type { Catalogue } from "./types.js";
 import { CANONICAL_SCHEMA_VERSION } from "./types.js";
+import { repoPath } from "../paths.js";
+
+const require = createRequire(import.meta.url);
+const Ajv2020 = require("ajv/dist/2020.js") as new (opts: object) => {
+  compile: (schema: object) => ((data: unknown) => boolean) & { errors?: { instancePath: string; message?: string; params?: unknown }[] | null };
+};
+const addFormats = require("ajv-formats") as (ajv: unknown) => void;
 
 export interface ValidationIssue {
   path: string;
   message: string;
+}
+
+const schema = JSON.parse(
+  fs.readFileSync(repoPath("canonical/schema/catalogue.schema.json"), "utf8"),
+) as object;
+
+const ajv = new Ajv2020({ allErrors: true, strict: false });
+addFormats(ajv);
+const validateSchema = ajv.compile(schema);
+
+function plain(catalogue: Catalogue): unknown {
+  return JSON.parse(JSON.stringify(catalogue));
 }
 
 export function validateCatalogue(catalogue: Catalogue): ValidationIssue[] {
@@ -13,6 +34,15 @@ export function validateCatalogue(catalogue: Catalogue): ValidationIssue[] {
       path: "schemaVersion",
       message: `expected ${CANONICAL_SCHEMA_VERSION}, got ${catalogue.schemaVersion}`,
     });
+  }
+
+  if (!validateSchema(plain(catalogue))) {
+    for (const err of validateSchema.errors ?? []) {
+      issues.push({
+        path: err.instancePath || "/",
+        message: `${err.message ?? "invalid"}${err.params ? ` ${JSON.stringify(err.params)}` : ""}`,
+      });
+    }
   }
 
   const ids = new Set<string>();

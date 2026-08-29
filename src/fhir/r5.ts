@@ -42,7 +42,9 @@ export function exportR5(catalogue: Catalogue, releaseLabel: string): Record<str
         combinedPharmaceuticalDoseForm: mp.doseForm
           ? { coding: [mp.doseForm], text: mp.doseForm.display }
           : undefined,
-        route: mp.routes.map((r) => ({ coding: [r], text: r.display })),
+        route: mp.routes.length
+          ? mp.routes.map((r) => ({ coding: [r], text: r.display }))
+          : undefined,
         status: { coding: [mp.regulatoryStatus] },
         extension: [
           ...commonExt(mp.jurisdiction, mp.identityAuthority, releaseLabel),

@@ -21,7 +21,10 @@ export function jsonLine(value: unknown): string {
 }
 
 function sortValue(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(sortValue);
+  if (Array.isArray(value)) {
+    if (value.length === 0) return undefined;
+    return value.map(sortValue);
+  }
   if (value && typeof value === "object") {
     const rec = value as Record<string, unknown>;
     const out: Record<string, unknown> = {};

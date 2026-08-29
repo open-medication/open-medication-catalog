@@ -15,6 +15,21 @@ Outputs under `output/ch-base/`:
 
 Live fetch uses the immutable Swissmedic archive `OGD_YYYYMM.ZIP`, not the overwritten `OGD.zip`.
 
+Regenerate canonical TypeScript types after editing `canonical/schema/catalogue.schema.json`:
+
+```bash
+pnpm gen:types
+```
+
+Official builds fetch live licence pages and refuse to redistribute if a committed `terms.snapshot.txt` no longer matches. Fixture/CI builds set `OMC_SKIP_TERMS=1`. Check snapshots with `pnpm omc terms`.
+
+The HL7 Java validator (`validator_cli` 6.9.12, SHA-256 in `tooling/pins.json`) is normative:
+
+```bash
+pnpm omc fhir-validate --dir output/ch-base/release
+```
+
+
 Custom experimental build (not publishable as official):
 
 ```bash

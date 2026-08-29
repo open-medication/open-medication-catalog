@@ -11,6 +11,7 @@ import { repoPath } from "../paths.js";
 import { calendarForDate, parseDataMonth, type ReleaseCalendar } from "./dates.js";
 import { detectAnomalies, diffCatalogues, qualityReport, type ChangeReport } from "./quality.js";
 import { writeRelease, updateCatalogJson } from "./packager.js";
+import { assertTermsAllowRedistribution } from "./terms.js";
 import type { Catalogue } from "../canonical/types.js";
 
 const GENERATOR_VERSION = "0.1.0";
@@ -67,6 +68,10 @@ export async function build(opts: BuildOptions): Promise<BuildResult> {
   const outDir = opts.outDir ?? repoPath("output", artifactId);
   const cacheDir = path.join(outDir, ".cache");
   fs.mkdirSync(cacheDir, { recursive: true });
+
+  if (official && process.env.OMC_SKIP_TERMS !== "1") {
+    await assertTermsAllowRedistribution(sourceIds);
+  }
 
   const ctxBase = (sourceId: string): AdapterContext => ({
     cacheDir,

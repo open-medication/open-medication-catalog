@@ -31,6 +31,15 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm rebuild:native
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Cache HL7 validator
+        uses: actions/cache@v4
+        with:
+          path: tooling/validator_cli.jar
+          key: validator-cli-${{ hashFiles('tooling/pins.json') }}
       - name: Skip if GitHub Release already exists
         id: exists
         env:
@@ -62,6 +71,9 @@ jobs:
             exit 0
           fi
           exit "$code"
+      - name: Java FHIR validate
+        if: steps.exists.outputs.exists == 'false' && steps.build.outputs.not_yet != 'true'
+        run: pnpm omc fhir-validate --dir "output/${{ matrix.artifact }}/release" --max 25
       - name: Publish GitHub Release
         if: steps.exists.outputs.exists == 'false' && steps.build.outputs.not_yet != 'true'
         env:

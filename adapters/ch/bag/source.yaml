@@ -17,6 +17,7 @@ pinnedProfilePrefix: "http://fhir.ch/ig/ch-epl/"
 terms:
   url: "https://sl.bag.admin.ch/resources/current-and-archived-data"
   reviewedAt: "2026-08-28"
+  checksum: "427e897f7e8b5f1e255a5c128c2d6922df6d3d9630b838ec786902b07a94cace"
   notes: "Public redistribution of BAG-derived fields is gated until terms are recorded. Adapter is implemented but not in the ch-enriched recipe."
 releasePolicy:
   public: false
