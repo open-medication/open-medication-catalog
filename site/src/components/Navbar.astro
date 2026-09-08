@@ -1,0 +1,100 @@
+---
+import { GITHUB_URL, TITLE } from "../lib/site.ts";
+import Mark from "./Mark.astro";
+
+const links = [
+  { href: "/#download", label: "Download" },
+  { href: "/#licence", label: "Licence" },
+  { href: GITHUB_URL, label: "GitHub", external: true },
+];
+---
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="brand" aria-label={`${TITLE} home`}>
+      <Mark class="brand-mark" />
+      <span class="brand-name">{TITLE}</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      {links.map((link) => (
+        <a
+          href={link.href}
+          class="nav-link"
+          {...(link.external ? { target: "_blank", rel: "noreferrer" } : {})}
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(16px);
+    background: color-mix(in srgb, var(--color-paper) 88%, transparent);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 4rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+    color: var(--color-ink);
+    flex-shrink: 0;
+  }
+
+  .brand:hover {
+    color: var(--color-ink);
+  }
+
+  .brand-mark {
+    width: 1.85rem;
+    height: 1.85rem;
+    color: var(--color-green);
+    flex-shrink: 0;
+  }
+
+  .brand-name {
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.35rem;
+  }
+
+  .nav-link {
+    color: var(--color-ink-muted);
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+
+  .nav-link:hover {
+    color: var(--color-green);
+  }
+
+  @media screen and (max-width: 640px) {
+    .brand-name {
+      display: none;
+    }
+  }
+</style>

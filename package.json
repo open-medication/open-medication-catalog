@@ -24,7 +24,10 @@
     "rebuild:native": "npm --prefix node_modules/better-sqlite3 run install",
     "gen:types": "tsx scripts/generate-canonical-types.ts",
     "sushi:r4": "sushi fhir/r4",
-    "sushi:r5": "sushi fhir/r5"
+    "sushi:r5": "sushi fhir/r5",
+    "site:dev": "pnpm --dir site dev",
+    "site:build": "pnpm --dir site build",
+    "site:check": "pnpm --dir site check"
   },
   "dependencies": {
     "ajv": "^8.17.1",

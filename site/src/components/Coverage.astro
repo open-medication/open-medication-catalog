@@ -1,0 +1,64 @@
+---
+const rows = [
+  { code: "CH", name: "Switzerland", sources: "Swissmedic, Refdata, BAG SL", status: "Production (Swissmedic). Refdata in ch-enriched. BAG not in the public recipe yet." },
+  { code: "FR", name: "France", sources: "BDPM", status: "Planned" },
+  { code: "GB", name: "United Kingdom", sources: "dm+d (TRUD)", status: "Planned (credentials required)" },
+  { code: "NO", name: "Norway", sources: "FEST", status: "Planned" },
+  { code: "CA", name: "Canada", sources: "DPD", status: "Planned" },
+  { code: "US", name: "United States", sources: "FDA NDC", status: "Planned" },
+  { code: "SA", name: "Saudi Arabia", sources: "SFDA", status: "Planned" },
+];
+---
+
+<section class="section" id="coverage">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="h2">Coverage</h2>
+      <p class="body-text">
+        Multiple countries publish their data under open licensing terms. We identified countries on the list below and will integrate them step by step into the catalog.
+      </p>
+    </div>
+    <div class="card table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Jurisdiction</th>
+            <th>Sources</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr>
+              <td class="mono">{row.code}</td>
+              <td>{row.name}</td>
+              <td>{row.sources}</td>
+              <td>{row.status}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<style>
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  .table-wrap table {
+    min-width: 36rem;
+  }
+
+  .table-wrap th:first-child,
+  .table-wrap td:first-child {
+    padding-left: 1.1rem;
+  }
+
+  .table-wrap td:last-child,
+  .table-wrap th:last-child {
+    padding-right: 1.1rem;
+  }
+</style>

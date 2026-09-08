@@ -1,0 +1,43 @@
+---
+import { SPONSOR_NAME, SPONSOR_TECH_URL, SPONSOR_URL } from "../lib/site.ts";
+---
+
+<section class="section" id="sponsor">
+  <div class="container">
+    <div class="sponsor card">
+      <p class="eyebrow">Sponsor</p>
+      <a class="sponsor-logo" href={SPONSOR_URL} target="_blank" rel="noreferrer">
+        <img src="/images/evoleen-wordmark.svg" alt={SPONSOR_NAME} width="139" height="45" />
+      </a>
+      <p class="body-text">
+        {SPONSOR_NAME} sponsors this project.
+        <a class="inline-link" href={SPONSOR_TECH_URL} target="_blank" rel="noreferrer">Evoleen Technology</a>
+        builds digital health software.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sponsor {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 2rem 1.75rem;
+  }
+
+  .sponsor-logo {
+    display: block;
+    line-height: 0;
+  }
+
+  .sponsor-logo img {
+    height: 2.1rem;
+    width: auto;
+  }
+
+  .sponsor .body-text {
+    max-width: 40rem;
+  }
+</style>

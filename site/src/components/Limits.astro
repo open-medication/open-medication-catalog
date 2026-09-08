@@ -1,0 +1,42 @@
+---
+const limits = [
+  "No prescribing, interactions, dosing, substitution, or cross-country equivalence.",
+  "R5 follows IDMP. It is not ISO IDMP certified. Swissmedic routes stay Swissmedic codes until EDQM is verified.",
+  "A later global catalog is the union of national catalogs.",
+  "Build attestations are not included yet. Unsigned zips are not for unattended hospital use.",
+];
+---
+
+<section class="section" id="limits">
+  <div class="container">
+    <div class="limits card">
+      <h2 class="h2">Limits</h2>
+      <ul>
+        {limits.map((item) => (
+          <li class="body-text">{item}</li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .limits {
+    padding: 2rem 1.75rem;
+    background: var(--color-brass-soft);
+    border-color: color-mix(in srgb, var(--color-brass) 28%, var(--color-rule));
+  }
+
+  .limits .h2 {
+    margin: 0.55rem 0 1.1rem;
+  }
+
+  .limits ul {
+    margin: 0;
+    padding-left: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    max-width: 46rem;
+  }
+</style>

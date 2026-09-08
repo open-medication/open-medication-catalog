@@ -1,0 +1,69 @@
+---
+---
+
+<section class="section" id="licence">
+  <div class="container licence-grid">
+    <div class="section-header">
+      <p class="eyebrow">Licence</p>
+      <h2 class="h2">Generator and dataset licences</h2>
+    </div>
+    <div class="licence-cards">
+      <article class="card licence-card">
+        <h3 class="h3">Generator: Apache-2.0</h3>
+        <p class="body-text">
+          The CLI, adapters, schemas, and Implementation Guide sources are Apache-2.0.
+        </p>
+        <p class="body-text">
+          Note that we strictly separate the code from the actual medication catalog data. We don't
+          relicense medication catalog; those come with their respective providers' open licence terms.
+        </p>
+      </article>
+      <article class="card licence-card">
+        <h3 class="h3">Datasets: upstream terms</h3>
+        <p class="body-text">
+          All catalog data is licensed according to the respective providers' licensing terms. We aim
+          to include only data that carries a licence permissive enough for commercial and
+          non-commercial use. Some licences may require attribution.
+        </p>
+        <p class="body-text">
+          We are not liable for fitness for a specific purpose, legal compatibility with or
+          suitability for integration into any product.
+        </p>
+      </article>
+    </div>
+    <p class="body-text">
+      <a class="inline-link" href="/licence">Licence notes</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .licence-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .licence-grid .section-header {
+    margin-bottom: 0;
+  }
+
+  .licence-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  .licence-card {
+    padding: 1.35rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  @media screen and (max-width: 720px) {
+    .licence-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

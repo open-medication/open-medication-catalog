@@ -1,0 +1,71 @@
+---
+import { CATALOG_PATH, FHIR_CANONICAL_BASE, GITHUB_URL, TITLE } from "../lib/site.ts";
+---
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>
+      <p class="footer-name">{TITLE}</p>
+      <p class="footer-copy">
+        Apache-2.0 generator. Dataset licences and attributions are in each release.
+      </p>
+    </div>
+    <nav class="footer-links" aria-label="Footer">
+      <a href={GITHUB_URL}>GitHub</a>
+      <a href={CATALOG_PATH}>catalog.json</a>
+      <a href={FHIR_CANONICAL_BASE}>FHIR base</a>
+      <a href="/licence">Licence</a>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--color-rule);
+    padding: 2.25rem 0 2.75rem;
+    background: var(--color-paper-inset);
+  }
+
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .footer-name {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+  }
+
+  .footer-copy {
+    margin: 0;
+    max-width: 28rem;
+    color: var(--color-ink-muted);
+    font-size: 0.88rem;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem 1.25rem;
+  }
+
+  .footer-links a {
+    color: var(--color-ink-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .footer-links a:hover {
+    color: var(--color-green);
+  }
+
+  @media screen and (max-width: 640px) {
+    .footer-inner {
+      flex-direction: column;
+    }
+  }
+</style>

@@ -15,3 +15,6 @@ fhir/*/input-cache/
 .env
 .env.*
 !.env.example
+site/node_modules/
+site/dist/
+site/.astro/

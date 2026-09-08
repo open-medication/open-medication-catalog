@@ -97,29 +97,8 @@ jobs:
   catalog:
     needs: release
     if: always() && !cancelled()
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/pages.yml
     permissions:
       contents: write
       pages: write
       id-token: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.15.0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Rebuild catalog.json from GitHub Releases
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm omc catalog --write pages/catalog.json
-      - name: Publish catalog.json on Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./pages
-          keep_files: true
-          cname: openmedicationcatalog.org

@@ -42,3 +42,24 @@ jobs:
         run: pnpm omc fhir-validate --dir /tmp/omc-ci/release --max 10
       - name: Terms snapshots still match live pages
         run: pnpm omc terms
+
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: site/pnpm-lock.yaml
+      - name: Install site dependencies
+        working-directory: site
+        run: pnpm install --frozen-lockfile
+      - name: Check and build landing page
+        working-directory: site
+        run: |
+          pnpm check
+          pnpm build

@@ -13,6 +13,8 @@ Latest-artifact index (not GitHub `/releases/latest`):
 [`https://openmedicationcatalog.org/catalog.json`](https://openmedicationcatalog.org/catalog.json)
 (GitHub Pages alias: `https://open-medication.github.io/open-medication-catalog/catalog.json`)
 
+Landing page: [`https://openmedicationcatalog.org`](https://openmedicationcatalog.org) (`site/` Astro project, published with `catalog.json` on GitHub Pages).
+
 ## Country tracker
 
 | Jurisdiction | Sources | Adapter status | Public redistribution | Credentials |
