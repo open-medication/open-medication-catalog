@@ -31,10 +31,33 @@ function normalizeHtml(html: string): string {
     .toLowerCase();
 }
 
+/** Slice one opendata.swiss terms_* definition so site chrome does not bust the checksum. */
+export function extractTermsFragment(html: string, fragmentId: string): string {
+  const matches = [...html.matchAll(/id=["'](terms_[a-z0-9_]+)["']/gi)];
+  const idx = matches.findIndex((m) => m[1]!.toLowerCase() === fragmentId.toLowerCase());
+  if (idx < 0) {
+    throw new Error(`Terms fragment #${fragmentId} not found`);
+  }
+  const start = matches[idx]!.index!;
+  const tagStart = html.lastIndexOf("<", start);
+  const from = tagStart >= 0 ? tagStart : start;
+  const next = matches[idx + 1];
+  const to = next ? html.lastIndexOf("<", next.index!) : html.length;
+  if (to <= from) {
+    throw new Error(`Terms fragment #${fragmentId} has empty bounds`);
+  }
+  return html.slice(from, to);
+}
+
+export function termsChecksum(html: string, fragmentId?: string): string {
+  const slice = fragmentId ? extractTermsFragment(html, fragmentId) : html;
+  return crypto.createHash("sha256").update(normalizeHtml(slice)).digest("hex");
+}
+
 export async function checkTerms(sourceDir: string): Promise<TermsStatus> {
   const desc = YAML.parse(fs.readFileSync(path.join(sourceDir, "source.yaml"), "utf8")) as {
     sourceId: string;
-    terms: { url: string; reviewedAt: string; checksum?: string };
+    terms: { url: string; reviewedAt: string; checksum?: string; fragment?: string };
   };
   const snapFile = path.join(sourceDir, "terms.snapshot.txt");
   let stored: string | undefined;
@@ -44,7 +67,7 @@ export async function checkTerms(sourceDir: string): Promise<TermsStatus> {
   let fetchError: string | undefined;
   try {
     const buf = await fetchBinary(desc.terms.url, { maxBytes: 5 * 1024 * 1024 });
-    current = crypto.createHash("sha256").update(normalizeHtml(buf.toString("utf8"))).digest("hex");
+    current = termsChecksum(buf.toString("utf8"), desc.terms.fragment);
   } catch (err) {
     fetchError = err instanceof Error ? err.message : String(err);
   }

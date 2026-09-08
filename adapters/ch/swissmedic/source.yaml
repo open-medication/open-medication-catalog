@@ -18,9 +18,10 @@ xsdDir: xsd
 terms:
   url: "https://opendata.swiss/en/terms-of-use#terms_open"
   datasetUrl: "https://opendata.swiss/en/dataset/daten-von-human-und-tierarzneimitteln"
-  reviewedAt: "2026-08-28"
-  checksum: "31153456b90f5ba60cb7fbe83b48f9b0976de6bea2289890c18285400d4354d8"
-  notes: "opendata.swiss terms_open — commercial use and redistribution allowed; attribution recorded."
+  fragment: terms_open
+  reviewedAt: "2026-09-08"
+  checksum: "af848ff7d465aae5b363edc63f6cc0cac570beb3c1ac0cea24c17c57f5abf820"
+  notes: "opendata.swiss terms_open — commercial use and redistribution allowed; attribution recorded. Checksum covers the #terms_open definition only."
 releasePolicy:
   public: true
   required: true
