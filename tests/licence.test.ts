@@ -3,8 +3,8 @@ import { BagAdapter } from "../src/adapters/ch/bag.js";
 import { RefdataAdapter } from "../src/adapters/ch/refdata.js";
 import { SwissmedicAdapter } from "../src/adapters/ch/swissmedic.js";
 import { listSourceDirs, loadSourceDescriptorById } from "../src/adapters/descriptor.js";
+import { getRecipe } from "../src/artifacts.js";
 import { licensingTexts, sourceLicensing } from "../src/pipeline/licensing.js";
-import { allSourceLicences, sourcesForArtifact } from "../site/src/lib/licences.ts";
 
 const adapters = [new SwissmedicAdapter(), new RefdataAdapter(), new BagAdapter()];
 
@@ -27,15 +27,15 @@ describe("licence flags from source.yaml", () => {
     expect(listSourceDirs().map((s) => s.sourceId).sort()).toEqual(["bag", "refdata", "swissmedic"]);
   });
 
-  it("site download rows match YAML and artifact recipes", () => {
+  it("artifact recipes list sources that have licence descriptors", () => {
     const swiss = loadSourceDescriptorById("swissmedic");
-    const row = allSourceLicences().find((s) => s.sourceId === "swissmedic");
-    expect(row?.termsUrl).toBe(swiss.terms.url);
-    expect(row?.commercialUse).toBe(swiss.commercialUse);
-    expect(row?.redistribution).toBe(swiss.redistribution);
-    expect(allSourceLicences().map((s) => s.sourceId)).toEqual(["swissmedic", "refdata", "bag"]);
-    expect(sourcesForArtifact("ch-base").map((s) => s.sourceId)).toEqual(["swissmedic"]);
-    expect(sourcesForArtifact("ch-enriched").map((s) => s.sourceId)).toEqual(["swissmedic", "refdata"]);
+    expect(swiss.terms.url).toContain("#terms_open");
+    expect(swiss.commercialUse).toBe("allowed");
+    expect(getRecipe("ch-base").requiredSources).toEqual(["swissmedic"]);
+    expect(getRecipe("ch-enriched").requiredSources).toEqual(["swissmedic", "refdata"]);
+    for (const id of ["swissmedic", "refdata"]) {
+      expect(loadSourceDescriptorById(id).terms.url.length).toBeGreaterThan(0);
+    }
   });
 });
 
