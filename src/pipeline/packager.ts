@@ -10,6 +10,7 @@ import { writeSqlite } from "../sqlite/writer.js";
 import { repoPath } from "../paths.js";
 import { sha256, writeDeterministicZip } from "../security.js";
 import { writeJson, type QualityReport, type ChangeReport } from "./quality.js";
+import { sourceLicensing } from "./licensing.js";
 
 function loadPins(): unknown {
   return JSON.parse(fs.readFileSync(repoPath("tooling/pins.json"), "utf8"));
@@ -64,6 +65,7 @@ export async function writeRelease(input: PackagerInput): Promise<{ zipPath: str
       retrievedAt: s.retrievedAt,
       sha256: s.sha256,
       uri: s.uri,
+      licensing: sourceLicensing(s.sourceId),
     })),
   };
   writeJson(path.join(root, "manifest.json"), manifest);

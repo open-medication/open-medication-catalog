@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import YAML from "yaml";
-import { repoPath } from "../paths.js";
+import { sourceDirFor, listSourceDirs } from "../adapters/descriptor.js";
 import { fetchBinary } from "../security.js";
 
 export interface TermsStatus {
@@ -14,12 +14,6 @@ export interface TermsStatus {
   changed: boolean;
   fetchError?: string;
 }
-
-const SOURCE_DIRS: Record<string, string> = {
-  swissmedic: repoPath("adapters/ch/swissmedic"),
-  refdata: repoPath("adapters/ch/refdata"),
-  bag: repoPath("adapters/ch/bag"),
-};
 
 function normalizeHtml(html: string): string {
   return html
@@ -85,8 +79,8 @@ export async function checkTerms(sourceDir: string): Promise<TermsStatus> {
 
 export async function checkAllTerms(): Promise<TermsStatus[]> {
   const out: TermsStatus[] = [];
-  for (const d of Object.values(SOURCE_DIRS)) {
-    if (fs.existsSync(path.join(d, "source.yaml"))) out.push(await checkTerms(d));
+  for (const { dir } of listSourceDirs()) {
+    out.push(await checkTerms(dir));
   }
   return out;
 }
@@ -99,7 +93,7 @@ export async function assertTermsAllowRedistribution(sourceIds: string[]): Promi
   const unique = [...new Set(sourceIds)];
   const problems: string[] = [];
   for (const id of unique) {
-    const dir = SOURCE_DIRS[id];
+    const dir = sourceDirFor(id);
     if (!dir) continue;
     const status = await checkTerms(dir);
     if (!status.storedChecksum) {

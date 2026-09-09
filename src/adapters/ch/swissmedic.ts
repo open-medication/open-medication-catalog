@@ -27,6 +27,7 @@ import { canonicalId } from "../../identity.js";
 import { repoPath } from "../../paths.js";
 import { HttpStatusError, extractZip, fetchBinary, fileSignatureOk, sha256 } from "../../security.js";
 import { asArray, optionalText, parseXmlFile, text } from "../../xml.js";
+import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
 
 const ADAPTER_DIR = repoPath("adapters/ch/swissmedic");
@@ -54,20 +55,7 @@ interface UdcKey {
 
 export class SwissmedicAdapter implements Adapter {
   metadata(): AdapterMetadata {
-    const desc = YAML.parse(fs.readFileSync(path.join(ADAPTER_DIR, "source.yaml"), "utf8")) as {
-      terms: { url: string; reviewedAt: string };
-    };
-    return {
-      sourceId: "swissmedic",
-      identityAuthority: AUTHORITY,
-      jurisdiction: JURISDICTION,
-      credentialsRequired: false,
-      commercialUse: "allowed",
-      redistribution: "allowed",
-      attributionRequired: true,
-      updateFrequency: "monthly",
-      termsUrl: desc.terms.url,
-    };
+    return metadataFromDescriptor(loadSourceDescriptor(ADAPTER_DIR));
   }
 
   async fetch(ctx: AdapterContext): Promise<FetchResult> {
@@ -565,9 +553,6 @@ function findRows(doc: Record<string, unknown>, tag: string): Record<string, unk
 }
 
 function snapshotFrom(buf: Buffer, ctx: AdapterContext, uri: string): SourceSnapshot {
-  const desc = YAML.parse(fs.readFileSync(path.join(ADAPTER_DIR, "source.yaml"), "utf8")) as {
-    terms: { reviewedAt: string };
-  };
   return {
     id: sha256(buf).slice(0, 16),
     sourceId: "swissmedic",
@@ -576,7 +561,7 @@ function snapshotFrom(buf: Buffer, ctx: AdapterContext, uri: string): SourceSnap
     sourceEffectiveDate: ctx.cutoffDate,
     sha256: sha256(buf),
     uri,
-    termsReviewedAt: desc.terms.reviewedAt,
+    ...snapshotTerms(loadSourceDescriptor(ADAPTER_DIR)),
   };
 }
 

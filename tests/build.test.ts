@@ -58,6 +58,22 @@ describe("ch-base fixture build", () => {
 
     const revoked = result.catalogue.packages.find((p) => p.regulatoryStatus.code === "D");
     if (revoked) expect(medicationStatus(revoked)).toBe("inactive");
+
+    const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
+    const licenceReadme = fs.readFileSync(path.join(out, "release", "licensing", "README.md"), "utf8");
+    const manifest = JSON.parse(fs.readFileSync(path.join(out, "release", "manifest.json"), "utf8")) as {
+      sources: { id: string; licensing?: { termsUrl: string; commercialUse: string; checksum?: string } }[];
+    };
+    expect(licenceReadme).toMatch(/not liable/i);
+    expect(sourcesMd).toContain("https://opendata.swiss/en/terms-of-use#terms_open");
+    expect(sourcesMd).toContain("commercialUse: allowed");
+    const swissLic = manifest.sources.find((s) => s.id === "swissmedic")?.licensing;
+    expect(swissLic?.termsUrl).toBe("https://opendata.swiss/en/terms-of-use#terms_open");
+    expect(swissLic?.commercialUse).toBe("allowed");
+    expect(swissLic?.checksum).toMatch(/^[a-f0-9]{64}$/);
+    const snap = result.catalogue.sourceSnapshots.find((s) => s.sourceId === "swissmedic");
+    expect(snap?.termsChecksum).toBe(swissLic?.checksum);
+    expect(snap?.termsReviewedAt).toBeTruthy();
   });
 
   it("refuses to treat --source builds as official artifact ids", async () => {

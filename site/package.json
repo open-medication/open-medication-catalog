@@ -18,7 +18,8 @@
     "@fontsource-variable/newsreader": "^5.2.10",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "astro": "^6.1.8",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "yaml": "^2.8.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

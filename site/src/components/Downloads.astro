@@ -8,13 +8,15 @@ import {
   zipUrl,
   type CatalogArtifact,
 } from "../lib/catalog.ts";
+import { sourcesForArtifact } from "../lib/licences.ts";
 import IconArrowUpRight from "./IconArrowUpRight.astro";
+import LicenceFlags from "./LicenceFlags.astro";
 
 const catalog = parseCatalogDoc(bakedCatalog);
 
 const cards = ARTIFACT_META.map((meta) => {
   const entry: CatalogArtifact | undefined = catalog.artifacts[meta.id];
-  return { meta, entry };
+  return { meta, entry, sources: sourcesForArtifact(meta.id) };
 });
 ---
 
@@ -32,7 +34,7 @@ const cards = ARTIFACT_META.map((meta) => {
     </div>
 
     <div class="download-grid">
-      {cards.map(({ meta, entry }) => (
+      {cards.map(({ meta, entry, sources }) => (
         <article class="card download-card" data-artifact={meta.id}>
           <div class="download-top">
             <p class="eyebrow">{meta.jurisdiction}</p>
@@ -43,8 +45,11 @@ const cards = ARTIFACT_META.map((meta) => {
           <h3 class="h3">{meta.title}</h3>
           <p class="mono artifact-id">{meta.id}</p>
           <p class="body-text">{meta.blurb}</p>
-          <p class="sources">{meta.sources}</p>
-          <p class="redistrib body-text">{meta.redistribution}</p>
+          <div class="licence-stack">
+            {sources.map((source) => (
+              <LicenceFlags source={source} />
+            ))}
+          </div>
           <div class="download-actions">
             <div class="published-actions" data-role="published" hidden={!entry}>
               <a class="btn btn-primary" data-role="zip" href={entry ? zipUrl(entry) : "#"}>
@@ -145,14 +150,10 @@ const cards = ARTIFACT_META.map((meta) => {
     color: var(--color-brass);
   }
 
-  .sources {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--color-ink);
-  }
-
-  .redistrib {
-    font-size: 0.88rem;
+  .licence-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
   }
 
   .download-actions {

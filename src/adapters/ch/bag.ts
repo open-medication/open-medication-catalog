@@ -1,30 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
-import YAML from "yaml";
 import type { Catalogue, MappingCoverageReport, Reimbursement, SourceSnapshot } from "../../canonical/types.js";
 import { repoPath } from "../../paths.js";
 import { extractZip, fetchBinary, sha256 } from "../../security.js";
+import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
 
+const ADAPTER_DIR = repoPath("adapters/ch/bag");
 const PINNED_EPL = "http://fhir.ch/ig/ch-epl/";
 const PINNED_VERSION = "1.0.1";
 
 export class BagAdapter implements Adapter {
   metadata(): AdapterMetadata {
-    const desc = YAML.parse(
-      fs.readFileSync(path.join(repoPath("adapters/ch/bag"), "source.yaml"), "utf8"),
-    ) as { terms: { url: string } };
-    return {
-      sourceId: "bag",
-      identityAuthority: "bag",
-      jurisdiction: "CH",
-      credentialsRequired: false,
-      commercialUse: "review-required",
-      redistribution: "review-required",
-      attributionRequired: true,
-      updateFrequency: "monthly",
-      termsUrl: desc.terms.url,
-    };
+    return metadataFromDescriptor(loadSourceDescriptor(ADAPTER_DIR));
   }
 
   async fetch(ctx: AdapterContext): Promise<FetchResult> {
@@ -51,7 +39,7 @@ export class BagAdapter implements Adapter {
         retrievedAt: new Date(0).toISOString(),
         sha256: sha256(buf),
         uri: `file:${ctx.inputPath}`,
-        termsReviewedAt: "2026-08-28",
+        ...snapshotTerms(loadSourceDescriptor(ADAPTER_DIR)),
       },
     };
   }

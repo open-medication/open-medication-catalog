@@ -1,31 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
-import YAML from "yaml";
 import { authorityKey } from "../../branded.js";
 import type { Catalogue, MappingCoverageReport, Package, SourceSnapshot } from "../../canonical/types.js";
 import { repoPath } from "../../paths.js";
 import { extractZip, fetchBinary, fileSignatureOk, sha256 } from "../../security.js";
 import { asArray, optionalText, parseXmlFile, parseXmlString, text } from "../../xml.js";
+import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
 
 const ADAPTER_DIR = repoPath("adapters/ch/refdata");
 
 export class RefdataAdapter implements Adapter {
   metadata(): AdapterMetadata {
-    const desc = YAML.parse(fs.readFileSync(path.join(ADAPTER_DIR, "source.yaml"), "utf8")) as {
-      terms: { url: string };
-    };
-    return {
-      sourceId: "refdata",
-      identityAuthority: "swissmedic",
-      jurisdiction: "CH",
-      credentialsRequired: true,
-      commercialUse: "allowed",
-      redistribution: "allowed",
-      attributionRequired: true,
-      updateFrequency: "daily",
-      termsUrl: desc.terms.url,
-    };
+    return metadataFromDescriptor(loadSourceDescriptor(ADAPTER_DIR));
   }
 
   async fetch(ctx: AdapterContext): Promise<FetchResult> {
@@ -64,7 +51,7 @@ export class RefdataAdapter implements Adapter {
         retrievedAt: new Date(0).toISOString(),
         sha256: sha256(buf),
         uri,
-        termsReviewedAt: "2026-08-28",
+        ...snapshotTerms(loadSourceDescriptor(ADAPTER_DIR)),
       },
     };
   }

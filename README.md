@@ -2,7 +2,7 @@
 
 Open-source generator that turns authoritative national medicinal-product datasets into reproducible, validated SQLite and FHIR releases.
 
-**Software licence:** Apache-2.0 (this repository). **Generated datasets are not Apache-2.0**; each release carries upstream terms in `manifest.json` and `licensing/`.
+**Software licence:** Apache-2.0 (this repository). **Generated datasets are not Apache-2.0**; each release records upstream terms, our licence flags, and attribution in `manifest.json` and `licensing/`. Those flags are our interpretation of upstream terms, not a licence grant. You must cross-check the linked terms. We do not control how or when those terms change. See [docs/licences.md](docs/licences.md).
 
 Canonical FHIR base (immutable once published): `https://fhir.openmedicationcatalog.org`  
 Public IG/package publication is gated until `https://fhir.openmedicationcatalog.org` resolves over HTTPS.

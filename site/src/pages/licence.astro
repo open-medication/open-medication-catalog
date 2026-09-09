@@ -3,6 +3,9 @@ import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import { GITHUB_URL } from "../lib/site.ts";
+import { allSourceLicences, attributionLabel } from "../lib/licences.ts";
+
+const sources = allSourceLicences();
 ---
 
 <Layout
@@ -30,35 +33,47 @@ import { GITHUB_URL } from "../lib/site.ts";
         including attribution. Those terms are checksummed at build time. A material change on an
         upstream terms page blocks official redistribution until the snapshot is reviewed.
       </p>
+      <p class="body-text">
+        The flags below are indicators of our interpretation of the linked terms at the dated review.
+        They are not a licence grant. See the
+        <a class="inline-link" href="/#licence">licence section</a> for the rubric and disclaimer.
+      </p>
+      <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th>Source</th>
-            <th>Commercial use</th>
-            <th>Redistribution</th>
+            <th>commercialUse</th>
+            <th>redistribution</th>
+            <th>attributionRequired</th>
+            <th>Terms</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Swissmedic OGD</td>
-            <td>Allowed</td>
-            <td>Allowed (<code class="mono">terms_open</code>)</td>
-          </tr>
-          <tr>
-            <td>Refdata</td>
-            <td>Allowed</td>
-            <td>Derived fields only. The credential-gated ZIP is not included.</td>
-          </tr>
-          <tr>
-            <td>BAG Spezialitätenliste</td>
-            <td>Review-required</td>
-            <td>Not in a public recipe yet</td>
-          </tr>
+          {sources.map((source) => (
+            <tr>
+              <td>{source.label}</td>
+              <td class="mono">{source.commercialUse}</td>
+              <td class="mono">{source.redistribution}</td>
+              <td class="mono">{attributionLabel(source.attributionRequired)}</td>
+              <td>
+                <a class="inline-link" href={source.termsUrl} target="_blank" rel="noreferrer">
+                  Upstream terms
+                </a>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
+      </div>
       <p class="body-text">
         Each release zip includes <code class="mono">manifest.json</code> and a
-        <code class="mono">licensing/</code> directory.
+        <code class="mono">licensing/</code> directory with the same flags, URLs, checksums, and
+        disclaimer.
+      </p>
+      <p class="body-text">
+        Tagging rubric:
+        <a class="inline-link" href={`${GITHUB_URL}/blob/main/docs/licences.md`}>docs/licences.md</a>.
       </p>
 
       <h2 class="h2">This website</h2>
@@ -84,5 +99,9 @@ import { GITHUB_URL } from "../lib/site.ts";
   .licence-page .h2 {
     margin-top: 1.25rem;
     font-size: 1.35rem;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
   }
 </style>
