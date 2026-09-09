@@ -5,6 +5,13 @@ import YAML from "yaml";
 import { sourceDirFor, listSourceDirs } from "../adapters/descriptor.js";
 import { fetchBinary } from "../security.js";
 
+/** Override Node fetch defaults (`Accept-Language: *`) that some CMS stacks reject with 415. */
+export const TERMS_PAGE_HEADERS = {
+  Accept: "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
+  "Accept-Language": "en,de;q=0.8",
+  "User-Agent": "open-medication-catalog (terms-check; https://github.com/open-medication/open-medication-catalog)",
+};
+
 export interface TermsStatus {
   sourceId: string;
   url: string;
@@ -60,7 +67,10 @@ export async function checkTerms(sourceDir: string): Promise<TermsStatus> {
   let current: string | undefined;
   let fetchError: string | undefined;
   try {
-    const buf = await fetchBinary(desc.terms.url, { maxBytes: 5 * 1024 * 1024 });
+    const buf = await fetchBinary(desc.terms.url, {
+      maxBytes: 5 * 1024 * 1024,
+      headers: TERMS_PAGE_HEADERS,
+    });
     current = termsChecksum(buf.toString("utf8"), desc.terms.fragment);
   } catch (err) {
     fetchError = err instanceof Error ? err.message : String(err);

@@ -10,7 +10,13 @@ export interface FetchOptions {
   headers?: Record<string, string>;
   maxBytes?: number;
   allowedContentTypes?: string[];
+  /** Extra GET attempts after a retryable HTTP status. Default 2 (3 tries total). */
+  retries?: number;
+  retryDelayMs?: number;
 }
+
+/** CMS/WAF noise seen on Refdata terms (415) plus typical transient gateway codes. */
+export const RETRYABLE_HTTP_STATUS = new Set([408, 415, 425, 429, 500, 502, 503, 504]);
 
 function assertHttpUrl(url: string): void {
   if (!url.startsWith("https://") && !url.startsWith("http://")) {
@@ -18,8 +24,11 @@ function assertHttpUrl(url: string): void {
   }
 }
 
-export async function fetchBinary(url: string, opts: FetchOptions = {}): Promise<Buffer> {
-  assertHttpUrl(url);
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchBinaryOnce(url: string, opts: FetchOptions): Promise<Buffer> {
   const res = await fetch(url, { headers: opts.headers, redirect: "follow" });
   if (!res.ok) {
     throw new HttpStatusError(url, res.status, res.statusText);
@@ -40,6 +49,24 @@ export async function fetchBinary(url: string, opts: FetchOptions = {}): Promise
     throw new Error(`Download exceeded ${max} bytes (${url})`);
   }
   return buf;
+}
+
+export async function fetchBinary(url: string, opts: FetchOptions = {}): Promise<Buffer> {
+  assertHttpUrl(url);
+  const retries = opts.retries ?? 2;
+  const delay = opts.retryDelayMs ?? 250;
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fetchBinaryOnce(url, opts);
+    } catch (err) {
+      lastErr = err;
+      const retryable = err instanceof HttpStatusError && RETRYABLE_HTTP_STATUS.has(err.status);
+      if (!retryable || attempt === retries) throw err;
+      if (delay > 0) await sleep(delay * (attempt + 1));
+    }
+  }
+  throw lastErr;
 }
 
 export class HttpStatusError extends Error {
