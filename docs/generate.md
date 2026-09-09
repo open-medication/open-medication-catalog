@@ -11,6 +11,7 @@ Outputs under `output/ch-base/`:
 - `release/fhir-r4/*.ndjson`
 - `release/fhir-r5/*.ndjson`
 - `release/manifest.json`
+- `release/licensing/` — upstream terms URLs, flags, checksums, and disclaimer
 - `ch-base-2026.08.zip`
 
 Live fetch uses the immutable Swissmedic archive `OGD_YYYYMM.zip` (the server uses lowercase; `.ZIP` is tried as a fallback), not the overwritten `OGD.zip`. `pnpm omc next-month ch-base` reports the newest unpublished archive relative to GitHub Releases.

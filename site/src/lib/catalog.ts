@@ -16,9 +16,7 @@ export interface ArtifactMeta {
   id: string;
   title: string;
   jurisdiction: string;
-  sources: string;
   blurb: string;
-  redistribution: string;
 }
 
 /** Official recipes we always show, even before a public zip exists. */
@@ -27,17 +25,13 @@ export const ARTIFACT_META: ArtifactMeta[] = [
     id: "ch-base",
     title: "Switzerland: base",
     jurisdiction: "CH",
-    sources: "Swissmedic OGD",
     blurb: "Swissmedic medicinal-product export.",
-    redistribution: "Swissmedic open terms. Licence and attribution are in the zip.",
   },
   {
     id: "ch-enriched",
     title: "Switzerland: enriched",
     jurisdiction: "CH",
-    sources: "Swissmedic OGD + Refdata",
     blurb: "Swissmedic export plus GTIN and trade status from Refdata. The Refdata ZIP is not included.",
-    redistribution: "Derived Refdata fields only. Attribution may be required.",
   },
 ];
 

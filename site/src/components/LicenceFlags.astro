@@ -1,0 +1,118 @@
+---
+import IconArrowUpRight from "./IconArrowUpRight.astro";
+import type { SourceLicence } from "../lib/licences.ts";
+import { attributionLabel } from "../lib/licences.ts";
+
+interface Props {
+  source: SourceLicence;
+}
+
+const { source } = Astro.props;
+---
+
+<div class="licence-source">
+  <div class="licence-source-head">
+    <p class="licence-source-name">{source.label}</p>
+    <a class="terms-link" href={source.termsUrl} target="_blank" rel="noreferrer">
+      Terms
+      <IconArrowUpRight />
+    </a>
+  </div>
+  <dl class="licence-flags">
+    <div>
+      <dt>commercialUse</dt>
+      <dd class="mono">{source.commercialUse}</dd>
+    </div>
+    <div>
+      <dt>redistribution</dt>
+      <dd class="mono">{source.redistribution}</dd>
+    </div>
+    <div>
+      <dt>attributionRequired</dt>
+      <dd class="mono">{attributionLabel(source.attributionRequired)}</dd>
+    </div>
+  </dl>
+  {source.redistributeRaw === false && (
+    <p class="licence-source-note">Derived fields only. The raw ZIP is not included.</p>
+  )}
+</div>
+
+<style>
+  .licence-source {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.7rem 0.8rem;
+    background: var(--color-paper-inset);
+    border-radius: 8px;
+  }
+
+  .licence-source-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .licence-source-name {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .terms-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .terms-link svg {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+
+  .licence-flags {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem 0.65rem;
+    margin: 0;
+  }
+
+  .licence-flags div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .licence-flags dt {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .licence-flags dd {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--color-ink);
+  }
+
+  .licence-source-note {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--color-ink-muted);
+  }
+
+  @media screen and (max-width: 720px) {
+    .licence-flags {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

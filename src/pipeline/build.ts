@@ -12,6 +12,7 @@ import { calendarForDate, parseDataMonth, type ReleaseCalendar } from "./dates.j
 import { detectAnomalies, diffCatalogues, qualityReport, type ChangeReport } from "./quality.js";
 import { writeRelease } from "./packager.js";
 import { assertTermsAllowRedistribution } from "./terms.js";
+import { licensingTexts } from "./licensing.js";
 import type { Catalogue } from "../canonical/types.js";
 
 const GENERATOR_VERSION = "0.1.0";
@@ -156,17 +157,7 @@ export async function build(opts: BuildOptions): Promise<BuildResult> {
     rawSourceZips: rawZips,
     quality,
     changes,
-    licensingTexts: [
-      {
-        name: "SOURCES.md",
-        text: catalogue.sourceSnapshots
-          .map(
-            (s) =>
-              `- ${s.sourceId} (${s.identityAuthority}) effective ${s.sourceEffectiveDate ?? "unknown"} sha256 ${s.sha256}\n`,
-          )
-          .join(""),
-      },
-    ],
+    licensingTexts: licensingTexts(catalogue.sourceSnapshots, attach),
   });
 
   return { catalogue, zipPath: packed.zipPath, sha256: packed.sha256, official };

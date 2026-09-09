@@ -1,6 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
-import YAML from "yaml";
 import type { Catalogue, MappingCoverageReport, SourceSnapshot } from "../canonical/types.js";
 
 export interface AdapterContext {
@@ -52,8 +49,3 @@ export type PartialCatalogue = Pick<
 > & {
   sourceSnapshots: SourceSnapshot[];
 };
-
-export function loadSourceDescriptor(dir: string): Record<string, unknown> {
-  const file = path.join(dir, "source.yaml");
-  return YAML.parse(fs.readFileSync(file, "utf8")) as Record<string, unknown>;
-}

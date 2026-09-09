@@ -1,4 +1,5 @@
 ---
+import { GITHUB_URL } from "../lib/site.ts";
 ---
 
 <section class="section" id="licence">
@@ -11,28 +12,67 @@
       <article class="card licence-card">
         <h3 class="h3">Generator: Apache-2.0</h3>
         <p class="body-text">
-          The CLI, adapters, schemas, and Implementation Guide sources are Apache-2.0.
-        </p>
-        <p class="body-text">
-          Note that we strictly separate the code from the actual medication catalog data. We don't
-          relicense medication catalog; those come with their respective providers' open licence terms.
+          The CLI, adapters, schemas, and Implementation Guide sources are Apache-2.0. We strictly
+          separate that code from the medication catalog data and do not relicense the catalog.
         </p>
       </article>
       <article class="card licence-card">
         <h3 class="h3">Datasets: upstream terms</h3>
         <p class="body-text">
-          All catalog data is licensed according to the respective providers' licensing terms. We aim
-          to include only data that carries a licence permissive enough for commercial and
-          non-commercial use. Some licences may require attribution.
-        </p>
-        <p class="body-text">
-          We are not liable for fitness for a specific purpose, legal compatibility with or
-          suitability for integration into any product.
+          Catalog data keeps each provider’s own terms. Download cards show the flags below and a
+          Terms link to the upstream page. Official builds checksum that page and halt redistribution
+          if it no longer matches the reviewed snapshot.
         </p>
       </article>
     </div>
+
+    <article class="card licence-card licence-flags-card">
+      <h3 class="h3">What the flags mean</h3>
+      <p class="body-text">
+        <code class="mono">commercialUse</code>, <code class="mono">redistribution</code>, and
+        <code class="mono">attributionRequired</code> on each artifact are
+        <strong>indicators of our interpretation</strong> of the linked upstream terms at the dated
+        review. They are not a licence grant and not legal advice.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Value</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">allowed</td>
+            <td>We found an explicit grant for that activity in the linked terms.</td>
+          </tr>
+          <tr>
+            <td class="mono">disallowed</td>
+            <td>We found an explicit prohibition. The source is not in a public recipe.</td>
+          </tr>
+          <tr>
+            <td class="mono">review-required</td>
+            <td>Terms are missing, gated, or ambiguous. Not in a public recipe until resolved.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="body-text">
+        <code class="mono">attributionRequired</code> is <code class="mono">true</code> or
+        <code class="mono">false</code> according to whether those terms ask for attribution.
+      </p>
+      <p class="body-text">
+        We are not liable for misinterpreting upstream licences. We are not liable for fitness for a
+        specific purpose, or for legal compatibility or suitability for integration into any
+        downstream product. Every customer bears the responsibility of cross-checking the linked
+        upstream terms before use. We are not in control of how those terms are worded or when they
+        change. The checksum in a release is a snapshot, not a guarantee the live page stays still.
+      </p>
+    </article>
+
     <p class="body-text">
-      <a class="inline-link" href="/licence">Licence notes</a>
+      Source table:
+      <a class="inline-link" href="/licence">Licence notes</a>. Tagging rubric:
+      <a class="inline-link" href={`${GITHUB_URL}/blob/main/docs/licences.md`}>docs/licences.md</a>.
     </p>
   </div>
 </section>
@@ -59,6 +99,10 @@
     display: flex;
     flex-direction: column;
     gap: 0.55rem;
+  }
+
+  .licence-flags-card table {
+    margin: 0.35rem 0;
   }
 
   @media screen and (max-width: 720px) {
