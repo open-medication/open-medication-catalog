@@ -1,15 +1,16 @@
 ---
+import bakedCatalog from "../../public/catalog.json" with { type: "json" };
 import { CATALOG_PATH, GITHUB_RELEASES_URL } from "../lib/site.ts";
 import {
   ARTIFACT_META,
   formatDataMonth,
-  loadCatalog,
+  parseCatalogDoc,
   zipUrl,
   type CatalogArtifact,
 } from "../lib/catalog.ts";
 import IconArrowUpRight from "./IconArrowUpRight.astro";
 
-const catalog = loadCatalog();
+const catalog = parseCatalogDoc(bakedCatalog);
 
 const cards = ARTIFACT_META.map((meta) => {
   const entry: CatalogArtifact | undefined = catalog.artifacts[meta.id];
@@ -32,14 +33,12 @@ const cards = ARTIFACT_META.map((meta) => {
 
     <div class="download-grid">
       {cards.map(({ meta, entry }) => (
-        <article class="card download-card">
+        <article class="card download-card" data-artifact={meta.id}>
           <div class="download-top">
             <p class="eyebrow">{meta.jurisdiction}</p>
-            {entry ? (
-              <span class="pill pill-brass">{formatDataMonth(entry.latest)}</span>
-            ) : (
-              <span class="pill pill-muted">Not yet published</span>
-            )}
+            <span class:list={["pill", entry ? "pill-brass" : "pill-muted"]} data-role="month">
+              {entry ? formatDataMonth(entry.latest) : "Not yet published"}
+            </span>
           </div>
           <h3 class="h3">{meta.title}</h3>
           <p class="mono artifact-id">{meta.id}</p>
@@ -47,30 +46,78 @@ const cards = ARTIFACT_META.map((meta) => {
           <p class="sources">{meta.sources}</p>
           <p class="redistrib body-text">{meta.redistribution}</p>
           <div class="download-actions">
-            {entry ? (
-              <>
-                <a class="btn btn-primary" href={zipUrl(entry)}>
-                  Download zip
-                </a>
-                <a class="btn btn-secondary" href={entry.manifest}>
-                  manifest.json
-                </a>
-                <a class="ghost-link" href={entry.url} target="_blank" rel="noreferrer">
-                  Release notes
-                  <IconArrowUpRight />
-                </a>
-              </>
-            ) : (
-              <p class="body-text empty-note">
-                No public zip for <code class="mono">{meta.id}</code> yet.
-              </p>
-            )}
+            <div class="published-actions" data-role="published" hidden={!entry}>
+              <a class="btn btn-primary" data-role="zip" href={entry ? zipUrl(entry) : "#"}>
+                Download zip
+              </a>
+              <a class="btn btn-secondary" data-role="manifest" href={entry?.manifest ?? "#"}>
+                manifest.json
+              </a>
+              <a
+                class="ghost-link"
+                data-role="notes"
+                href={entry?.url ?? "#"}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Release notes
+                <IconArrowUpRight />
+              </a>
+            </div>
+            <p class="body-text empty-note" data-role="empty" hidden={Boolean(entry)}>
+              No public zip for <code class="mono">{meta.id}</code> yet.
+            </p>
           </div>
         </article>
       ))}
     </div>
   </div>
 </section>
+
+<script>
+  import { fetchCatalog, formatDataMonth, zipUrl, type CatalogArtifact } from "../lib/catalog.ts";
+
+  function applyCatalogToCard(card: HTMLElement, entry: CatalogArtifact | undefined): void {
+    const pill = card.querySelector("[data-role=month]");
+    const published = card.querySelector("[data-role=published]");
+    const empty = card.querySelector("[data-role=empty]");
+    const zip = card.querySelector<HTMLAnchorElement>("[data-role=zip]");
+    const manifest = card.querySelector<HTMLAnchorElement>("[data-role=manifest]");
+    const notes = card.querySelector<HTMLAnchorElement>("[data-role=notes]");
+    if (!(pill instanceof HTMLElement) || !(published instanceof HTMLElement) || !(empty instanceof HTMLElement)) {
+      return;
+    }
+    if (entry) {
+      pill.textContent = formatDataMonth(entry.latest);
+      pill.classList.add("pill-brass");
+      pill.classList.remove("pill-muted");
+      published.hidden = false;
+      empty.hidden = true;
+      if (zip) zip.href = zipUrl(entry);
+      if (manifest) manifest.href = entry.manifest;
+      if (notes) notes.href = entry.url;
+    } else {
+      pill.textContent = "Not yet published";
+      pill.classList.add("pill-muted");
+      pill.classList.remove("pill-brass");
+      published.hidden = true;
+      empty.hidden = false;
+    }
+  }
+
+  const cards = document.querySelectorAll<HTMLElement>("[data-artifact]");
+  fetchCatalog()
+    .then((doc) => {
+      for (const card of cards) {
+        const id = card.dataset.artifact;
+        if (!id) continue;
+        applyCatalogToCard(card, doc.artifacts[id]);
+      }
+    })
+    .catch((err: unknown) => {
+      console.warn("Could not refresh catalog.json", err);
+    });
+</script>
 
 <style>
   .download-grid {
@@ -115,6 +162,18 @@ const cards = ARTIFACT_META.map((meta) => {
     gap: 0.6rem;
     margin-top: auto;
     padding-top: 0.75rem;
+  }
+
+  .published-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .published-actions[hidden],
+  .empty-note[hidden] {
+    display: none;
   }
 
   .ghost-link {

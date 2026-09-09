@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Open Medication Catalog">
+  <rect width="1200" height="630" fill="#f3efe6"/>
+  <defs>
+    <pattern id="rules" width="48" height="630" patternUnits="userSpaceOnUse">
+      <rect x="47" width="1" height="630" fill="#0f5c4c" opacity="0.06"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#rules)"/>
+  <rect width="14" height="630" fill="#0f5c4c"/>
+  <g transform="translate(88, 198)">
+    <rect width="168" height="168" rx="36" fill="#0f5c4c"/>
+    <rect x="36" y="36" width="96" height="96" rx="13" fill="#f3efe6"/>
+    <path d="M52 66h80M52 84h80M52 102h50" fill="none" stroke="#0f5c4c" stroke-width="7.2" stroke-linecap="round"/>
+    <rect x="96" y="98" width="34" height="18" rx="9" fill="#8a6d32"/>
+  </g>
+  <text x="300" y="268" fill="#1b241f" font-family="Georgia, 'Iowan Old Style', Palatino, serif" font-size="54" font-weight="500" letter-spacing="-1.4">Open Medication Catalog</text>
+  <rect x="300" y="292" width="72" height="3" rx="1.5" fill="#8a6d32"/>
+  <text x="300" y="360" fill="#5e6b63" font-family="Georgia, 'Iowan Old Style', Palatino, serif" font-size="26">A multi-national medication catalog based on open data,</text>
+  <text x="300" y="398" fill="#5e6b63" font-family="Georgia, 'Iowan Old Style', Palatino, serif" font-size="26">with reproducible FHIR R4, FHIR R5 and SQLite releases.</text>
+  <text x="300" y="486" fill="#0f5c4c" font-family="Menlo, 'IBM Plex Mono', ui-monospace, monospace" font-size="18" letter-spacing="2.4">OPENMEDICATIONCATALOG.ORG</text>
+</svg>

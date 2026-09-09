@@ -1,5 +1,4 @@
-import catalogJson from "../../public/catalog.json" with { type: "json" };
-import { GITHUB_REPO } from "./site.ts";
+import { CATALOG_PATH, GITHUB_REPO } from "./site.ts";
 
 export interface CatalogArtifact {
   latest: string;
@@ -42,8 +41,21 @@ export const ARTIFACT_META: ArtifactMeta[] = [
   },
 ];
 
-export function loadCatalog(): CatalogDoc {
-  return catalogJson as CatalogDoc;
+export function parseCatalogDoc(data: unknown): CatalogDoc {
+  if (!data || typeof data !== "object" || !("artifacts" in data)) {
+    throw new Error("catalog.json is missing an artifacts object");
+  }
+  const artifacts = (data as { artifacts: unknown }).artifacts;
+  if (!artifacts || typeof artifacts !== "object") {
+    throw new Error("catalog.json artifacts must be an object");
+  }
+  return { artifacts: artifacts as Record<string, CatalogArtifact> };
+}
+
+export async function fetchCatalog(url: string = CATALOG_PATH): Promise<CatalogDoc> {
+  const res = await fetch(url, { cache: "no-store", credentials: "same-origin" });
+  if (!res.ok) throw new Error(`catalog.json HTTP ${res.status}`);
+  return parseCatalogDoc(await res.json());
 }
 
 export function zipUrl(entry: CatalogArtifact): string {

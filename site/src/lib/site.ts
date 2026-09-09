@@ -12,3 +12,7 @@ export const SPONSOR_TECH_URL = "https://www.evoleen-technology.com";
 export const TITLE = "Open Medication Catalog";
 export const DESCRIPTION =
   "A multi-national medication catalog based on open data sources, with stable and reproducible FHIR R4, FHIR R5 (IDMP) and SQLite releases.";
+export const OG_IMAGE_PATH = "/og-image.png";
+export const OG_IMAGE_WIDTH = 1200;
+export const OG_IMAGE_HEIGHT = 630;
+export const OG_IMAGE_ALT = `${TITLE} — open-data FHIR and SQLite medication releases`;

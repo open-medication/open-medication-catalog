@@ -87,22 +87,6 @@ a:hover {
   outline-offset: 3px;
 }
 
-.skip-link {
-  position: absolute;
-  left: 12px;
-  top: -40px;
-  z-index: 200;
-  padding: 8px 14px;
-  background: var(--color-ink);
-  color: var(--color-paper);
-  border-radius: 6px;
-  text-decoration: none;
-}
-
-.skip-link:focus {
-  top: 12px;
-}
-
 .page-wrap {
   position: relative;
   isolation: isolate;
