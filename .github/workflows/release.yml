@@ -1,15 +1,15 @@
-name: monthly-release
+name: release
 on:
   schedule:
-    # Daily 07:00 UTC on days 7–14
-    - cron: "0 7 7-14 * *"
+    # 1st and 15th, 07:00 UTC (~every other week)
+    - cron: "0 7 1,15 * *"
   workflow_dispatch:
     inputs:
       artifact:
         description: "ch-base or ch-enriched"
         default: "ch-base"
       month:
-        description: "YYYY.MM (default current UTC month)"
+        description: "YYYY.MM (default: newest unpublished Swissmedic archive)"
         required: false
 jobs:
   release:
@@ -30,40 +30,38 @@ jobs:
           node-version: "22"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm rebuild:native
+      - name: Discover next unpublished month
+        id: next
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ARGS=(pnpm omc next-month "${{ matrix.artifact }}" --github-output "$GITHUB_OUTPUT")
+          MONTH="${{ github.event.inputs.month }}"
+          if [ -n "$MONTH" ]; then ARGS+=(--month "$MONTH"); fi
+          "${ARGS[@]}"
+      - name: Rebuild native modules
+        if: steps.next.outputs.skip != 'true'
+        run: pnpm rebuild:native
       - uses: actions/setup-java@v4
+        if: steps.next.outputs.skip != 'true'
         with:
           distribution: temurin
           java-version: "17"
       - name: Cache HL7 validator
+        if: steps.next.outputs.skip != 'true'
         uses: actions/cache@v4
         with:
           path: tooling/validator_cli.jar
           key: validator-cli-${{ hashFiles('tooling/pins.json') }}
-      - name: Skip if GitHub Release already exists
-        id: exists
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          MONTH="${{ github.event.inputs.month }}"
-          if [ -z "$MONTH" ]; then MONTH="$(date -u +%Y.%m)"; fi
-          echo "month=$MONTH" >> "$GITHUB_OUTPUT"
-          TAG="${{ matrix.artifact }}-$MONTH"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
       - name: Build artifact
-        if: steps.exists.outputs.exists == 'false'
+        if: steps.next.outputs.skip != 'true'
         id: build
         env:
           REFDATA_API_KEY: ${{ secrets.REFDATA_API_KEY }}
         run: |
           LOG="${{ runner.temp }}/omc-build.log"
           set +e
-          pnpm omc build ${{ matrix.artifact }} --month "${{ steps.exists.outputs.month }}" --out "output/${{ matrix.artifact }}" 2>&1 | tee "$LOG"
+          pnpm omc build ${{ matrix.artifact }} --month "${{ steps.next.outputs.month }}" --out "output/${{ matrix.artifact }}" 2>&1 | tee "$LOG"
           code=${PIPESTATUS[0]}
           set -e
           if grep -q "not yet available" "$LOG" || [ -f "output/${{ matrix.artifact }}/.not-yet-available" ]; then
@@ -72,19 +70,19 @@ jobs:
           fi
           exit "$code"
       - name: Compile FHIR IGs
-        if: steps.exists.outputs.exists == 'false' && steps.build.outputs.not_yet != 'true'
+        if: steps.next.outputs.skip != 'true' && steps.build.outputs.not_yet != 'true'
         run: |
           pnpm exec sushi fhir/r4
           pnpm exec sushi fhir/r5
       - name: Java FHIR validate
-        if: steps.exists.outputs.exists == 'false' && steps.build.outputs.not_yet != 'true'
+        if: steps.next.outputs.skip != 'true' && steps.build.outputs.not_yet != 'true'
         run: pnpm omc fhir-validate --dir "output/${{ matrix.artifact }}/release" --max 25
       - name: Publish GitHub Release
-        if: steps.exists.outputs.exists == 'false' && steps.build.outputs.not_yet != 'true'
+        if: steps.next.outputs.skip != 'true' && steps.build.outputs.not_yet != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ steps.exists.outputs.tag }}"
+          TAG="${{ steps.next.outputs.tag }}"
           ZIP=$(ls output/${{ matrix.artifact }}/*.zip 2>/dev/null | head -n 1)
           if [ ! -f "$ZIP" ]; then
             echo "No zip produced after a successful build"

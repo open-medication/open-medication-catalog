@@ -12,10 +12,14 @@ export interface FetchOptions {
   allowedContentTypes?: string[];
 }
 
-export async function fetchBinary(url: string, opts: FetchOptions = {}): Promise<Buffer> {
+function assertHttpUrl(url: string): void {
   if (!url.startsWith("https://") && !url.startsWith("http://")) {
     throw new Error(`Refusing non-http(s) URL: ${url}`);
   }
+}
+
+export async function fetchBinary(url: string, opts: FetchOptions = {}): Promise<Buffer> {
+  assertHttpUrl(url);
   const res = await fetch(url, { headers: opts.headers, redirect: "follow" });
   if (!res.ok) {
     throw new HttpStatusError(url, res.status, res.statusText);
@@ -46,6 +50,27 @@ export class HttpStatusError extends Error {
   ) {
     super(`HTTP ${status} ${statusText} for ${url}`);
   }
+}
+
+const MISSING = new Set([404, 403]);
+
+/** True when HEAD (or a tiny ranged GET) says the URL exists. Throws on unexpected 5xx. */
+export async function httpExists(url: string): Promise<boolean> {
+  assertHttpUrl(url);
+  const head = await fetch(url, { method: "HEAD", redirect: "follow" });
+  if (head.status === 200) return true;
+  if (MISSING.has(head.status)) return false;
+  if (head.status === 405 || head.status === 501) {
+    const ranged = await fetch(url, {
+      method: "GET",
+      headers: { Range: "bytes=0-0" },
+      redirect: "follow",
+    });
+    if (ranged.ok) return true;
+    if (MISSING.has(ranged.status)) return false;
+    throw new HttpStatusError(url, ranged.status, ranged.statusText);
+  }
+  throw new HttpStatusError(url, head.status, head.statusText);
 }
 
 export function assertSafeZipPath(name: string, destAbs: string): string {

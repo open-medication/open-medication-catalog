@@ -1,6 +1,14 @@
 ---
 import "../styles/global.css";
-import { DESCRIPTION, SITE_URL, TITLE } from "../lib/site.ts";
+import {
+  DESCRIPTION,
+  OG_IMAGE_ALT,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_PATH,
+  OG_IMAGE_WIDTH,
+  SITE_URL,
+  TITLE,
+} from "../lib/site.ts";
 
 interface Props {
   title?: string;
@@ -16,6 +24,7 @@ const {
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? SITE_URL);
 const pageTitle = title === TITLE ? title : `${title} · ${TITLE}`;
+const ogImage = new URL(OG_IMAGE_PATH, SITE_URL).href;
 ---
 
 <!doctype html>
@@ -24,25 +33,41 @@ const pageTitle = title === TITLE ? title : `${title} · ${TITLE}`;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/favicon.svg" color="#0f5c4c" />
     <link rel="canonical" href={canonicalURL.href} />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    <meta name="application-name" content={TITLE} />
+    <meta name="apple-mobile-web-app-title" content={TITLE} />
     <meta name="theme-color" content="#f3efe6" />
+    <meta name="msapplication-TileColor" content="#0f5c4c" />
+    <meta name="msapplication-TileImage" content={new URL("/favicon-192.png", SITE_URL).href} />
+    <meta name="robots" content="index, follow" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL.href} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={TITLE} />
     <meta property="og:locale" content="en_US" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:secure_url" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
+    <meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />
+    <meta property="og:image:alt" content={OG_IMAGE_ALT} />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={OG_IMAGE_ALT} />
     {structuredData && (
       <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
     )}
   </head>
   <body>
-    <a class="skip-link" href="#content">Skip to content</a>
     <div class="page-wrap">
       <slot />
     </div>

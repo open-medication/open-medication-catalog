@@ -51,10 +51,13 @@ pnpm omc search output/ch-base/release/database/medication.sqlite Metformin
 Live Swissmedic (no credentials), archive-first:
 
 ```text
-pnpm omc build ch-base --month 2026.09
+pnpm omc next-month ch-base
+pnpm omc build ch-base --month 2026.08
 ```
 
-If `OGD_202609.zip` is not published yet, the command exits successfully as **not yet available**.
+`next-month` compares GitHub Releases to the Swissmedic archive and prints the newest unpublished `YYYY.MM`. If nothing newer exists it prints `up-to-date`. If a given `OGD_YYYYMM.zip` is not published yet, `omc build` exits successfully as **not yet available**.
+
+The release workflow runs on the 1st and 15th UTC. It ships that newest unpublished month, or skips when already current. Manual dispatch can still force a month.
 
 ## Architecture
 

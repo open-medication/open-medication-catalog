@@ -13,7 +13,7 @@ Outputs under `output/ch-base/`:
 - `release/manifest.json`
 - `ch-base-2026.08.zip`
 
-Live fetch uses the immutable Swissmedic archive `OGD_YYYYMM.zip` (the server uses lowercase; `.ZIP` is tried as a fallback), not the overwritten `OGD.zip`.
+Live fetch uses the immutable Swissmedic archive `OGD_YYYYMM.zip` (the server uses lowercase; `.ZIP` is tried as a fallback), not the overwritten `OGD.zip`. `pnpm omc next-month ch-base` reports the newest unpublished archive relative to GitHub Releases.
 
 Regenerate canonical TypeScript types after editing `canonical/schema/catalogue.schema.json`:
 

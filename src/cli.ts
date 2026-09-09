@@ -5,6 +5,7 @@ import { searchPackages } from "./sqlite/writer.js";
 import { isOfficialArtifactId } from "./artifacts.js";
 import { SourceNotYetAvailableError } from "./adapters/ch/swissmedic.js";
 import { rebuildCatalogFromGithubReleases } from "./pipeline/packager.js";
+import { discoverNextDataMonth, formatNextMonthSummary, githubOutputLines } from "./pipeline/discover.js";
 import { checkAllTerms } from "./pipeline/terms.js";
 import { CATALOG_JSON_REL } from "./constants.js";
 import { ensureValidatorJar, validateReleaseFhir } from "./pipeline/validator.js";
@@ -124,6 +125,20 @@ program
   .action((db: string, query: string) => {
     const rows = searchPackages(db, query);
     console.log(JSON.stringify(rows, null, 2));
+  });
+
+program
+  .command("next-month")
+  .description("Find the newest unpublished Swissmedic archive newer than the last GitHub Release")
+  .argument("<artifactId>")
+  .option("--month <yyyy.mm>", "use this data month instead of discovering")
+  .option("--github-output <path>", "append skip/month/tag fields for GitHub Actions")
+  .action(async (artifactId: string, opts: { month?: string; githubOutput?: string }) => {
+    const result = await discoverNextDataMonth({ artifactId, forcedMonth: opts.month });
+    console.log(formatNextMonthSummary(result));
+    if (opts.githubOutput) {
+      fs.appendFileSync(opts.githubOutput, `${githubOutputLines(result)}\n`);
+    }
   });
 
 program

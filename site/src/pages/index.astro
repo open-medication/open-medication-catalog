@@ -10,7 +10,17 @@ import Build from "../components/Build.astro";
 import Licence from "../components/Licence.astro";
 import Sponsor from "../components/Sponsor.astro";
 import Footer from "../components/Footer.astro";
-import { DESCRIPTION, GITHUB_URL, SITE_URL, TITLE } from "../lib/site.ts";
+import {
+  DESCRIPTION,
+  GITHUB_URL,
+  OG_IMAGE_ALT,
+  OG_IMAGE_PATH,
+  SITE_URL,
+  TITLE,
+} from "../lib/site.ts";
+
+const ogImage = new URL(OG_IMAGE_PATH, SITE_URL).href;
+const logo = new URL("/favicon-192.png", SITE_URL).href;
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -23,6 +33,13 @@ const structuredData = {
   description: DESCRIPTION,
   codeRepository: GITHUB_URL,
   isAccessibleForFree: true,
+  image: ogImage,
+  screenshot: ogImage,
+  logo: {
+    "@type": "ImageObject",
+    url: logo,
+    caption: OG_IMAGE_ALT,
+  },
 };
 ---
 
