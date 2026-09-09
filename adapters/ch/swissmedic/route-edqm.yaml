@@ -1,0 +1,201 @@
+# Swissmedic ROUTE_ADMIN -> EDQM route of administration.
+# Matched only when the Swissmedic English UDC label equals an EDQM English ROA term
+# from HL7 IPS Medicine EDQM Route of Administration v2.0.1 (expansion 5 February 2025).
+# Canonical data keeps Swissmedic codes. R5 adds an EDQM coding beside them when mapped.
+# Veterinary and otherwise unmatched labels stay Swissmedic-only.
+reviewedAt: "2026-09-09"
+udcRelease: "2026.08"
+edqmSystem: "http://standardterms.edqm.eu"
+map:
+  AUR:
+    code: "20001000"
+    display: "Auricular use"
+  CUT:
+    code: "20003000"
+    display: "Cutaneous use"
+  DEN:
+    code: "20004000"
+    display: "Dental use"
+  EAMN:
+    code: "20011000"
+    display: "Extraamniotic use"
+  EINR:
+    code: "20063000"
+    display: "Skin scarification"
+  ENDC:
+    code: "20006000"
+    display: "Endocervical use"
+  ENDT:
+    code: "20008000"
+    display: "Endotracheopulmonary use"
+  ENNU:
+    code: "20007000"
+    display: "Endosinusial use"
+  EPI:
+    code: "20009000"
+    display: "Epidural use"
+  GAS:
+    code: "20013000"
+    display: "Gastroenteral use"
+  GIN:
+    code: "20014000"
+    display: "Gingival use"
+  HAEM:
+    code: "20015000"
+    display: "Haemodialysis"
+  IAM:
+    code: "20022000"
+    display: "Intraamniotic use"
+  IAR:
+    code: "20023000"
+    display: "Intraarterial use"
+  IARC:
+    code: "20024000"
+    display: "Intraarticular use"
+  IBUR:
+    code: "20025000"
+    display: "Intrabursal use"
+  ICA:
+    code: "20027000"
+    display: "Intracavernous use"
+  ICAR:
+    code: "20026000"
+    display: "Intracardiac use"
+  ICER:
+    code: "20028000"
+    display: "Intracervical use"
+  ICOR:
+    code: "20029000"
+    display: "Intracoronary use"
+  IDER:
+    code: "20030000"
+    display: "Intradermal use"
+  IDIS:
+    code: "20031000"
+    display: "Intradiscal use"
+  ILES:
+    code: "20032000"
+    display: "Intralesional use"
+  IMU:
+    code: "20035000"
+    display: "Intramuscular use"
+  INH:
+    code: "20020000"
+    display: "Inhalation use"
+  IOCUL:
+    code: "20036000"
+    display: "Intraocular use"
+  IPER:
+    code: "20038000"
+    display: "Intraperitoneal use"
+  IPLE:
+    code: "20039000"
+    display: "Intrapleural use"
+  ISTE:
+    code: "20041000"
+    display: "Intrasternal use"
+  ITHE:
+    code: "20042000"
+    display: "Intrathecal use"
+  IU:
+    code: "20044000"
+    display: "Intrauterine use"
+  IV:
+    code: "20045000"
+    display: "Intravenous use"
+  IVES:
+    code: "20046000"
+    display: "Intravesical use"
+  LYM:
+    code: "20033000"
+    display: "Intralymphatic use"
+  MUC:
+    code: "20054000"
+    display: "Oromucosal use"
+  NAS:
+    code: "20049000"
+    display: "Nasal use"
+  NIC:
+    code: "20062000"
+    display: "Route of administration not applicable"
+  OCU:
+    code: "20051000"
+    display: "Ocular use"
+  ORA:
+    code: "20053000"
+    display: "Oral use"
+  PERA:
+    code: "20057000"
+    display: "Periarticular use"
+  PERN:
+    code: "20058000"
+    display: "Perineural use"
+  REC:
+    code: "20061000"
+    display: "Rectal use"
+  RESP:
+    code: "20020000"
+    display: "Inhalation use"
+  SUBC:
+    code: "20066000"
+    display: "Subcutaneous use"
+  SUBCJ:
+    code: "20065000"
+    display: "Subconjunctival use"
+  TRA:
+    code: "20070000"
+    display: "Transdermal use"
+  URE:
+    code: "20071000"
+    display: "Urethral use"
+  VAG:
+    code: "20072000"
+    display: "Vaginal use"
+unmapped:
+  - code: BIE
+    label: 'In-hive use'
+  - code: DIP
+    label: 'Dipping'
+  - code: FLU
+    label: 'Wing-web-stab use'
+  - code: FUS
+    label: 'Foot-stab use'
+  - code: FUTT
+    label: 'In-feed use'
+  - code: IMAM
+    label: 'Intramammary use'
+  - code: IO
+    label: 'In ovo'
+  - code: IOVA
+    label: 'intra-ovarian use'
+  - code: IRUM
+    label: 'Intraruminal use'
+  - code: ITES
+    label: 'intra-testicular'
+  - code: LOK
+    label: 'local use'
+  - code: OCUN
+    label: 'Oculonasal use'
+  - code: PAR
+    label: 'Paravertebral use'
+  - code: PON
+    label: 'Pour-on use'
+  - code: SCHL
+    label: 'mucosal administration (oromucosal, nasal,  vaginal, rectal, urethral)'
+  - code: SCHN
+    label: 'Beak dipping'
+  - code: SPO
+    label: 'Spot-on use'
+  - code: SUBA
+    label: 'subarachnoidale Anwendung'
+  - code: TOPD
+    label: 'Top-dressing use'
+  - code: TRIN
+    label: 'In drinking water/milk use'
+  - code: VER
+    label: 'zum Vernebeln'
+  - code: WAS
+    label: 'Water-borne use'
+  - code: ZIT
+    label: 'Teat use'
+# mapped 48 of 71 ROUTE_ADMIN codes

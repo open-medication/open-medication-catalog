@@ -32,7 +32,11 @@ Join is authorisation number + pack code (strings). Invariant: within Swissmedic
 
 ## Routes
 
-Published as Swissmedic `ROUTE_ADMIN` coding + label. EDQM system is not asserted until codes and licence are verified.
+Published as Swissmedic `ROUTE_ADMIN` coding + label. Swissmedic records these “in accordance with the EDQM list”; the OGD codes themselves are Swissmedic mnemonics (`ORA`, `IV`, …), not EDQM `200xxxxx` identifiers.
+
+R5 `MedicinalProductDefinition.route` therefore keeps the Swissmedic coding and, when the English UDC label equals an EDQM ROA term (HL7 IPS expansion, 5 February 2025), adds a second coding with `system` `http://standardterms.edqm.eu`. That mapping is in `adapters/ch/swissmedic/route-edqm.yaml` (48 of 71 UDC codes on the 2026.08 dump). Unmatched labels, mostly veterinary, stay Swissmedic-only.
+
+We do not redistribute the EDQM Standard Terms database. The extra coding is an identifier assertion; displays stay the Swissmedic labels. EDQM Standard Terms remain copyright EDQM / Council of Europe ([conditions](https://www.edqm.eu/en/standard-terms-database)).
 
 ## Reproducibility
 

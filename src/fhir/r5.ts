@@ -1,5 +1,6 @@
+import { edqmRouteCoding } from "../adapters/ch/route-edqm.js";
+import { SWISSMEDIC_SYSTEMS, type Catalogue, type CodedValue } from "../canonical/types.js";
 import { FHIR_CANONICAL_BASE } from "../constants.js";
-import type { Catalogue } from "../canonical/types.js";
 import { jsonLine, parseFhirDecimal } from "./serialize.js";
 
 export const R5_MPD_PROFILE = `${FHIR_CANONICAL_BASE}/StructureDefinition/OpenMedicinalProductDefinition`;
@@ -42,9 +43,7 @@ export function exportR5(catalogue: Catalogue, releaseLabel: string): Record<str
         combinedPharmaceuticalDoseForm: mp.doseForm
           ? { coding: [mp.doseForm], text: mp.doseForm.display }
           : undefined,
-        route: mp.routes.length
-          ? mp.routes.map((r) => ({ coding: [r], text: r.display }))
-          : undefined,
+        route: mp.routes.length ? mp.routes.map(routeCodeableConcept) : undefined,
         status: { coding: [mp.regulatoryStatus] },
         extension: [
           ...commonExt(mp.jurisdiction, mp.identityAuthority, releaseLabel),
@@ -155,6 +154,16 @@ function ingredientStrength(strength: {
     ];
   }
   return strength.text ? [{ text: strength.text }] : undefined;
+}
+
+/** Swissmedic ROUTE_ADMIN plus an EDQM coding when the English labels matched. */
+export function routeCodeableConcept(route: CodedValue): { coding: CodedValue[]; text?: string } {
+  const coding = [route];
+  if (route.system === SWISSMEDIC_SYSTEMS.route) {
+    const edqm = edqmRouteCoding(route.code);
+    if (edqm) coding.push(edqm);
+  }
+  return { coding, text: route.display };
 }
 
 function commonExt(jurisdiction: string, identityAuthority: string, release: string) {
