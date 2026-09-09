@@ -5,5 +5,13 @@
   Cache-Control: public, max-age=300, must-revalidate
   Content-Type: application/json; charset=utf-8
 
+/og-image.png
+  Cache-Control: public, max-age=86400, must-revalidate
+  Content-Type: image/png
+
+/apple-touch-icon.png
+  Cache-Control: public, max-age=86400
+  Content-Type: image/png
+
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
