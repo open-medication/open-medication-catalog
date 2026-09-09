@@ -565,6 +565,9 @@ function findRows(doc: Record<string, unknown>, tag: string): Record<string, unk
 }
 
 function snapshotFrom(buf: Buffer, ctx: AdapterContext, uri: string): SourceSnapshot {
+  const desc = YAML.parse(fs.readFileSync(path.join(ADAPTER_DIR, "source.yaml"), "utf8")) as {
+    terms: { reviewedAt: string };
+  };
   return {
     id: sha256(buf).slice(0, 16),
     sourceId: "swissmedic",
@@ -573,7 +576,7 @@ function snapshotFrom(buf: Buffer, ctx: AdapterContext, uri: string): SourceSnap
     sourceEffectiveDate: ctx.cutoffDate,
     sha256: sha256(buf),
     uri,
-    termsReviewedAt: "2026-08-28",
+    termsReviewedAt: desc.terms.reviewedAt,
   };
 }
 

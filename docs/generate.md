@@ -21,7 +21,7 @@ Regenerate canonical TypeScript types after editing `canonical/schema/catalogue.
 pnpm gen:types
 ```
 
-Official builds fetch live licence pages and refuse to redistribute if a committed `terms.snapshot.txt` no longer matches. Fixture/CI builds set `OMC_SKIP_TERMS=1`. Check snapshots with `pnpm omc terms`.
+Official builds fetch live licence pages and refuse to redistribute if a committed `terms.snapshot.txt` no longer matches. Swissmedic compares the `#terms_open` definition only. Fixture/CI builds set `OMC_SKIP_TERMS=1`. Check snapshots with `pnpm omc terms`.
 
 The HL7 Java validator (`validator_cli` 6.9.12, SHA-256 in `tooling/pins.json`) is normative:
 
