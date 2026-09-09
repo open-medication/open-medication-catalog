@@ -10,7 +10,7 @@ import { assertValidCatalogue } from "../canonical/validate.js";
 import { repoPath } from "../paths.js";
 import { calendarForDate, parseDataMonth, type ReleaseCalendar } from "./dates.js";
 import { detectAnomalies, diffCatalogues, qualityReport, type ChangeReport } from "./quality.js";
-import { writeRelease, updateCatalogJson } from "./packager.js";
+import { writeRelease } from "./packager.js";
 import { assertTermsAllowRedistribution } from "./terms.js";
 import type { Catalogue } from "../canonical/types.js";
 
@@ -169,6 +169,5 @@ export async function build(opts: BuildOptions): Promise<BuildResult> {
     ],
   });
 
-  updateCatalogJson(repoPath("pages", "catalog.json"), artifactId, cal.dataMonth);
   return { catalogue, zipPath: packed.zipPath, sha256: packed.sha256, official };
 }

@@ -1,0 +1,327 @@
+@import "@fontsource-variable/newsreader";
+@import "@fontsource-variable/inter";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+
+/*
+ * Open Medication Catalog. Gazette / pharmacopeia paper.
+ */
+
+:root {
+  --color-paper: #f3efe6;
+  --color-paper-raised: #faf7f1;
+  --color-paper-inset: #ebe6db;
+  --color-ink: #1b241f;
+  --color-ink-muted: #5e6b63;
+  --color-rule: #d4cdc0;
+  --color-green: #0f5c4c;
+  --color-green-hover: #0a4539;
+  --color-green-soft: #e4efe9;
+  --color-brass: #8a6d32;
+  --color-brass-soft: #f4ead4;
+  --color-white: #fffcf7;
+  --font-serif: "Newsreader Variable", "Newsreader", "Iowan Old Style", Palatino, Georgia, serif;
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius-card: 12px;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 0 rgba(27, 36, 31, 0.04), 0 12px 32px -16px rgba(27, 36, 31, 0.18);
+  --measure: 42rem;
+  --page: 68rem;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-paper);
+  background-image:
+    linear-gradient(180deg, rgba(243, 239, 230, 0.92), rgba(243, 239, 230, 0.92)),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 47px,
+      rgba(15, 92, 76, 0.035) 47px,
+      rgba(15, 92, 76, 0.035) 48px
+    );
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: var(--color-green);
+}
+
+a:hover {
+  color: var(--color-green-hover);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-green);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -40px;
+  z-index: 200;
+  padding: 8px 14px;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+.page-wrap {
+  position: relative;
+  isolation: isolate;
+}
+
+.container {
+  width: min(100% - 2.5rem, var(--page));
+  margin-inline: auto;
+}
+
+/* ---- Type ---- */
+
+.h1 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  color: var(--color-ink);
+}
+
+.h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.7rem, 3vw, 2.15rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.h3 {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.lede {
+  margin: 0;
+  max-width: var(--measure);
+  font-family: var(--font-serif);
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.body-text {
+  margin: 0;
+  color: var(--color-ink-muted);
+  line-height: 1.65;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-green);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+}
+
+/* ---- Buttons ---- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1.15rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background: var(--color-green);
+  color: var(--color-white);
+}
+
+.btn-primary:hover {
+  background: var(--color-green-hover);
+  color: var(--color-white);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-rule);
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+
+.btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* ---- Sections ---- */
+
+.section {
+  padding: 4.5rem 0;
+}
+
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  max-width: 40rem;
+}
+
+.section-rule {
+  border: 0;
+  border-top: 1px solid var(--color-rule);
+  margin: 0;
+}
+
+.card {
+  background: var(--color-paper-raised);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-green-soft);
+  color: var(--color-green);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.pill-muted {
+  background: var(--color-paper-inset);
+  color: var(--color-ink-muted);
+}
+
+.pill-brass {
+  background: var(--color-brass-soft);
+  color: var(--color-brass);
+}
+
+.inline-link {
+  color: var(--color-green);
+  text-underline-offset: 3px;
+}
+
+pre,
+.code-block {
+  margin: 0;
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  background: var(--color-ink);
+  color: #e8efe9;
+  border-radius: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid var(--color-rule);
+  vertical-align: top;
+}
+
+th {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+@media screen and (max-width: 720px) {
+  .container {
+    width: min(100% - 1.5rem, var(--page));
+  }
+
+  .section {
+    padding: 3.25rem 0;
+  }
+
+  th,
+  td {
+    padding: 0.55rem 0.4rem;
+  }
+}

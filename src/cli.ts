@@ -6,6 +6,7 @@ import { isOfficialArtifactId } from "./artifacts.js";
 import { SourceNotYetAvailableError } from "./adapters/ch/swissmedic.js";
 import { rebuildCatalogFromGithubReleases } from "./pipeline/packager.js";
 import { checkAllTerms } from "./pipeline/terms.js";
+import { CATALOG_JSON_REL } from "./constants.js";
 import { ensureValidatorJar, validateReleaseFhir } from "./pipeline/validator.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -127,8 +128,8 @@ program
 
 program
   .command("catalog")
-  .description("Rebuild pages/catalog.json from published GitHub Releases (all official artifacts)")
-  .option("--write <path>", "output path", "pages/catalog.json")
+  .description("Rebuild site/public/catalog.json from published GitHub Releases (all official artifacts)")
+  .option("--write <path>", "output path", CATALOG_JSON_REL.join("/"))
   .action(async (opts: { write: string }) => {
     const doc = await rebuildCatalogFromGithubReleases(path.resolve(opts.write));
     console.log(`wrote ${opts.write} artifacts=${Object.keys(doc.artifacts).join(",") || "(none)"}`);

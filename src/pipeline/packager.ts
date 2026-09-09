@@ -106,6 +106,7 @@ export interface CatalogArtifact {
   latest: string;
   tag: string;
   url: string;
+  zip: string;
   manifest: string;
 }
 
@@ -122,6 +123,7 @@ export function catalogEntry(artifactId: string, releaseLabel: string): CatalogA
     latest: releaseLabel,
     tag,
     url: `${base}/tag/${tag}`,
+    zip: `${base}/download/${tag}/${tag}.zip`,
     manifest: `${base}/download/${tag}/manifest.json`,
   };
 }

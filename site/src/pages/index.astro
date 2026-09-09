@@ -1,0 +1,43 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import Hero from "../components/Hero.astro";
+import Downloads from "../components/Downloads.astro";
+import About from "../components/About.astro";
+import Coverage from "../components/Coverage.astro";
+import Limits from "../components/Limits.astro";
+import Build from "../components/Build.astro";
+import Licence from "../components/Licence.astro";
+import Sponsor from "../components/Sponsor.astro";
+import Footer from "../components/Footer.astro";
+import { DESCRIPTION, GITHUB_URL, SITE_URL, TITLE } from "../lib/site.ts";
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: TITLE,
+  applicationCategory: "HealthApplication",
+  operatingSystem: "Any",
+  license: "https://www.apache.org/licenses/LICENSE-2.0",
+  url: SITE_URL,
+  description: DESCRIPTION,
+  codeRepository: GITHUB_URL,
+  isAccessibleForFree: true,
+};
+---
+
+<Layout structuredData={structuredData}>
+  <Navbar />
+  <main id="content">
+    <Hero />
+    <hr class="section-rule container" />
+    <Downloads />
+    <About />
+    <Coverage />
+    <Limits />
+    <Build />
+    <Licence />
+    <Sponsor />
+  </main>
+  <Footer />
+</Layout>

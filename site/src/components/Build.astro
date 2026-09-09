@@ -1,0 +1,41 @@
+---
+import { FHIR_CANONICAL_BASE, GITHUB_URL } from "../lib/site.ts";
+---
+
+<section class="section" id="build">
+  <div class="container build-grid">
+    <div class="section-header">
+      <p class="eyebrow">Generator</p>
+      <h2 class="h2">Build from source</h2>
+      <p class="body-text">
+        Official builds use recipes in <code class="mono">artifacts.yaml</code>.
+        Implementation Guides will be published at
+        <a class="inline-link" href={FHIR_CANONICAL_BASE}>{FHIR_CANONICAL_BASE.replace("https://", "")}</a>
+        in the future.
+      </p>
+    </div>
+    <pre class="code-block" tabindex="0"><code>{`pnpm install
+pnpm omc build ch-base --month 2026.09
+pnpm omc search output/ch-base/release/database/medication.sqlite Metformin`}</code></pre>
+    <p class="body-text build-doc">
+      Node.js 22+, pnpm 10. See the
+      <a class="inline-link" href={`${GITHUB_URL}#readme`}>repository README</a>.
+    </p>
+  </div>
+</section>
+
+<style>
+  .build-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .build-grid .section-header {
+    margin-bottom: 0;
+  }
+
+  .build-doc {
+    font-size: 0.95rem;
+  }
+</style>

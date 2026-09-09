@@ -1,0 +1,144 @@
+---
+import { CATALOG_PATH, GITHUB_RELEASES_URL } from "../lib/site.ts";
+import {
+  ARTIFACT_META,
+  formatDataMonth,
+  loadCatalog,
+  zipUrl,
+  type CatalogArtifact,
+} from "../lib/catalog.ts";
+import IconArrowUpRight from "./IconArrowUpRight.astro";
+
+const catalog = loadCatalog();
+
+const cards = ARTIFACT_META.map((meta) => {
+  const entry: CatalogArtifact | undefined = catalog.artifacts[meta.id];
+  return { meta, entry };
+});
+---
+
+<section class="section" id="download">
+  <div class="container">
+    <div class="section-header">
+      <p class="eyebrow">Releases</p>
+      <h2 class="h2">Download the latest artifacts</h2>
+      <p class="body-text">
+        Monthly zips are published at the
+        <a class="inline-link" href={GITHUB_RELEASES_URL}>GitHub Releases</a>
+        page or can be downloaded below. A machine-parsable catalog can be found at
+        <a class="inline-link" href={CATALOG_PATH}><code class="mono">catalog.json</code></a>.
+      </p>
+    </div>
+
+    <div class="download-grid">
+      {cards.map(({ meta, entry }) => (
+        <article class="card download-card">
+          <div class="download-top">
+            <p class="eyebrow">{meta.jurisdiction}</p>
+            {entry ? (
+              <span class="pill pill-brass">{formatDataMonth(entry.latest)}</span>
+            ) : (
+              <span class="pill pill-muted">Not yet published</span>
+            )}
+          </div>
+          <h3 class="h3">{meta.title}</h3>
+          <p class="mono artifact-id">{meta.id}</p>
+          <p class="body-text">{meta.blurb}</p>
+          <p class="sources">{meta.sources}</p>
+          <p class="redistrib body-text">{meta.redistribution}</p>
+          <div class="download-actions">
+            {entry ? (
+              <>
+                <a class="btn btn-primary" href={zipUrl(entry)}>
+                  Download zip
+                </a>
+                <a class="btn btn-secondary" href={entry.manifest}>
+                  manifest.json
+                </a>
+                <a class="ghost-link" href={entry.url} target="_blank" rel="noreferrer">
+                  Release notes
+                  <IconArrowUpRight />
+                </a>
+              </>
+            ) : (
+              <p class="body-text empty-note">
+                No public zip for <code class="mono">{meta.id}</code> yet.
+              </p>
+            )}
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .download-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  .download-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 1.5rem 1.4rem 1.35rem;
+  }
+
+  .download-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .artifact-id {
+    margin: 0;
+    color: var(--color-brass);
+  }
+
+  .sources {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-ink);
+  }
+
+  .redistrib {
+    font-size: 0.88rem;
+  }
+
+  .download-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: auto;
+    padding-top: 0.75rem;
+  }
+
+  .ghost-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: 0.25rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .ghost-link svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .empty-note {
+    font-size: 0.9rem;
+  }
+
+  @media screen and (max-width: 800px) {
+    .download-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+import "../styles/global.css";
+import { DESCRIPTION, SITE_URL, TITLE } from "../lib/site.ts";
+
+interface Props {
+  title?: string;
+  description?: string;
+  structuredData?: Record<string, unknown>;
+}
+
+const {
+  title = TITLE,
+  description = DESCRIPTION,
+  structuredData,
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? SITE_URL);
+const pageTitle = title === TITLE ? title : `${title} · ${TITLE}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalURL.href} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f3efe6" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={TITLE} />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    {structuredData && (
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
+    )}
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+    <div class="page-wrap">
+      <slot />
+    </div>
+  </body>
+</html>

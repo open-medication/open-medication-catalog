@@ -31,6 +31,9 @@ describe("catalogFromReleaseTags", () => {
     ]);
     expect(doc.artifacts["ch-base"]?.latest).toBe("2026.09");
     expect(doc.artifacts["ch-base"]?.tag).toBe("ch-base-2026.09");
+    expect(doc.artifacts["ch-base"]?.zip).toBe(
+      "https://github.com/open-medication/open-medication-catalog/releases/download/ch-base-2026.09/ch-base-2026.09.zip",
+    );
     expect(doc.artifacts["ch-enriched"]?.latest).toBe("2026.08");
     expect(doc.artifacts["ch-enriched"]?.tag).toBe("ch-enriched-2026.08");
   });

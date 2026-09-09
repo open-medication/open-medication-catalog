@@ -1,0 +1,59 @@
+---
+const items = [
+  {
+    title: "SQLite",
+    body: "Packages, medicinal products, and declarations, with full-text search.",
+  },
+  {
+    title: "FHIR R4 and R5",
+    body: "R4 Medication per package. R5 MedicinalProductDefinition, PackagedProductDefinition, Ingredient, and RegulatedAuthorization. R5 follows IDMP. It is not ISO IDMP certified.",
+  },
+  {
+    title: "Source files",
+    body: "Source snapshots, checksums, and licence files. Official zips are binary-reproducible.",
+  },
+];
+---
+
+<section class="section" id="about">
+  <div class="container">
+    <div class="section-header">
+      <p class="eyebrow">Contents</p>
+      <h2 class="h2">Release contents</h2>
+      <p class="body-text">
+        We convert the country-specific formats to standardized formats and offer them for download as-is.
+      </p>
+    </div>
+    <div class="about-grid">
+      {items.map((item) => (
+        <article class="about-item">
+          <h3 class="h3">{item.title}</h3>
+          <p class="body-text">{item.body}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem 2rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--color-rule);
+  }
+
+  .about-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding-top: 1.25rem;
+  }
+
+  @media screen and (max-width: 800px) {
+    .about-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

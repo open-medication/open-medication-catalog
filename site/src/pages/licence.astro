@@ -1,0 +1,88 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import { GITHUB_URL } from "../lib/site.ts";
+---
+
+<Layout
+  title="Licence"
+  description="Apache-2.0 for the generator. Upstream terms and attribution for each national dataset, recorded in every release zip."
+>
+  <Navbar />
+  <main id="content" class="section">
+    <article class="container licence-page">
+      <p class="eyebrow">Licence</p>
+      <h1 class="h1">Generator and dataset licences</h1>
+      <p class="lede">
+        The generator is Apache-2.0. The medicinal-product data keeps its upstream licence and attribution.
+      </p>
+
+      <h2 class="h2">Generator</h2>
+      <p class="body-text">
+        The CLI, adapters, schemas, and Implementation Guide sources are licensed under the
+        <a class="inline-link" href={`${GITHUB_URL}/blob/main/LICENSE`}>Apache License 2.0</a>.
+      </p>
+
+      <h2 class="h2">Published datasets</h2>
+      <p class="body-text">
+        Generated SQLite and FHIR files keep the terms of the national sources they were built from,
+        including attribution. Those terms are checksummed at build time. A material change on an
+        upstream terms page blocks official redistribution until the snapshot is reviewed.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Source</th>
+            <th>Commercial use</th>
+            <th>Redistribution</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Swissmedic OGD</td>
+            <td>Allowed</td>
+            <td>Allowed (<code class="mono">terms_open</code>)</td>
+          </tr>
+          <tr>
+            <td>Refdata</td>
+            <td>Allowed</td>
+            <td>Derived fields only. The credential-gated ZIP is not included.</td>
+          </tr>
+          <tr>
+            <td>BAG Spezialitätenliste</td>
+            <td>Review-required</td>
+            <td>Not in a public recipe yet</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="body-text">
+        Each release zip includes <code class="mono">manifest.json</code> and a
+        <code class="mono">licensing/</code> directory.
+      </p>
+
+      <h2 class="h2">This website</h2>
+      <p class="body-text">
+        The landing page is static. It does not set cookies or load analytics. Fonts are self-hosted.
+      </p>
+    </article>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .licence-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .licence-page .h1 {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+  }
+
+  .licence-page .h2 {
+    margin-top: 1.25rem;
+    font-size: 1.35rem;
+  }
+</style>
