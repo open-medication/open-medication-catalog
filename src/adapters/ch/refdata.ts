@@ -1,10 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { authorityKey } from "../../branded.js";
-import type { Catalogue, MappingCoverageReport, Package, SourceSnapshot } from "../../canonical/types.js";
+import type { Catalogue, MappingCoverageReport, SourceSnapshot } from "../../canonical/types.js";
 import { repoPath } from "../../paths.js";
 import { extractZip, fetchBinary, fileSignatureOk, sha256 } from "../../security.js";
-import { asArray, optionalText, parseXmlFile, parseXmlString, text } from "../../xml.js";
+import { asArray, optionalText, parseXmlFile, parseXmlString } from "../../xml.js";
 import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
 
@@ -92,6 +91,18 @@ export class RefdataAdapter implements Adapter {
             { name: "authNr", classification: "mapped", count: articles.filter((a) => a.authNr).length },
             { name: "packCode", classification: "mapped", count: articles.filter((a) => a.packCode).length },
             { name: "tradeStatus", classification: "mapped", count: articles.filter((a) => a.tradeStatus).length },
+            { name: "names", classification: "mapped", count: articles.filter((a) => a.names.length).length },
+            {
+              name: "marketingValidFrom",
+              classification: "mapped",
+              count: articles.filter((a) => a.marketingValidFrom).length,
+            },
+            { name: "atc", classification: "intentionally-ignored", count: articles.filter((a) => a.atc).length },
+            {
+              name: "abgabekategorie",
+              classification: "intentionally-ignored",
+              count: articles.filter((a) => a.abgabekategorie).length,
+            },
           ],
           unknownFields: [],
         },
@@ -112,9 +123,78 @@ export interface RefdataArticle {
   gtin?: string;
   authNr?: string;
   packCode?: string;
+  sequence?: string;
   tradeStatus?: string;
-  name?: string;
+  type?: string;
+  atc?: string;
+  abgabekategorie?: string;
+  names: { language: string; text: string }[];
+  marketingValidFrom?: string;
+  marketingValidTo?: string;
+  extraKeys: string[];
 }
+
+const KNOWN_ARTICLE_KEYS = new Set(
+  [
+    "GTIN",
+    "GTIN13",
+    "EAN",
+    "BC",
+    "AUTHNR",
+    "AUTH_NR",
+    "SWISSMEDICNO",
+    "ZULASSUNGSNUMMER",
+    "IKSNR",
+    "IKS_NR",
+    "PACKCODE",
+    "PACK_CODE",
+    "PACKUNGSCODE",
+    "PKG",
+    "PACK",
+    "STATUS",
+    "TRADESTATUS",
+    "HANDELSSTATUS",
+    "INCOMMERCE",
+    "TYPE",
+    "ATC",
+    "ATCCODE",
+    "ATC_CODE",
+    "ABGABEKATEGORIE",
+    "ABGABE_KATEGORIE",
+    "SMCAT",
+    "DOSISSTAERKE",
+    "SEQUENZNUMMER",
+    "SEQ",
+    "NAME",
+    "NAME_DE",
+    "NAME_FR",
+    "NAME_IT",
+    "NAME_EN",
+    "NOM_DE",
+    "NOM_FR",
+    "NOM_IT",
+    "NOM_EN",
+    "DSCR",
+    "DSCRD",
+    "DSCRF",
+    "DSCRI",
+    "DSCRE",
+    "DESCRIPTION",
+    "BEZEICHNUNG",
+    "VALIDFROM",
+    "VALID_FROM",
+    "VALIDTO",
+    "VALID_TO",
+    "INCOMMERCEFROM",
+    "INCOMMERCETO",
+    "DATEFROM",
+    "DATETO",
+    "HANDELSSTATUSVON",
+    "HANDELSSTATUSBIS",
+    "FROM",
+    "TO",
+  ].map((k) => k.toLowerCase()),
+);
 
 export function collectArticles(doc: unknown): RefdataArticle[] {
   const rows: Record<string, unknown>[] = [];
@@ -125,31 +205,65 @@ export function collectArticles(doc: unknown): RefdataArticle[] {
       return;
     }
     const rec = node as Record<string, unknown>;
-    const keys = Object.keys(rec);
     const looksLikeArticle =
       first(rec, ["GTIN", "Gtin", "EAN", "BC"]) &&
       first(rec, ["AUTHNR", "AuthNr", "SwissmedicNo", "ZULASSUNGSNUMMER", "IkSnr", "IKSNR"]);
     if (looksLikeArticle) rows.push(rec);
     if ("ARTICLE" in rec) asArray(rec.ARTICLE).forEach((a) => walk(a));
     else Object.values(rec).forEach(walk);
-    void keys;
   };
   walk(doc);
-  return rows.map((row) => ({
+  return rows.map(rowToArticle);
+}
+
+function rowToArticle(row: Record<string, unknown>): RefdataArticle {
+  const names: { language: string; text: string }[] = [];
+  const pushName = (language: string, text: string | undefined) => {
+    if (text) names.push({ language, text });
+  };
+  pushName("de", first(row, ["NAME_DE", "NOM_DE", "DSCRD"]));
+  pushName("fr", first(row, ["NAME_FR", "NOM_FR", "DSCRF"]));
+  pushName("it", first(row, ["NAME_IT", "NOM_IT", "DSCRI"]));
+  pushName("en", first(row, ["NAME_EN", "NOM_EN", "DSCRE"]));
+  if (names.length === 0) {
+    const generic = first(row, ["NAME", "DSCR", "DESCRIPTION", "Bezeichnung"]);
+    if (generic) names.push({ language: "de", text: generic });
+  }
+  const extraKeys = Object.keys(row).filter((k) => {
+    if (k.startsWith(":") || k === "?xml") return false;
+    return !KNOWN_ARTICLE_KEYS.has(k.toLowerCase());
+  });
+  return {
     gtin: first(row, ["GTIN", "Gtin", "EAN", "BC"]),
     authNr: first(row, ["AUTHNR", "AuthNr", "SwissmedicNo", "ZULASSUNGSNUMMER", "IkSnr", "IKSNR"]),
     packCode: first(row, ["PACKCODE", "PackCode", "PACKUNGSCODE", "Pkg", "PACK"]),
+    sequence: first(row, ["DOSISSTAERKE", "SEQUENZNUMMER", "Seq"]),
     tradeStatus: first(row, ["STATUS", "TradeStatus", "Handelsstatus", "INCOMMERCE"]),
-    name: first(row, ["NAME", "DSCR", "DESCRIPTION", "Bezeichnung"]),
-  }));
+    type: first(row, ["TYPE"]),
+    atc: first(row, ["ATC", "ATC_CODE", "ATCCODE"]),
+    abgabekategorie: first(row, ["ABGABEKATEGORIE", "ABGABE_KATEGORIE", "SMCAT"]),
+    names,
+    marketingValidFrom: first(row, [
+      "VALIDFROM",
+      "VALID_FROM",
+      "INCOMMERCEFROM",
+      "DATEFROM",
+      "HANDELSSTATUSVON",
+    ]),
+    marketingValidTo: first(row, ["VALIDTO", "VALID_TO", "INCOMMERCETO", "DATETO", "HANDELSSTATUSBIS"]),
+    extraKeys,
+  };
 }
 
 export function applyRefdata(catalogue: Catalogue, articles: RefdataArticle[], snapshot: SourceSnapshot): void {
   const byAuthPack = new Map<string, RefdataArticle>();
   for (const a of articles) {
     if (!a.authNr || !a.packCode) continue;
+    if (a.type && a.type.toUpperCase() === "NONPHARMA") continue;
     byAuthPack.set(`${a.authNr}|${a.packCode}`, a);
   }
+  let atcMismatch = 0;
+  let abgabeMismatch = 0;
   for (const pkg of catalogue.packages) {
     const [auth, , pack] = pkg.authorityKey.split("|");
     if (!auth || !pack) continue;
@@ -174,6 +288,45 @@ export function applyRefdata(catalogue: Catalogue, articles: RefdataArticle[], s
         originalField: "STATUS",
       };
     }
+    if (hit.names.length) {
+      pkg.names = hit.names.map((n) => ({ text: n.text, language: n.language }));
+      pkg.fieldProvenance.names = { sourceId: "refdata", snapshotId: snapshot.id, originalField: "NAME_DE" };
+    }
+    if (hit.marketingValidFrom) {
+      pkg.marketingValidFrom = hit.marketingValidFrom;
+      pkg.fieldProvenance.marketingValidFrom = {
+        sourceId: "refdata",
+        snapshotId: snapshot.id,
+        originalField: "VALIDFROM",
+      };
+    }
+    if (hit.marketingValidTo) {
+      pkg.marketingValidTo = hit.marketingValidTo;
+      pkg.fieldProvenance.marketingValidTo = {
+        sourceId: "refdata",
+        snapshotId: snapshot.id,
+        originalField: "VALIDTO",
+      };
+    }
+    const group = catalogue.productGroups.find((g) => g.id === pkg.productGroupId);
+    if (hit.atc && group?.atc?.code && hit.atc !== group.atc.code) atcMismatch += 1;
+    const swissAbgabe = pkg.metadata?.abgabekategorie;
+    if (hit.abgabekategorie && swissAbgabe && hit.abgabekategorie !== swissAbgabe) abgabeMismatch += 1;
+  }
+  const coverage = catalogue.mappingCoverage.find((m) => m.sourceId === "refdata");
+  if (coverage) {
+    if (atcMismatch) {
+      coverage.fields.push({ name: "atc-mismatch", classification: "intentionally-ignored", count: atcMismatch });
+    }
+    if (abgabeMismatch) {
+      coverage.fields.push({
+        name: "abgabekategorie-mismatch",
+        classification: "intentionally-ignored",
+        count: abgabeMismatch,
+      });
+    }
+    const extras = [...new Set(articles.flatMap((a) => a.extraKeys))].sort();
+    coverage.unknownFields = extras;
   }
 }
 

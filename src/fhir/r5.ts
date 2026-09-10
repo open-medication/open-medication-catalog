@@ -2,6 +2,8 @@ import { edqmRouteCoding } from "../adapters/ch/route-edqm.js";
 import { SWISSMEDIC_SYSTEMS, type Catalogue, type CodedValue } from "../canonical/types.js";
 import { FHIR_CANONICAL_BASE } from "../constants.js";
 import { jsonLine, parseFhirDecimal } from "./serialize.js";
+import { packageDisplayName, translationExtensions } from "./translation.js";
+import { reimbursementDetailExtension } from "./reimbursement.js";
 
 export const R5_MPD_PROFILE = `${FHIR_CANONICAL_BASE}/StructureDefinition/OpenMedicinalProductDefinition`;
 export const R5_PPD_PROFILE = `${FHIR_CANONICAL_BASE}/StructureDefinition/OpenPackagedProductDefinition`;
@@ -76,6 +78,13 @@ export function exportR5(catalogue: Catalogue, releaseLabel: string): Record<str
   }
 
   for (const pkg of catalogue.packages) {
+    const display = packageDisplayName(pkg, pkg.description);
+    const translations = translationExtensions(pkg.names, display);
+    const bagRows = catalogue.reimbursements.filter((r) => r.packageId === pkg.id);
+    const dateRange =
+      pkg.marketingValidFrom || pkg.marketingValidTo
+        ? { start: pkg.marketingValidFrom, end: pkg.marketingValidTo }
+        : undefined;
     ppd.push(
       jsonLine({
         resourceType: "PackagedProductDefinition",
@@ -88,14 +97,18 @@ export function exportR5(catalogue: Catalogue, releaseLabel: string): Record<str
           { system: `${FHIR_CANONICAL_BASE}/sid/resource-id`, value: pkg.id },
           ...pkg.identifiers,
         ],
-        name: pkg.description,
+        name: display,
+        _name: translations ? { extension: translations } : undefined,
         description: pkg.description,
         packageFor: [{ reference: `MedicinalProductDefinition/${pkg.medicinalProductId}` }],
         containedItemQuantity: fhirQuantity(pkg.quantity.structured ? pkg.quantity.value : undefined, pkg.quantity.unit?.display ?? pkg.quantity.unit?.code),
         marketingStatus: pkg.marketingStatus
-          ? [{ status: { coding: [pkg.marketingStatus] } }]
+          ? [{ status: { coding: [pkg.marketingStatus] }, dateRange }]
           : undefined,
-        extension: commonExt(pkg.jurisdiction, pkg.identityAuthority, releaseLabel),
+        extension: [
+          ...commonExt(pkg.jurisdiction, pkg.identityAuthority, releaseLabel),
+          ...bagRows.map(reimbursementDetailExtension),
+        ],
       }),
     );
   }

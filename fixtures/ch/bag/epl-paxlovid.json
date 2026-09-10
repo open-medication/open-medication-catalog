@@ -1,0 +1,217 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "PackagedProductDefinition",
+        "id": "PMP-Paxlovid-Filmcoatedtablet",
+        "identifier": [
+          {
+            "system": "http://fhir.ch/ig/ch-epl/sid/pcid",
+            "value": "CH-01001107-0687930010000-0001"
+          }
+        ],
+        "description": "PAXLOVID Filmtabl 4x150mg/2x100mg",
+        "packaging": {
+          "identifier": [
+            {
+              "system": "urn:oid:2.51.1.1",
+              "value": "7680687930017"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "RegulatedAuthorization",
+        "id": "FOPH-21529",
+        "extension": [
+          {
+            "url": "http://fhir.ch/ig/ch-epl/StructureDefinition/reimbursementSL",
+            "extension": [
+              {
+                "url": "FOPHDossierNumber",
+                "valueIdentifier": {
+                  "system": "urn:oid:2.16.756.1",
+                  "value": "21529"
+                }
+              },
+              {
+                "url": "status",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://fhir.ch/ig/ch-epl/CodeSystem/ch-epl-foph-reimbursement-status",
+                      "code": "756001021001",
+                      "display": "Reimbursed"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "expiryDate",
+                "valueDate": "2026-03-31"
+              },
+              {
+                "url": "listingStatus",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://fhir.ch/ig/ch-epl/CodeSystem/ch-epl-foph-listing-status",
+                      "code": "756001002001",
+                      "display": "Listed"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "listingPeriod",
+                "valuePeriod": {
+                  "start": "2023-12-01",
+                  "end": "2025-12-31"
+                }
+              },
+              {
+                "url": "firstListingDate",
+                "valueDate": "2023-12-01"
+              },
+              {
+                "url": "costShare",
+                "valueInteger": 10
+              },
+              {
+                "url": "gamme",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://fhir.ch/ig/ch-epl/CodeSystem/ch-epl-foph-gamme",
+                      "code": "756002004001",
+                      "display": "Oral"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://fhir.ch/ig/ch-epl/StructureDefinition/productPrice",
+                "extension": [
+                  {
+                    "url": "value",
+                    "valueMoney": { "value": 958.62, "currency": "CHF" }
+                  },
+                  {
+                    "url": "type",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://fhir.ch/ig/ch-epl/CodeSystem/ch-epl-foph-price-type",
+                          "code": "756002005002",
+                          "display": "Ex-factory price"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "url": "changeType",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://fhir.ch/ig/ch-epl/CodeSystem/ch-epl-foph-type-of-price-change",
+                          "code": "756002006010",
+                          "display": "Price mutation after triennal review of pharmaceuticals"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "url": "changeDate",
+                    "valueDate": "2023-12-01"
+                  }
+                ]
+              },
+              {
+                "url": "http://fhir.ch/ig/ch-epl/StructureDefinition/productPrice",
+                "extension": [
+                  {
+                    "url": "value",
+                    "valueMoney": { "value": 1113.95, "currency": "CHF" }
+                  },
+                  {
+                    "url": "type",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://fhir.ch/ig/ch-epl/CodeSystem/ch-epl-foph-price-type",
+                          "code": "756002005001",
+                          "display": "Retail price"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "url": "changeDate",
+                    "valueDate": "2024-01-01"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "subject": [
+          { "reference": "PackagedProductDefinition/PMP-Paxlovid-Filmcoatedtablet" }
+        ],
+        "type": {
+          "coding": [
+            {
+              "system": "http://fhir.ch/ig/ch-epl/CodeSystem/ch-authorisation-type",
+              "code": "756000002003",
+              "display": "Reimbursement SL"
+            }
+          ]
+        },
+        "indication": [
+          {
+            "extension": [
+              {
+                "url": "http://fhir.ch/ig/ch-epl/StructureDefinition/regulatedAuthorization-limitation",
+                "extension": [
+                  {
+                    "url": "status",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://fhir.ch/ig/ch-epl/CodeSystem/ch-epl-foph-limitationstatus",
+                          "code": "756002071001",
+                          "display": "Limitation Reimbursed"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "url": "limitationIndication",
+                    "valueReference": { "reference": "ClinicalUseDefinition/LIM-840539006" }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ClinicalUseDefinition",
+        "id": "LIM-840539006",
+        "type": "indication",
+        "indication": {
+          "diseaseSymptomProcedure": {
+            "concept": {
+              "text": "Befristete Limitation bis 31.12.2025. PAXLOVID wird als antivirale Monotherapie vergütet."
+            }
+          }
+        }
+      }
+    }
+  ]
+}

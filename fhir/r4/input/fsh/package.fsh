@@ -4,7 +4,12 @@ Id: OpenMedicationPackage
 Title: "Open Medication Package (R4)"
 Description: """One Medication per canonical Package (Swissmedic Packung).
 
-Always keep the original pack text in code.text (and the package-description extension).
+code.text is the Refdata pack trade name when present (default language de, else first available).
+If there is no Refdata name, code.text is {SEQUENZNAME} — {Swissmedic pack text} when the sequence
+name is not already in the pack text, otherwise the Swissmedic pack text alone.
+Other languages use the HL7 translation extension on code.text (_text).
+Always keep the original identity-authority pack text in the package-description extension.
+
 Medication.amount is populated only for a faithful structured ratio.
 
 Medication.status is catalogue-record usability only:
@@ -25,6 +30,7 @@ Do not set inactive merely because a pack is not marketed or not reimbursed."""
     OmcRegulatoryStatus named regulatoryStatus 0..1 and
     OmcMarketingStatus named marketingStatus 0..1 and
     OmcReimbursementStatus named reimbursementStatus 0..1 and
+    OmcReimbursement named reimbursement 0..* and
     OmcPackageDescription named packageDescription 1..1 and
     OmcMedicinalProductId named medicinalProductId 0..1 and
     OmcProductGroupId named productGroupId 0..1
@@ -94,6 +100,45 @@ Description: "Reimbursement listing status (e.g. BAG). Not Medication.status."
 * ^context[=].expression = "Medication"
 * value[x] only Coding
 * valueCoding 1..1
+
+Extension: OmcReimbursement
+Id: reimbursement
+Title: "OMC reimbursement detail"
+Description: "BAG/FOPH Spezialitätenliste fields for a package. Used on experimental --enable-bag builds; not in official ch-enriched until redistribution terms are recorded."
+* ^url = "https://fhir.openmedicationcatalog.org/StructureDefinition/reimbursement"
+* ^context[+].type = #element
+* ^context[=].expression = "Medication"
+* extension contains
+    status 1..1 and
+    validFrom 0..1 and
+    validTo 0..1 and
+    firstListingDate 0..1 and
+    expiryDate 0..1 and
+    costShare 0..1 and
+    dossierNumber 0..1 and
+    limitations 0..1 and
+    gamme 0..1 and
+    price 0..*
+* extension[status].value[x] only Coding
+* extension[validFrom].value[x] only date
+* extension[validTo].value[x] only date
+* extension[firstListingDate].value[x] only date
+* extension[expiryDate].value[x] only date
+* extension[costShare].value[x] only integer
+* extension[dossierNumber].value[x] only string
+* extension[limitations].value[x] only string
+* extension[gamme].value[x] only Coding
+* extension[price].extension contains
+    value 1..1 and
+    currency 1..1 and
+    type 0..1 and
+    changeType 0..1 and
+    changeDate 0..1
+* extension[price].extension[value].value[x] only string
+* extension[price].extension[currency].value[x] only string
+* extension[price].extension[type].value[x] only Coding
+* extension[price].extension[changeType].value[x] only Coding
+* extension[price].extension[changeDate].value[x] only date
 
 Extension: OmcPackageDescription
 Id: package-description

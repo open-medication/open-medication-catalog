@@ -58,6 +58,7 @@ export async function writeRelease(input: PackagerInput): Promise<{ zipPath: str
     canonicalBase: FHIR_CANONICAL_BASE,
     pins: loadPins(),
     githubRepo: GITHUB_REPO,
+    experimentalBag: input.catalogue.sourceSnapshots.some((s) => s.sourceId === "bag") ? true : undefined,
     sources: input.catalogue.sourceSnapshots.map((s) => ({
       id: s.sourceId,
       identityAuthority: s.identityAuthority,

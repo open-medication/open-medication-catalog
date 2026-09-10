@@ -1,6 +1,8 @@
 import { FHIR_CANONICAL_BASE } from "../constants.js";
 import type { Catalogue, Package } from "../canonical/types.js";
-import { stableJson, jsonLine, parseFhirDecimal } from "./serialize.js";
+import { jsonLine, parseFhirDecimal } from "./serialize.js";
+import { packageDisplayName, translationExtensions } from "./translation.js";
+import { reimbursementDetailExtension } from "./reimbursement.js";
 
 export const R4_PROFILE = `${FHIR_CANONICAL_BASE}/StructureDefinition/OpenMedicationPackage`;
 
@@ -36,6 +38,13 @@ export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<str
   for (const pkg of catalogue.packages) {
     const mp = catalogue.medicinalProducts.find((m) => m.id === pkg.medicinalProductId);
     const status = medicationStatus(pkg);
+    const fallback =
+      mp?.names[0]?.text && !pkg.description.includes(mp.names[0].text)
+        ? `${mp.names[0].text} — ${pkg.description}`
+        : pkg.description;
+    const display = packageDisplayName(pkg, fallback);
+    const translations = translationExtensions(pkg.names, display);
+    const bagRows = catalogue.reimbursements.filter((r) => r.packageId === pkg.id);
     const resource: Record<string, unknown> = {
       resourceType: "Medication",
       id: pkg.id,
@@ -48,7 +57,8 @@ export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<str
         ...pkg.identifiers,
       ],
       code: {
-        text: pkg.description,
+        text: display,
+        _text: translations ? { extension: translations } : undefined,
         coding: pkg.gtin
           ? [{ system: "https://www.gs1.org/gtin", code: pkg.gtin }]
           : mp
@@ -81,18 +91,13 @@ export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<str
         pkg.reimbursementStatus
           ? ext("reimbursement-status", pkg.reimbursementStatus.code, pkg.reimbursementStatus.system)
           : undefined,
+        ...bagRows.map(reimbursementDetailExtension),
         ext("package-description", pkg.description),
         mp ? ext("medicinal-product-id", mp.id) : undefined,
         mp?.productGroupId ? ext("product-group-id", mp.productGroupId) : undefined,
       ].filter(Boolean),
     };
     if (status) resource.status = status;
-    if (mp?.names[0]?.text) {
-      const code = resource.code as { text: string };
-      if (!code.text.includes(mp.names[0].text)) {
-        code.text = `${mp.names[0].text} — ${pkg.description}`;
-      }
-    }
     medications.push(jsonLine(resource));
   }
   return {
@@ -126,5 +131,3 @@ function metaSource(catalogue: Catalogue, identityAuthority: string): string {
   const snap = catalogue.sourceSnapshots.find((s) => s.identityAuthority === identityAuthority);
   return snap?.uri ?? `${FHIR_CANONICAL_BASE}/source/${identityAuthority}`;
 }
-
-void stableJson;

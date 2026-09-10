@@ -184,6 +184,9 @@ export interface Package {
   marketingStatus?: CodedValue;
   reimbursementStatus?: CodedValue;
   gtin?: string;
+  names?: LocalizedName[];
+  marketingValidFrom?: string;
+  marketingValidTo?: string;
   identifiers: Identifier[];
   fieldProvenance: FieldProvenanceMap;
   sourceRecords: SourceRecordRef[];
@@ -265,10 +268,27 @@ export interface Reimbursement {
     value: string;
     currency: string;
   };
+  prices?: ProductPrice[];
   limitations?: string;
   validFrom?: string;
   validTo?: string;
+  firstListingDate?: string;
+  expiryDate?: string;
+  costShare?: number;
+  gamme?: CodedValue;
+  dossierNumber?: string;
   fieldProvenance: FieldProvenance;
+}
+/**
+ * This interface was referenced by `Catalogue`'s JSON-Schema
+ * via the `definition` "ProductPrice".
+ */
+export interface ProductPrice {
+  value: string;
+  currency: string;
+  type?: CodedValue;
+  changeType?: CodedValue;
+  changeDate?: string;
 }
 /**
  * This interface was referenced by `Catalogue`'s JSON-Schema

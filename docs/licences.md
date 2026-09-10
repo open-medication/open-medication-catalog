@@ -38,6 +38,8 @@ A source may have `redistribution: allowed` for **derived fields only** while `r
 | Refdata | allowed | derived fields; not the credential-gated ZIP | required if fields unchanged | [Refdata article terms](https://www.refdata.ch/de/artikel/abfrage/artikel-refdatabase-gtin) |
 | BAG SL | review-required | review-required | TBD | [BAG SL data](https://sl.bag.admin.ch/resources/current-and-archived-data) |
 
+BAG flags stay `review-required` until a written reuse grant. Outreach to `epl@bag.admin.ch` (Cc `Arzneimittel-Krankenversicherung@bag.admin.ch`) is in progress. Fetch still requires `--input`. Do not treat the download SPA or CH EPL IG CC0 as a data licence.
+
 Flags live in `adapters/<jurisdiction>/<source>/source.yaml`. Adapter `metadata()` must read them from that file.
 
 ## How to verify

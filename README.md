@@ -21,13 +21,17 @@ Landing page: [`https://openmedicationcatalog.org`](https://openmedicationcatalo
 | --- | --- | --- | --- | --- |
 | CH | Swissmedic | production (this repo) | allowed (`terms_open`) | no |
 | CH | Refdata | optional enrichment (`ch-enriched`) | derived fields, not the raw ZIP | yes |
-| CH | BAG SL | implemented, **not** in `ch-enriched` yet | review-required | no |
+| CH | BAG SL | implemented; local `--enable-bag` only | review-required | no |
 | FR | BDPM | planned | French Open Licence | no |
 | GB | dm+d | planned | review-required (TRUD) | yes |
 | NO | FEST | planned | NLOD | no |
 | CA | DPD | planned | OGL-Canada | no |
 | US | FDA NDC | planned | CC0 / public domain | no |
 | SA | SFDA | planned | review-required | TBD |
+| ID | BPOM | planned | review-required (reach out to BPOM) | TBD |
+| PL | RPL (URPL) | planned | public register; integrate as-is | no |
+
+Poland: [RPL on healthinformationportal.eu](https://www.healthinformationportal.eu/health-information-sources/register-medicinal-products-rejestr-produktow-leczniczych-rpl), [RPL guide](https://mojapteczka.pl/blog/en/polish-medicines-register-rpl-guide/).
 
 A **global** database will be the union of national catalogues (`requiredArtifacts` on a future recipe), not a cross-country ontology.
 
@@ -40,7 +44,7 @@ omc build ch-base          # Swissmedic only
 omc build ch-enriched      # Swissmedic + Refdata (all-or-nothing)
 ```
 
-`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched`.
+`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata.
 
 ```text
 pnpm install

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Catalogue, MappingCoverageReport, Reimbursement, SourceSnapshot } from "../../canonical/types.js";
+import type { Catalogue, MappingCoverageReport, ProductPrice, Reimbursement, SourceSnapshot } from "../../canonical/types.js";
 import { repoPath } from "../../paths.js";
 import { extractZip, fetchBinary, sha256 } from "../../security.js";
 import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
@@ -96,7 +96,10 @@ export class BagAdapter implements Adapter {
       mappingCoverage: [
         {
           sourceId: "bag",
-          fields: [{ name: "resourceType", classification: "mapped", count: resources.length }],
+          fields: [
+            { name: "resourceType", classification: "mapped", count: resources.length },
+            { name: "reimbursementSL", classification: "mapped", count: resources.length },
+          ],
           unknownFields: [],
         },
       ],
@@ -121,38 +124,266 @@ export interface FhirResource {
 }
 
 export function applyBag(catalogue: Catalogue, resources: FhirResource[], snapshot: SourceSnapshot): void {
-  const byGtin = new Map<string, FhirResource>();
-  const byAuthPack = new Map<string, FhirResource>();
+  const clinicalById = new Map<string, FhirResource>();
   for (const res of resources) {
-    for (const id of res.identifier ?? []) {
-      if (id.system?.includes("gtin") && id.value) byGtin.set(id.value, res);
-      if (id.system?.toLowerCase().includes("swissmedic") && id.value) {
-        byAuthPack.set(id.value, res);
-      }
+    if (res.resourceType === "ClinicalUseDefinition" && res.id) clinicalById.set(res.id, res);
+  }
+
+  const ppdByGtin = new Map<string, FhirResource>();
+  for (const res of resources) {
+    if (res.resourceType !== "PackagedProductDefinition") continue;
+    for (const gtin of gtinsOf(res)) ppdByGtin.set(gtin, res);
+  }
+
+  const raByPpdId = new Map<string, FhirResource>();
+  for (const res of resources) {
+    if (res.resourceType !== "RegulatedAuthorization") continue;
+    if (!hasReimbursementSl(res)) continue;
+    for (const sub of subjectRefs(res)) {
+      const id = localId(sub);
+      if (id) raByPpdId.set(id, res);
     }
   }
+
+  let joined = 0;
   for (const pkg of catalogue.packages) {
-    const hit =
-      (pkg.gtin ? byGtin.get(pkg.gtin) : undefined) ??
-      byAuthPack.get(pkg.metadata?.packCode ? `${pkg.authorityKey.split("|")[0]}|${pkg.metadata.packCode}` : "") ??
-      byAuthPack.get(pkg.authorityKey.split("|")[0] ?? "");
-    if (!hit) continue;
-    pkg.reimbursementStatus = {
-      system: "https://fhir.openmedicationcatalog.org/CodeSystem/ch-bag-listing",
-      code: "listed",
-      display: "Listed on Spezialitätenliste",
-    };
-    pkg.fieldProvenance.reimbursementStatus = {
-      sourceId: "bag",
-      snapshotId: snapshot.id,
-      originalField: "resourceType",
-    };
-    catalogue.reimbursements.push({
+    const ppd = pkg.gtin ? ppdByGtin.get(pkg.gtin) : undefined;
+    const ra = ppd?.id ? raByPpdId.get(ppd.id) : undefined;
+    if (!ra) continue;
+    const sl = reimbursementSl(resExtensions(ra));
+    if (!sl) continue;
+    joined += 1;
+    const listing = sl.listingStatus ?? sl.status;
+    if (listing) {
+      pkg.reimbursementStatus = listing;
+      pkg.fieldProvenance.reimbursementStatus = {
+        sourceId: "bag",
+        snapshotId: snapshot.id,
+        originalField: "reimbursementSL.listingStatus",
+      };
+    }
+    const prices = sl.prices;
+    const retail = prices.find((p) => /retail|public|verkauf/i.test(p.type?.display ?? p.type?.code ?? ""));
+    const row: Reimbursement = {
       packageId: pkg.id,
-      status: pkg.reimbursementStatus,
-      fieldProvenance: pkg.fieldProvenance.reimbursementStatus,
-    });
+      status: sl.status ?? listing ?? { system: "https://fhir.openmedicationcatalog.org/CodeSystem/ch-bag-listing", code: "listed" },
+      price: retail
+        ? { value: retail.value, currency: retail.currency }
+        : prices[0]
+          ? { value: prices[0].value, currency: prices[0].currency }
+          : undefined,
+      prices: prices.length ? prices : undefined,
+      limitations: limitationText(ra, clinicalById),
+      validFrom: sl.listingPeriodStart,
+      validTo: sl.listingPeriodEnd,
+      firstListingDate: sl.firstListingDate,
+      expiryDate: sl.expiryDate,
+      costShare: sl.costShare,
+      gamme: sl.gamme,
+      dossierNumber: sl.dossierNumber,
+      fieldProvenance: {
+        sourceId: "bag",
+        snapshotId: snapshot.id,
+        originalField: "reimbursementSL",
+      },
+    };
+    catalogue.reimbursements.push(row);
   }
+
+  const coverage = catalogue.mappingCoverage.find((m) => m.sourceId === "bag");
+  if (coverage) {
+    coverage.fields.push({ name: "joinedPackages", classification: "mapped", count: joined });
+  }
+}
+
+interface ParsedSl {
+  status?: { system: string; code: string; display?: string };
+  listingStatus?: { system: string; code: string; display?: string };
+  listingPeriodStart?: string;
+  listingPeriodEnd?: string;
+  firstListingDate?: string;
+  expiryDate?: string;
+  costShare?: number;
+  gamme?: { system: string; code: string; display?: string };
+  dossierNumber?: string;
+  prices: ProductPrice[];
+}
+
+function hasReimbursementSl(res: FhirResource): boolean {
+  return resExtensions(res).some((e) => String(e.url ?? "").includes("reimbursementSL"));
+}
+
+function reimbursementSl(exts: FhirExt[]): ParsedSl | undefined {
+  const root = exts.find((e) => String(e.url ?? "").includes("reimbursementSL"));
+  if (!root) return undefined;
+  const kids = asExts(root.extension);
+  const prices: ProductPrice[] = [];
+  for (const k of kids) {
+    if (String(k.url ?? "").includes("productPrice")) {
+      const p = parseProductPrice(k);
+      if (p) prices.push(p);
+    }
+  }
+  return {
+    status: codedFromExt(kids, "status"),
+    listingStatus: codedFromExt(kids, "listingStatus"),
+    listingPeriodStart: periodStart(kids, "listingPeriod"),
+    listingPeriodEnd: periodEnd(kids, "listingPeriod"),
+    firstListingDate: dateFromExt(kids, "firstListingDate"),
+    expiryDate: dateFromExt(kids, "expiryDate"),
+    costShare: integerFromExt(kids, "costShare"),
+    gamme: codedFromExt(kids, "gamme"),
+    dossierNumber: identifierValue(kids, "FOPHDossierNumber"),
+    prices,
+  };
+}
+
+function parseProductPrice(ext: FhirExt): ProductPrice | undefined {
+  const kids = asExts(ext.extension);
+  const money = kids.find((k) => k.url === "value")?.valueMoney as { value?: number; currency?: string } | undefined;
+  if (money?.value == null || !money.currency) return undefined;
+  return {
+    value: String(money.value),
+    currency: money.currency,
+    type: codedFromExt(kids, "type"),
+    changeType: codedFromExt(kids, "changeType"),
+    changeDate: dateFromExt(kids, "changeDate"),
+  };
+}
+
+function limitationText(ra: FhirResource, clinicalById: Map<string, FhirResource>): string | undefined {
+  const texts: string[] = [];
+  const indications = asRefs(
+    ra.indication as { extension?: FhirExt[]; reference?: { reference?: string } }[] | { extension?: FhirExt[]; reference?: { reference?: string } } | undefined,
+  );
+  for (const ind of indications) {
+    const lim = asExts(ind.extension).find((e) => String(e.url ?? "").includes("regulatedAuthorization-limitation"));
+    if (!lim) continue;
+    const kids = asExts(lim.extension);
+    const ref = referenceFromExt(kids, "limitationIndication");
+    const id = ref ? localId(ref) : undefined;
+    const cud = id ? clinicalById.get(id) : undefined;
+    const desc = clinicalLimitationText(cud) ?? codedFromExt(kids, "status")?.display;
+    if (desc) texts.push(desc);
+  }
+  return texts.length ? texts.join(" | ") : undefined;
+}
+
+function asRefs<T>(v: T[] | T | undefined): T[] {
+  if (!v) return [];
+  return Array.isArray(v) ? v : [v];
+}
+
+function clinicalLimitationText(cud: FhirResource | undefined): string | undefined {
+  if (!cud) return undefined;
+  if (typeof cud.description === "string" && cud.description.trim()) return cud.description;
+  const ind = cud.indication as
+    | { diseaseSymptomProcedure?: { concept?: { text?: string } } }
+    | undefined;
+  const text = ind?.diseaseSymptomProcedure?.concept?.text;
+  return text?.trim() || undefined;
+}
+
+interface FhirExt {
+  url?: string;
+  extension?: FhirExt[] | FhirExt;
+  valueCodeableConcept?: { coding?: { system?: string; code?: string; display?: string }[] };
+  valueDate?: string;
+  valueInteger?: number;
+  valueIdentifier?: { value?: string };
+  valuePeriod?: { start?: string; end?: string };
+  valueMoney?: { value?: number; currency?: string };
+  valueReference?: { reference?: string };
+  [key: string]: unknown;
+}
+
+function resExtensions(res: FhirResource): FhirExt[] {
+  return asExts(res.extension as FhirExt[] | FhirExt | undefined);
+}
+
+function asExts(v: FhirExt[] | FhirExt | undefined): FhirExt[] {
+  if (!v) return [];
+  return Array.isArray(v) ? v : [v];
+}
+
+function findExt(kids: FhirExt[], leaf: string): FhirExt | undefined {
+  return kids.find((k) => {
+    const u = String(k.url ?? "");
+    return u === leaf || u.endsWith(`/${leaf}`) || u.endsWith(`#${leaf}`);
+  });
+}
+
+function codedFromExt(
+  kids: FhirExt[],
+  url: string,
+): { system: string; code: string; display?: string } | undefined {
+  const coding = findExt(kids, url)?.valueCodeableConcept?.coding?.[0];
+  if (!coding?.system || !coding.code) return undefined;
+  return { system: coding.system, code: coding.code, display: coding.display };
+}
+
+function dateFromExt(kids: FhirExt[], url: string): string | undefined {
+  return findExt(kids, url)?.valueDate;
+}
+
+function integerFromExt(kids: FhirExt[], url: string): number | undefined {
+  const n = findExt(kids, url)?.valueInteger;
+  return typeof n === "number" ? n : undefined;
+}
+
+function identifierValue(kids: FhirExt[], url: string): string | undefined {
+  return findExt(kids, url)?.valueIdentifier?.value;
+}
+
+function periodStart(kids: FhirExt[], url: string): string | undefined {
+  return findExt(kids, url)?.valuePeriod?.start;
+}
+
+function periodEnd(kids: FhirExt[], url: string): string | undefined {
+  return findExt(kids, url)?.valuePeriod?.end;
+}
+
+function referenceFromExt(kids: FhirExt[], url: string): string | undefined {
+  return findExt(kids, url)?.valueReference?.reference;
+}
+
+function subjectRefs(res: FhirResource): string[] {
+  const raw = res.subject as { reference?: string }[] | { reference?: string } | undefined;
+  if (!raw) return [];
+  const arr = Array.isArray(raw) ? raw : [raw];
+  return arr.map((s) => s.reference).filter((r): r is string => Boolean(r));
+}
+
+function localId(ref: string): string | undefined {
+  const parts = ref.split("/");
+  return parts[parts.length - 1];
+}
+
+function gtinsOf(res: FhirResource): string[] {
+  const out: string[] = [];
+  const take = (id: { system?: string; value?: string } | undefined) => {
+    if (id?.value && isGtinSystem(id.system)) out.push(id.value);
+  };
+  for (const id of res.identifier ?? []) take(id);
+  walkPackaging(res.packaging, take);
+  return out;
+}
+
+function walkPackaging(node: unknown, take: (id: { system?: string; value?: string }) => void): void {
+  if (!node || typeof node !== "object") return;
+  if (Array.isArray(node)) {
+    node.forEach((n) => walkPackaging(n, take));
+    return;
+  }
+  const rec = node as { identifier?: { system?: string; value?: string }[]; packaging?: unknown };
+  for (const id of rec.identifier ?? []) take(id);
+  if (rec.packaging) walkPackaging(rec.packaging, take);
+}
+
+function isGtinSystem(system?: string): boolean {
+  if (!system) return false;
+  const s = system.toLowerCase();
+  return s.includes("gtin") || s === "urn:oid:2.51.1.1" || s.includes("gs1.org");
 }
 
 export function loadFhirResources(files: string[]): FhirResource[] {

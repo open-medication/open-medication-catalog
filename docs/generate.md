@@ -36,3 +36,11 @@ Custom experimental build (not publishable as official):
 ```bash
 pnpm omc build CH --source swissmedic --source refdata --input swissmedic=./OGD.zip --input refdata=./Refdata.Articles.zip
 ```
+
+Local BAG SL enrichment (not a public recipe; cannot `--publish`):
+
+```bash
+pnpm omc build ch-enriched --enable-bag --input swissmedic=./OGD.zip --input refdata=./Refdata.Articles.zip --input bag=./sl.json --month 2026.08
+```
+
+`OMC_ENABLE_BAG=1` is the same gate. BAG fetch still requires `--input` until a stable FHIR export URL is recorded. Official `ch-enriched` stays Swissmedic + Refdata.

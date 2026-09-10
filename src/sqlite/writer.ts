@@ -43,7 +43,14 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
       gtin TEXT,
       regulatory_status TEXT NOT NULL,
       marketing_status TEXT,
-      reimbursement_status TEXT
+      reimbursement_status TEXT,
+      marketing_valid_from TEXT,
+      marketing_valid_to TEXT
+    );
+    CREATE TABLE package_name (
+      package_id TEXT NOT NULL,
+      language TEXT NOT NULL,
+      text TEXT NOT NULL
     );
     CREATE TABLE organization (
       id TEXT PRIMARY KEY,
@@ -78,6 +85,25 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
       retrieved_at TEXT NOT NULL,
       sha256 TEXT NOT NULL,
       uri TEXT NOT NULL
+    );
+    CREATE TABLE reimbursement (
+      package_id TEXT NOT NULL,
+      status_code TEXT NOT NULL,
+      status_system TEXT,
+      status_display TEXT,
+      price_value TEXT,
+      price_currency TEXT,
+      prices_json TEXT,
+      limitations TEXT,
+      valid_from TEXT,
+      valid_to TEXT,
+      first_listing_date TEXT,
+      expiry_date TEXT,
+      cost_share INTEGER,
+      gamme_code TEXT,
+      gamme_system TEXT,
+      gamme_display TEXT,
+      dossier_number TEXT
     );
     CREATE VIRTUAL TABLE package_fts USING fts5(
       package_id UNINDEXED,
@@ -115,7 +141,7 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
     `INSERT INTO medicinal_product VALUES (@id,@product_group_id,@jurisdiction,@identity_authority,@authority_key,@name,@dose_form,@regulatory_status)`,
   );
   const insP = db.prepare(
-    `INSERT INTO package VALUES (@id,@medicinal_product_id,@product_group_id,@jurisdiction,@identity_authority,@authority_key,@description,@quantity_value,@quantity_unit,@quantity_structured,@gtin,@regulatory_status,@marketing_status,@reimbursement_status)`,
+    `INSERT INTO package VALUES (@id,@medicinal_product_id,@product_group_id,@jurisdiction,@identity_authority,@authority_key,@description,@quantity_value,@quantity_unit,@quantity_structured,@gtin,@regulatory_status,@marketing_status,@reimbursement_status,@marketing_valid_from,@marketing_valid_to)`,
   );
   const insO = db.prepare(`INSERT INTO organization VALUES (@id,@name,@role,@authority_key)`);
   const insA = db.prepare(`INSERT INTO authorization VALUES (@id,@authority_key,@status,@holder_id)`);
@@ -125,6 +151,10 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
   const insId = db.prepare(`INSERT INTO identifier VALUES (@entity_id,@system,@value)`);
   const insS = db.prepare(
     `INSERT INTO source_snapshot VALUES (@id,@source_id,@identity_authority,@source_effective_date,@retrieved_at,@sha256,@uri)`,
+  );
+  const insName = db.prepare(`INSERT INTO package_name VALUES (@package_id,@language,@text)`);
+  const insR = db.prepare(
+    `INSERT INTO reimbursement VALUES (@package_id,@status_code,@status_system,@status_display,@price_value,@price_currency,@prices_json,@limitations,@valid_from,@valid_to,@first_listing_date,@expiry_date,@cost_share,@gamme_code,@gamme_system,@gamme_display,@dossier_number)`,
   );
   const insFts = db.prepare(
     `INSERT INTO package_fts (package_id, name, description, gtin, identifiers) VALUES (?,?,?,?,?)`,
@@ -183,12 +213,20 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
         regulatory_status: pkg.regulatoryStatus.code,
         marketing_status: pkg.marketingStatus?.code ?? null,
         reimbursement_status: pkg.reimbursementStatus?.code ?? null,
+        marketing_valid_from: pkg.marketingValidFrom ?? null,
+        marketing_valid_to: pkg.marketingValidTo ?? null,
       });
       for (const id of pkg.identifiers) insId.run({ entity_id: pkg.id, system: id.system, value: id.value });
+      for (const n of pkg.names ?? []) {
+        insName.run({ package_id: pkg.id, language: n.language, text: n.text });
+      }
       const mp = catalogue.medicinalProducts.find((m) => m.id === pkg.medicinalProductId);
+      const nameBlob = [mp?.names[0]?.text ?? "", ...(pkg.names ?? []).map((n) => n.text)]
+        .filter(Boolean)
+        .join(" ");
       insFts.run(
         pkg.id,
-        mp?.names[0]?.text ?? "",
+        nameBlob,
         pkg.description,
         pkg.gtin ?? "",
         pkg.identifiers.map((i) => i.value).join(" "),
@@ -203,6 +241,27 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
         authority_key: a.authorityKey,
         status: a.status.code,
         holder_id: a.holderId ?? null,
+      });
+    }
+    for (const r of catalogue.reimbursements) {
+      insR.run({
+        package_id: r.packageId,
+        status_code: r.status.code,
+        status_system: r.status.system,
+        status_display: r.status.display ?? null,
+        price_value: r.price?.value ?? null,
+        price_currency: r.price?.currency ?? null,
+        prices_json: r.prices?.length ? JSON.stringify(r.prices) : null,
+        limitations: r.limitations ?? null,
+        valid_from: r.validFrom ?? null,
+        valid_to: r.validTo ?? null,
+        first_listing_date: r.firstListingDate ?? null,
+        expiry_date: r.expiryDate ?? null,
+        cost_share: r.costShare ?? null,
+        gamme_code: r.gamme?.code ?? null,
+        gamme_system: r.gamme?.system ?? null,
+        gamme_display: r.gamme?.display ?? null,
+        dossier_number: r.dossierNumber ?? null,
       });
     }
     for (const s of catalogue.sourceSnapshots) {
@@ -232,6 +291,11 @@ export function searchPackages(dbFile: string, query: string): Record<string, un
           OR ifnull(gtin,'') LIKE @q
           OR source_package_id LIKE @q
           OR source_product_id LIKE @q
+          OR EXISTS (
+            SELECT 1 FROM package_name pn
+            WHERE pn.package_id = medication_packages.package_id
+              AND pn.text LIKE @q COLLATE NOCASE
+          )
        LIMIT 50`,
     )
     .all({ q: like });
