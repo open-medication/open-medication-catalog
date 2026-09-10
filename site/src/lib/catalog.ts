@@ -31,7 +31,7 @@ export const ARTIFACT_META: ArtifactMeta[] = [
     id: "ch-enriched",
     title: "Switzerland: enriched",
     jurisdiction: "CH",
-    blurb: "Swissmedic export plus GTIN and trade status from Refdata. The Refdata ZIP is not included.",
+    blurb: "Swissmedic export plus GTIN, trade status, and pack names from Refdata.",
   },
 ];
 

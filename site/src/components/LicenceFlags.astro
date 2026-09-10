@@ -32,9 +32,6 @@ const { source } = Astro.props;
       <dd class="mono">{attributionLabel(source.attributionRequired)}</dd>
     </div>
   </dl>
-  {source.redistributeRaw === false && (
-    <p class="licence-source-note">Derived fields only. The raw ZIP is not included.</p>
-  )}
 </div>
 
 <style>
@@ -102,12 +99,6 @@ const { source } = Astro.props;
     margin: 0;
     font-size: 0.82rem;
     color: var(--color-ink);
-  }
-
-  .licence-source-note {
-    margin: 0;
-    font-size: 0.82rem;
-    color: var(--color-ink-muted);
   }
 
   @media screen and (max-width: 720px) {
