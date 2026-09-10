@@ -6,6 +6,13 @@
       "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-base-2026.08",
       "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-base-2026.08/ch-base-2026.08.zip",
       "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-base-2026.08/manifest.json"
+    },
+    "ch-enriched": {
+      "latest": "2026.08",
+      "tag": "ch-enriched-2026.08",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-enriched-2026.08",
+      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-enriched-2026.08/ch-enriched-2026.08.zip",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-enriched-2026.08/manifest.json"
     }
   }
 }
