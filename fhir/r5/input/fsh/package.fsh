@@ -17,7 +17,13 @@ Id: OpenPackagedProductDefinition
 Title: "Open Packaged Product Definition (R5)"
 Description: """Canonical Package → PackagedProductDefinition.
 packageFor is 1..1 for Swissmedic packs (one sequence per pack).
-Original pack text is description. containedItemQuantity only when straightforward.
+Original pack text is description (identity authority).
+name is the Refdata pack trade name when present (default language de);
+otherwise the Swissmedic description. Other languages use the HL7
+translation extension on name (_name). Do not copy pack names onto MedicinalProductDefinition.
+containedItemQuantity only when straightforward.
+marketingStatus.dateRange carries trade validity dates when present.
+BAG SL fields (local --enable-bag only) are on the reimbursement extension, not Swissmedic RegulatedAuthorization.
 Do not fabricate nested packaging."""
 * identifier 1..*
 * description 1..1
@@ -25,7 +31,8 @@ Do not fabricate nested packaging."""
 * extension contains
     OmcJurisdictionR5 named jurisdiction 1..1 and
     OmcIdentityAuthorityR5 named identityAuthority 1..1 and
-    OmcReleaseR5 named omcRelease 1..1
+    OmcReleaseR5 named omcRelease 1..1 and
+    OmcReimbursementR5 named reimbursement 0..*
 
 Profile: OpenRegulatedAuthorization
 Parent: RegulatedAuthorization
@@ -102,3 +109,42 @@ Description: "UUIDv5 of the optional ProductGroup (Swissmedic Präparat)."
 * ^context[=].expression = "MedicinalProductDefinition"
 * value[x] only string
 * valueString 1..1
+
+Extension: OmcReimbursementR5
+Id: reimbursement
+Title: "OMC reimbursement detail"
+Description: "BAG/FOPH Spezialitätenliste fields for a package. Emitted on PackagedProductDefinition. Used on experimental --enable-bag builds; not in official ch-enriched until redistribution terms are recorded."
+* ^url = "https://fhir.openmedicationcatalog.org/StructureDefinition/reimbursement"
+* ^context[+].type = #element
+* ^context[=].expression = "PackagedProductDefinition"
+* extension contains
+    status 1..1 and
+    validFrom 0..1 and
+    validTo 0..1 and
+    firstListingDate 0..1 and
+    expiryDate 0..1 and
+    costShare 0..1 and
+    dossierNumber 0..1 and
+    limitations 0..1 and
+    gamme 0..1 and
+    price 0..*
+* extension[status].value[x] only Coding
+* extension[validFrom].value[x] only date
+* extension[validTo].value[x] only date
+* extension[firstListingDate].value[x] only date
+* extension[expiryDate].value[x] only date
+* extension[costShare].value[x] only integer
+* extension[dossierNumber].value[x] only string
+* extension[limitations].value[x] only string
+* extension[gamme].value[x] only Coding
+* extension[price].extension contains
+    value 1..1 and
+    currency 1..1 and
+    type 0..1 and
+    changeType 0..1 and
+    changeDate 0..1
+* extension[price].extension[value].value[x] only string
+* extension[price].extension[currency].value[x] only string
+* extension[price].extension[type].value[x] only Coding
+* extension[price].extension[changeType].value[x] only Coding
+* extension[price].extension[changeDate].value[x] only date

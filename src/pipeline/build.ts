@@ -26,6 +26,7 @@ export interface BuildOptions {
   dataMonth?: string;
   previousDir?: string;
   publishOfficial?: boolean;
+  enableBag?: boolean;
 }
 
 export interface BuildResult {
@@ -43,9 +44,21 @@ const adapters: Record<string, Adapter> = {
 };
 
 export async function build(opts: BuildOptions): Promise<BuildResult> {
-  const official = Boolean(opts.artifactId && isOfficialArtifactId(opts.artifactId) && !opts.sources);
+  const wantBag = Boolean(opts.enableBag) || process.env.OMC_ENABLE_BAG === "1";
+  if (wantBag && opts.sources?.length) {
+    throw new Error("--enable-bag is only valid for omc build ch-enriched (not --source)");
+  }
+  if (wantBag && opts.artifactId !== "ch-enriched") {
+    throw new Error("--enable-bag is only valid for omc build ch-enriched");
+  }
+
+  const official = Boolean(opts.artifactId && isOfficialArtifactId(opts.artifactId) && !opts.sources && !wantBag);
   if (opts.publishOfficial && !official) {
-    throw new Error("Custom --source builds cannot be published under an official artifact identity");
+    throw new Error(
+      wantBag
+        ? "BAG-enriched builds cannot be published as an official artifact"
+        : "Custom --source builds cannot be published under an official artifact identity",
+    );
   }
 
   let recipe: ArtifactRecipe | undefined;
@@ -54,9 +67,15 @@ export async function build(opts: BuildOptions): Promise<BuildResult> {
   let jurisdiction: string;
   if (opts.artifactId && !opts.sources) {
     recipe = getRecipe(opts.artifactId);
-    sourceIds = recipe.requiredSources;
+    sourceIds = [...recipe.requiredSources];
     artifactId = recipe.id;
     jurisdiction = recipe.jurisdiction;
+    if (wantBag) {
+      if (!sourceIds.includes("refdata")) {
+        throw new Error("--enable-bag requires swissmedic + refdata (ch-enriched)");
+      }
+      if (!sourceIds.includes("bag")) sourceIds.push("bag");
+    }
   } else if (opts.sources?.length) {
     sourceIds = opts.sources;
     artifactId = `custom-${(opts.jurisdiction ?? "CH").toLowerCase()}`;

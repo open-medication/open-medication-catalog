@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ARTICLES>
+  <ARTICLE>
+    <GTIN>7680687930017</GTIN>
+    <AUTHNR>10029</AUTHNR>
+    <PACKCODE>2</PACKCODE>
+    <STATUS>inCommerce</STATUS>
+    <TYPE>PHARMA</TYPE>
+    <NAME_DE>Emser Salz Lösung Pack DE</NAME_DE>
+    <NAME_FR>Emser Salz Lösung Pack FR</NAME_FR>
+    <NAME_IT>Emser Salz Lösung Pack IT</NAME_IT>
+    <NAME_EN>Emser Salz Lösung Pack EN</NAME_EN>
+    <VALIDFROM>2020-01-01</VALIDFROM>
+    <VALIDTO>2099-12-31</VALIDTO>
+  </ARTICLE>
+</ARTICLES>

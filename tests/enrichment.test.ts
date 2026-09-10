@@ -4,12 +4,12 @@ import { parseXmlString } from "../src/xml.js";
 import { emptyCatalogue } from "../src/adapters/compose.js";
 import { canonicalId } from "../src/identity.js";
 import { authorityKey } from "../src/branded.js";
-import { SWISSMEDIC_SYSTEMS } from "../src/canonical/types.js";
-import { BagAdapter } from "../src/adapters/ch/bag.js";
+import { SWISSMEDIC_SYSTEMS, type Package, type SourceSnapshot } from "../src/canonical/types.js";
+import { applyBag, BagAdapter, loadFhirResources } from "../src/adapters/ch/bag.js";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { Package, SourceSnapshot } from "../src/canonical/types.js";
+import { repoPath } from "../src/paths.js";
 
 function snap(): SourceSnapshot {
   return {
@@ -25,7 +25,7 @@ function snap(): SourceSnapshot {
 describe("refdata join", () => {
   it("joins on authorisation + pack code as strings", () => {
     const xml = `<?xml version="1.0"?><ARTICLES>
-      <ARTICLE><GTIN>7680123450017</GTIN><AUTHNR>001</AUTHNR><PACKCODE>001</PACKCODE><STATUS>inCommerce</STATUS></ARTICLE>
+      <ARTICLE><GTIN>7680123450017</GTIN><AUTHNR>001</AUTHNR><PACKCODE>001</PACKCODE><STATUS>inCommerce</STATUS><NAME_DE>Prednison DE</NAME_DE><NAME_FR>Prednisone FR</NAME_FR><VALIDFROM>2020-01-01</VALIDFROM><VALIDTO>2099-12-31</VALIDTO></ARTICLE>
     </ARTICLES>`;
     const articles = collectArticles(parseXmlString(xml));
     expect(articles[0]?.authNr).toBe("001");
@@ -63,6 +63,12 @@ describe("refdata join", () => {
     applyRefdata(cat, articles, snap());
     expect(pkg.gtin).toBe("7680123450017");
     expect(pkg.marketingStatus?.code).toBe("inCommerce");
+    expect(pkg.names).toEqual([
+      { language: "de", text: "Prednison DE" },
+      { language: "fr", text: "Prednisone FR" },
+    ]);
+    expect(pkg.marketingValidFrom).toBe("2020-01-01");
+    expect(pkg.marketingValidTo).toBe("2099-12-31");
   });
 });
 
@@ -101,5 +107,60 @@ describe("BAG CH EPL pin", () => {
         },
       ),
     ).rejects.toThrow(/CH EPL/);
+  });
+});
+
+describe("BAG join", () => {
+  it("joins CH EPL reimbursementSL on packaging GTIN", () => {
+    const cat = emptyCatalogue("custom-ch", "CH", "0.1.0");
+    const pkgId = canonicalId({
+      jurisdiction: "CH",
+      identityAuthority: "swissmedic",
+      entityType: "Package",
+      authorityKey: authorityKey(["10029", "2", "2"]),
+    });
+    const mpId = canonicalId({
+      jurisdiction: "CH",
+      identityAuthority: "swissmedic",
+      entityType: "MedicinalProduct",
+      authorityKey: authorityKey(["10029", "2"]),
+    });
+    const pkg: Package = {
+      id: pkgId,
+      jurisdiction: "CH",
+      identityAuthority: "swissmedic",
+      authorityKey: "10029|2|2",
+      medicinalProductId: mpId,
+      description: "200 ML",
+      quantity: { structured: false },
+      gtin: "7680687930017",
+      regulatoryStatus: { system: SWISSMEDIC_SYSTEMS.regulatoryStatus, code: "Z" },
+      identifiers: [{ system: SWISSMEDIC_SYSTEMS.package, value: "10029|2|2" }],
+      fieldProvenance: {},
+      sourceRecords: [],
+    };
+    cat.packages.push(pkg);
+    const bagSnap: SourceSnapshot = {
+      id: "bagsnap",
+      sourceId: "bag",
+      identityAuthority: "bag",
+      retrievedAt: "1970-01-01T00:00:00.000Z",
+      sha256: "bag",
+      uri: "file:fixture",
+    };
+    cat.sourceSnapshots.push(bagSnap);
+    applyBag(cat, loadFhirResources([repoPath("fixtures/ch/bag/epl-paxlovid.json")]), bagSnap);
+    expect(pkg.reimbursementStatus?.code).toBe("756001002001");
+    expect(cat.reimbursements).toHaveLength(1);
+    const row = cat.reimbursements[0]!;
+    expect(row.status.code).toBe("756001021001");
+    expect(row.dossierNumber).toBe("21529");
+    expect(row.costShare).toBe(10);
+    expect(row.gamme?.display).toBe("Oral");
+    expect(row.prices).toHaveLength(2);
+    expect(row.price?.value).toBe("1113.95");
+    expect(row.limitations).toMatch(/PAXLOVID/);
+    expect(row.validFrom).toBe("2023-12-01");
+    expect(row.firstListingDate).toBe("2023-12-01");
   });
 });

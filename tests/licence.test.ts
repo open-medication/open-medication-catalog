@@ -33,6 +33,10 @@ describe("licence flags from source.yaml", () => {
     expect(swiss.commercialUse).toBe("allowed");
     expect(getRecipe("ch-base").requiredSources).toEqual(["swissmedic"]);
     expect(getRecipe("ch-enriched").requiredSources).toEqual(["swissmedic", "refdata"]);
+    expect(getRecipe("ch-enriched").requiredSources).not.toContain("bag");
+    expect(loadSourceDescriptorById("bag").commercialUse).toBe("review-required");
+    expect(loadSourceDescriptorById("bag").redistribution).toBe("review-required");
+    expect(loadSourceDescriptorById("bag").releasePolicy?.public).toBe(false);
     for (const id of ["swissmedic", "refdata"]) {
       expect(loadSourceDescriptorById(id).terms.url.length).toBeGreaterThan(0);
     }

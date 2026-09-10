@@ -5,8 +5,10 @@
 | Source | Role | Artifact |
 | --- | --- | --- |
 | Swissmedic OGD | Regulatory ground truth | `ch-base`, `ch-enriched` |
-| Refdata Article Refdatabase | GTIN, trade status | `ch-enriched` only |
-| BAG Spezialitätenliste | Reimbursement | adapter present, not in recipe until terms are cleared |
+| Refdata Article Refdatabase | GTIN, trade status, pack trade names (DE/FR/IT/EN), trade dates if present | `ch-enriched` only |
+| BAG Spezialitätenliste | Reimbursement (status, prices, limitations, cost share, gamme, dates, dossier) | adapter present; **not** in the public recipe until terms are cleared. Local: `omc build ch-enriched --enable-bag` |
+
+Enrichment maps fields Swissmedic OGD does **not** already carry. Join keys, ATC, Abgabekategorie, and sequence number are not copied from Refdata. BAG IDMP product fields that duplicate Swissmedic (dose form, ingredients, ATC, German regulatory name) are skipped.
 
 ## Identity
 
@@ -29,6 +31,14 @@ Regulatory, marketing, reimbursement, and catalogue lifecycle are separate. R4 `
 ## Refdata join
 
 Join is authorisation number + pack code (strings). Invariant: within Swissmedic OGD, `(authorisationNumber, packageCode)` must not map to more than one sequence. Proven on the 2026-08 snapshot (0 collisions). Re-checked every `ch-base` build.
+
+Refdata names are pack-level trade names (`NAME / Stärke / Menge / Form`), not sequence names. They go on `Package.names` (`de`/`fr`/`it`/`en`). Swissmedic `description` stays the original pack text. FHIR R5 puts the default-language name on `PackagedProductDefinition.name` and other languages on the [translation](http://hl7.org/fhir/StructureDefinition/translation) extension; R4 does the same on `Medication.code.text`. They are not copied onto `MedicinalProductDefinition.name`.
+
+`TYPE=NONPHARMA` articles are not applied. ATC and Abgabekategorie mismatches against Swissmedic are recorded as intentionally ignored.
+
+## BAG join
+
+Join is package GTIN (from Refdata) to CH EPL `PackagedProductDefinition.packaging.identifier` (`urn:oid:2.51.1.1`), then `RegulatedAuthorization` of type Reimbursement SL. Official `ch-enriched` does not include BAG. `OMC_ENABLE_BAG=1` or `--enable-bag` injects BAG for a **local** zip (`manifest.experimentalBag: true`) that cannot be `--publish`ed. Fetch still requires `--input` until a stable FHIR export URL is recorded. Outreach to `epl@bag.admin.ch` (Cc `Arzneimittel-Krankenversicherung@bag.admin.ch`) is in progress; licence flags stay `review-required`. OMC is not the official SL; [sl.bag.admin.ch](https://sl.bag.admin.ch/sl) remains the KVV Art. 71 publication.
 
 ## Routes
 

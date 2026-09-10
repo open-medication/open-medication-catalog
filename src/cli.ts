@@ -37,6 +37,7 @@ program
   .option("--month <yyyy.mm>", "data release month")
   .option("--previous <dir>", "previous build dir for changes.json")
   .option("--publish", "attempt official publish (recipe builds only)", false)
+  .option("--enable-bag", "local BAG SL enrichment for ch-enriched only; cannot publish", false)
   .action(async (target: string, opts: {
     source: string[];
     input: string[];
@@ -44,6 +45,7 @@ program
     month?: string;
     previous?: string;
     publish?: boolean;
+    enableBag?: boolean;
   }) => {
     const custom = opts.source.length > 0;
     if (custom && isOfficialArtifactId(target)) {
@@ -60,6 +62,7 @@ program
       dataMonth: opts.month,
       previousDir: opts.previous,
       publishOfficial: opts.publish,
+      enableBag: opts.enableBag,
     });
     if (result.notYetAvailable) {
       const markerDir = opts.out ?? path.resolve("output", target);

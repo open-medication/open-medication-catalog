@@ -276,6 +276,9 @@
         "marketingStatus": { "$ref": "#/$defs/CodedValue" },
         "reimbursementStatus": { "$ref": "#/$defs/CodedValue" },
         "gtin": { "type": "string" },
+        "names": { "type": "array", "items": { "$ref": "#/$defs/LocalizedName" } },
+        "marketingValidFrom": { "type": "string" },
+        "marketingValidTo": { "type": "string" },
         "identifiers": { "type": "array", "items": { "$ref": "#/$defs/Identifier" } },
         "fieldProvenance": { "$ref": "#/$defs/FieldProvenanceMap" },
         "sourceRecords": { "type": "array", "items": { "$ref": "#/$defs/SourceRecordRef" } },
@@ -310,6 +313,18 @@
         "identifiers": { "type": "array", "items": { "$ref": "#/$defs/Identifier" } }
       }
     },
+    "ProductPrice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "currency"],
+      "properties": {
+        "value": { "type": "string" },
+        "currency": { "type": "string" },
+        "type": { "$ref": "#/$defs/CodedValue" },
+        "changeType": { "$ref": "#/$defs/CodedValue" },
+        "changeDate": { "type": "string" }
+      }
+    },
     "Reimbursement": {
       "type": "object",
       "additionalProperties": false,
@@ -326,9 +341,15 @@
             "currency": { "type": "string" }
           }
         },
+        "prices": { "type": "array", "items": { "$ref": "#/$defs/ProductPrice" } },
         "limitations": { "type": "string" },
         "validFrom": { "type": "string" },
         "validTo": { "type": "string" },
+        "firstListingDate": { "type": "string" },
+        "expiryDate": { "type": "string" },
+        "costShare": { "type": "integer" },
+        "gamme": { "$ref": "#/$defs/CodedValue" },
+        "dossierNumber": { "type": "string" },
         "fieldProvenance": { "$ref": "#/$defs/FieldProvenance" }
       }
     },
