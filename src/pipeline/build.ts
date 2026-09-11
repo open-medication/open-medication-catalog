@@ -1,10 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { getRecipe, isOfficialArtifactId, type ArtifactRecipe } from "../artifacts.js";
-import { emptyCatalogue, enrichWithBag, enrichWithRefdata, finalizeSwissmedic, mergePartials } from "../adapters/compose.js";
+import { emptyCatalogue, enrichWithBag, enrichWithRefdata, finalizeSwissmedic, mergePartials, sortCatalogue } from "../adapters/compose.js";
 import { SwissmedicAdapter, SourceNotYetAvailableError } from "../adapters/ch/swissmedic.js";
 import { RefdataAdapter } from "../adapters/ch/refdata.js";
 import { BagAdapter, loadFhirResources } from "../adapters/ch/bag.js";
+import { BdpmAdapter } from "../adapters/fr/bdpm.js";
 import type { Adapter, AdapterContext, FetchResult } from "../adapters/types.js";
 import { assertValidCatalogue } from "../canonical/validate.js";
 import { repoPath } from "../paths.js";
@@ -41,6 +42,7 @@ const adapters: Record<string, Adapter> = {
   swissmedic: new SwissmedicAdapter(),
   refdata: new RefdataAdapter(),
   bag: new BagAdapter(),
+  bdpm: new BdpmAdapter(),
 };
 
 export async function build(opts: BuildOptions): Promise<BuildResult> {
@@ -130,6 +132,7 @@ export async function build(opts: BuildOptions): Promise<BuildResult> {
   }
 
   if (sourceIds.includes("swissmedic")) finalizeSwissmedic(catalogue);
+  else sortCatalogue(catalogue);
   if (sourceIds.includes("refdata")) {
     const snap = fetched.get("refdata")!.snapshot;
     enrichWithRefdata(catalogue, parsed.get("refdata") as never, snap.id);

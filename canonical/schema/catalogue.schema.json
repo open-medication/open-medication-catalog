@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fhir.openmedicationcatalog.org/canonical/0.1.0/catalogue.schema.json",
+  "$id": "https://fhir.openmedicationcatalog.org/canonical/0.1.1/catalogue.schema.json",
   "title": "Catalogue",
-  "description": "OMC canonical catalogue 0.1.0. JSON Schema is the source of truth; TypeScript types are generated from this file.",
+  "description": "OMC canonical catalogue 0.1.1. JSON Schema is the source of truth; TypeScript types are generated from this file.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -21,7 +21,7 @@
     "mappingCoverage"
   ],
   "properties": {
-    "schemaVersion": { "const": "0.1.0" },
+    "schemaVersion": { "const": "0.1.1" },
     "artifactId": { "type": "string", "minLength": 1 },
     "release": { "type": "string" },
     "jurisdiction": { "type": "string", "minLength": 1 },
@@ -325,6 +325,15 @@
         "changeDate": { "type": "string" }
       }
     },
+    "ReimbursementRate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rate"],
+      "properties": {
+        "rate": { "type": "string", "minLength": 1 },
+        "indications": { "type": "string" }
+      }
+    },
     "Reimbursement": {
       "type": "object",
       "additionalProperties": false,
@@ -342,6 +351,7 @@
           }
         },
         "prices": { "type": "array", "items": { "$ref": "#/$defs/ProductPrice" } },
+        "rates": { "type": "array", "items": { "$ref": "#/$defs/ReimbursementRate" } },
         "limitations": { "type": "string" },
         "validFrom": { "type": "string" },
         "validTo": { "type": "string" },

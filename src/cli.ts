@@ -2,7 +2,7 @@
 import { Command } from "commander";
 import { build } from "./pipeline/build.js";
 import { searchPackages } from "./sqlite/writer.js";
-import { isOfficialArtifactId } from "./artifacts.js";
+import { isOfficialArtifactId, getRecipe } from "./artifacts.js";
 import { SourceNotYetAvailableError } from "./adapters/ch/swissmedic.js";
 import { rebuildCatalogFromGithubReleases } from "./pipeline/packager.js";
 import { discoverNextDataMonth, formatNextMonthSummary, githubOutputLines } from "./pipeline/discover.js";
@@ -15,12 +15,13 @@ import path from "node:path";
 const program = new Command();
 program.name("omc").description("Open Medication Catalogue generator").version("0.1.0");
 
-function parseInputs(input: string[] | undefined): Record<string, string> {
+function parseInputs(input: string[] | undefined, artifactId?: string): Record<string, string> {
   const out: Record<string, string> = {};
+  const fallback = defaultInputSource(artifactId);
   for (const item of input ?? []) {
     const idx = item.indexOf("=");
     if (idx === -1) {
-      out.swissmedic = path.resolve(item);
+      out[fallback] = path.resolve(item);
     } else {
       out[item.slice(0, idx)] = path.resolve(item.slice(idx + 1));
     }
@@ -28,11 +29,19 @@ function parseInputs(input: string[] | undefined): Record<string, string> {
   return out;
 }
 
+function defaultInputSource(artifactId?: string): string {
+  if (artifactId && isOfficialArtifactId(artifactId)) {
+    const sources = getRecipe(artifactId).requiredSources;
+    if (sources[0]) return sources[0];
+  }
+  return "swissmedic";
+}
+
 program
   .command("build")
-  .argument("<target>", "artifact id (ch-base, ch-enriched) or jurisdiction for custom builds")
+  .argument("<target>", "artifact id (ch-base, ch-enriched, fr-base) or jurisdiction for custom builds")
   .option("--source <id>", "custom local source (repeatable); cannot publish as official", collect, [] as string[])
-  .option("--input <spec>", "source=path or a Swissmedic zip", collect, [] as string[])
+  .option("--input <spec>", "source=path or a zip/dir for the recipe's primary source", collect, [] as string[])
   .option("--out <dir>", "output directory")
   .option("--month <yyyy.mm>", "data release month")
   .option("--previous <dir>", "previous build dir for changes.json")
@@ -57,7 +66,7 @@ program
       artifactId: custom ? undefined : target,
       jurisdiction: custom ? target : undefined,
       sources: custom ? opts.source : undefined,
-      inputBySource: parseInputs(opts.input),
+      inputBySource: parseInputs(opts.input, custom ? undefined : target),
       outDir: opts.out,
       dataMonth: opts.month,
       previousDir: opts.previous,
@@ -83,7 +92,7 @@ program
   .action(async (artifactId: string, opts: { input: string[]; month?: string }) => {
     await build({
       artifactId,
-      inputBySource: parseInputs(opts.input),
+      inputBySource: parseInputs(opts.input, artifactId),
       dataMonth: opts.month,
     });
   });
@@ -96,7 +105,7 @@ program
   .action(async (artifactId: string, opts: { input: string[]; month?: string }) => {
     const result = await build({
       artifactId,
-      inputBySource: parseInputs(opts.input),
+      inputBySource: parseInputs(opts.input, artifactId),
       dataMonth: opts.month,
     });
     if (result.notYetAvailable) {
@@ -116,7 +125,7 @@ program
     await build({
       artifactId,
       previousDir: opts.previous,
-      inputBySource: parseInputs(opts.input),
+      inputBySource: parseInputs(opts.input, artifactId),
       dataMonth: opts.month,
     });
   });
@@ -132,7 +141,7 @@ program
 
 program
   .command("next-month")
-  .description("Find the newest unpublished Swissmedic archive newer than the last GitHub Release")
+  .description("Find the newest unpublished data month newer than the last GitHub Release")
   .argument("<artifactId>")
   .option("--month <yyyy.mm>", "use this data month instead of discovering")
   .option("--github-output <path>", "append skip/month/tag fields for GitHub Actions")

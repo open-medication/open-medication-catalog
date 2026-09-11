@@ -2,11 +2,12 @@ import { describe, expect, it } from "vitest";
 import { BagAdapter } from "../src/adapters/ch/bag.js";
 import { RefdataAdapter } from "../src/adapters/ch/refdata.js";
 import { SwissmedicAdapter } from "../src/adapters/ch/swissmedic.js";
+import { BdpmAdapter } from "../src/adapters/fr/bdpm.js";
 import { listSourceDirs, loadSourceDescriptorById } from "../src/adapters/descriptor.js";
 import { getRecipe } from "../src/artifacts.js";
 import { licensingTexts, sourceLicensing } from "../src/pipeline/licensing.js";
 
-const adapters = [new SwissmedicAdapter(), new RefdataAdapter(), new BagAdapter()];
+const adapters = [new SwissmedicAdapter(), new RefdataAdapter(), new BagAdapter(), new BdpmAdapter()];
 
 describe("licence flags from source.yaml", () => {
   it("metadata matches YAML for every adapter", () => {
@@ -24,7 +25,7 @@ describe("licence flags from source.yaml", () => {
   });
 
   it("discovers every committed source.yaml", () => {
-    expect(listSourceDirs().map((s) => s.sourceId).sort()).toEqual(["bag", "refdata", "swissmedic"]);
+    expect(listSourceDirs().map((s) => s.sourceId).sort()).toEqual(["bag", "bdpm", "refdata", "swissmedic"]);
   });
 
   it("artifact recipes list sources that have licence descriptors", () => {
@@ -34,6 +35,10 @@ describe("licence flags from source.yaml", () => {
     expect(getRecipe("ch-base").requiredSources).toEqual(["swissmedic"]);
     expect(getRecipe("ch-enriched").requiredSources).toEqual(["swissmedic", "refdata"]);
     expect(getRecipe("ch-enriched").requiredSources).not.toContain("bag");
+    expect(getRecipe("fr-base").requiredSources).toEqual(["bdpm"]);
+    expect(loadSourceDescriptorById("bdpm").commercialUse).toBe("allowed");
+    expect(loadSourceDescriptorById("bdpm").redistribution).toBe("allowed");
+    expect(loadSourceDescriptorById("bdpm").attributionRequired).toBe(true);
     expect(loadSourceDescriptorById("bag").commercialUse).toBe("review-required");
     expect(loadSourceDescriptorById("bag").redistribution).toBe("review-required");
     expect(loadSourceDescriptorById("bag").releasePolicy?.public).toBe(false);

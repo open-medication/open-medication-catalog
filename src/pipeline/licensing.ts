@@ -52,7 +52,7 @@ ${LICENCE_DISCLAIMER}
 ## How to verify
 
 1. Open each \`termsUrl\` listed in \`SOURCES.md\` and in \`manifest.json\`.
-2. Compare the live page to the recorded \`checksum\` (SHA-256 of the normalized HTML, or of the named HTML fragment when \`fragment\` is set).
+2. Compare the live page to the recorded \`checksum\` (SHA-256 of the normalized HTML, or of the named HTML fragment when \`fragment\` is set; PDFs are SHA-256 of the file bytes).
 3. Treat the flags as our reading only.
 
 See \`SOURCES.md\` for per-source flags, dates, and notes.

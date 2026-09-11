@@ -22,7 +22,7 @@ Landing page: [`https://openmedicationcatalog.org`](https://openmedicationcatalo
 | CH | Swissmedic | production (this repo) | allowed (`terms_open`) | no |
 | CH | Refdata | optional enrichment (`ch-enriched`) | derived fields, not the raw ZIP | yes |
 | CH | BAG SL | implemented; local `--enable-bag` only | review-required | no |
-| FR | BDPM | planned | French Open Licence | no |
+| FR | BDPM | production (`fr-base`) | French Open Licence | no |
 | GB | dm+d | planned | review-required (TRUD) | yes |
 | NO | FEST | planned | NLOD | no |
 | CA | DPD | planned | OGL-Canada | no |
@@ -42,6 +42,7 @@ Composition is declared in [`artifacts.yaml`](artifacts.yaml):
 ```text
 omc build ch-base          # Swissmedic only
 omc build ch-enriched      # Swissmedic + Refdata (all-or-nothing)
+omc build fr-base          # BDPM only
 ```
 
 `--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata.
@@ -49,6 +50,7 @@ omc build ch-enriched      # Swissmedic + Refdata (all-or-nothing)
 ```text
 pnpm install
 pnpm omc build ch-base --input fixtures/ch/swissmedic/OGD_FIXTURE.zip --month 2026.08
+pnpm omc build fr-base --input fixtures/fr/bdpm/BDPM_FIXTURE.zip --month 2026.09
 pnpm omc search output/ch-base/release/database/medication.sqlite Metformin
 ```
 
@@ -59,7 +61,7 @@ pnpm omc next-month ch-base
 pnpm omc build ch-base --month 2026.08
 ```
 
-`next-month` compares GitHub Releases to the Swissmedic archive and prints the newest unpublished `YYYY.MM`. If nothing newer exists it prints `up-to-date`. If a given `OGD_YYYYMM.zip` is not published yet, `omc build` exits successfully as **not yet available**.
+`next-month` compares GitHub Releases to the upstream dump and prints the newest unpublished `YYYY.MM`. For Switzerland it probes the Swissmedic `OGD_YYYYMM.zip` archive. For France it treats the live BDPM files as available for the current month. If nothing newer exists it prints `up-to-date`. If a given Swissmedic archive is not published yet, `omc build` exits successfully as **not yet available**.
 
 The release workflow runs on the 1st and 15th UTC. It ships that newest unpublished month, or skips when already current. Manual dispatch can still force a month.
 

@@ -104,7 +104,7 @@ Description: "Reimbursement listing status (e.g. BAG). Not Medication.status."
 Extension: OmcReimbursement
 Id: reimbursement
 Title: "OMC reimbursement detail"
-Description: "BAG/FOPH Spezialitätenliste fields for a package. Used on experimental --enable-bag builds; not in official ch-enriched until redistribution terms are recorded."
+Description: "Package reimbursement fields (BAG SL and BDPM CIP rates). BAG is used on experimental --enable-bag builds; not in official ch-enriched until redistribution terms are recorded."
 * ^url = "https://fhir.openmedicationcatalog.org/StructureDefinition/reimbursement"
 * ^context[+].type = #element
 * ^context[=].expression = "Medication"
@@ -118,7 +118,8 @@ Description: "BAG/FOPH Spezialitätenliste fields for a package. Used on experim
     dossierNumber 0..1 and
     limitations 0..1 and
     gamme 0..1 and
-    price 0..*
+    price 0..* and
+    rate 0..*
 * extension[status].value[x] only Coding
 * extension[validFrom].value[x] only date
 * extension[validTo].value[x] only date
@@ -139,6 +140,11 @@ Description: "BAG/FOPH Spezialitätenliste fields for a package. Used on experim
 * extension[price].extension[type].value[x] only Coding
 * extension[price].extension[changeType].value[x] only Coding
 * extension[price].extension[changeDate].value[x] only date
+* extension[rate].extension contains
+    rate 1..1 and
+    indications 0..1
+* extension[rate].extension[rate].value[x] only string
+* extension[rate].extension[indications].value[x] only string
 
 Extension: OmcPackageDescription
 Id: package-description

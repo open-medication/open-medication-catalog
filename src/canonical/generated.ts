@@ -22,10 +22,10 @@ export type AuthorityKey = string;
 export type MappingClass = "mapped" | "intentionally-ignored" | "retained-as-metadata" | "unknown";
 
 /**
- * OMC canonical catalogue 0.1.0. JSON Schema is the source of truth; TypeScript types are generated from this file.
+ * OMC canonical catalogue 0.1.1. JSON Schema is the source of truth; TypeScript types are generated from this file.
  */
 export interface Catalogue {
-  schemaVersion: "0.1.0";
+  schemaVersion: "0.1.1";
   artifactId: string;
   release?: string;
   jurisdiction: string;
@@ -269,6 +269,7 @@ export interface Reimbursement {
     currency: string;
   };
   prices?: ProductPrice[];
+  rates?: ReimbursementRate[];
   limitations?: string;
   validFrom?: string;
   validTo?: string;
@@ -289,6 +290,14 @@ export interface ProductPrice {
   type?: CodedValue;
   changeType?: CodedValue;
   changeDate?: string;
+}
+/**
+ * This interface was referenced by `Catalogue`'s JSON-Schema
+ * via the `definition` "ReimbursementRate".
+ */
+export interface ReimbursementRate {
+  rate: string;
+  indications?: string;
 }
 /**
  * This interface was referenced by `Catalogue`'s JSON-Schema

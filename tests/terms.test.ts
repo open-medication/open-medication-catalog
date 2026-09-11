@@ -1,5 +1,6 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { extractTermsFragment, termsChecksum } from "../src/pipeline/terms.js";
+import { extractTermsFragment, looksLikePdf, termsChecksum, termsChecksumBytes } from "../src/pipeline/terms.js";
 
 const FIXTURE = `<html><body>
 <nav>cookie banner changing weekly 123</nav>
@@ -29,5 +30,21 @@ describe("extractTermsFragment", () => {
 
   it("fails when the fragment id is missing", () => {
     expect(() => extractTermsFragment("<p>no ids</p>", "terms_open")).toThrow(/not found/);
+  });
+});
+
+describe("termsChecksumBytes", () => {
+  it("hashes PDF bytes, not UTF-8-normalized HTML", () => {
+    const pdf = Buffer.from("%PDF-1.4\n%\xe2\xe3\xcf\xd3\n1 0 obj\n<<>>\nendobj\n", "latin1");
+    const asHtml = termsChecksum(pdf.toString("utf8"));
+    const asPdf = termsChecksumBytes(pdf, { url: "https://example.org/licence.pdf" });
+    expect(looksLikePdf(pdf, "https://example.org/licence.pdf")).toBe(true);
+    expect(asPdf).toBe(createHash("sha256").update(pdf).digest("hex"));
+    expect(asPdf).not.toBe(asHtml);
+  });
+
+  it("still hashes HTML through the text normalizer", () => {
+    const html = Buffer.from("<html><body>  Hello <b>World</b>  </body></html>");
+    expect(termsChecksumBytes(html, { url: "https://example.org/terms" })).toBe(termsChecksum(html.toString("utf8")));
   });
 });

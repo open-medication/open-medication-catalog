@@ -1,0 +1,40 @@
+# BDPM field mapping. Files have no header row; names are column order.
+# Unknown extra columns must not be silently ignored.
+sourceId: bdpm
+files:
+  CIS_bdpm.txt:
+    CIS: mapped
+    denomination: mapped
+    formePharmaceutique: mapped
+    voiesAdministration: mapped
+    statutAMM: mapped
+    typeProcedure: retained-as-metadata
+    etatCommercialisation: mapped
+    dateAMM: mapped
+    statutBDM: retained-as-metadata
+    numeroAutorisationEuropeenne: retained-as-metadata
+    titulaire: mapped
+    surveillanceRenforcee: retained-as-metadata
+  CIS_CIP_bdpm.txt:
+    CIS: mapped
+    CIP7: mapped
+    libellePresentation: mapped
+    statutAdministratif: mapped
+    etatCommercialisation: mapped
+    dateCommercialisation: mapped
+    CIP13: mapped
+    agrementCollectivites: mapped
+    tauxRemboursement: mapped
+    prix: mapped
+    prixAvecHonoraire: retained-as-metadata
+    honoraireDispensation: retained-as-metadata
+    indicationsRemboursement: mapped
+  CIS_COMPO_bdpm.txt:
+    CIS: mapped
+    elementPharmaceutique: mapped
+    codeSubstance: mapped
+    denominationSubstance: mapped
+    dosage: mapped
+    referenceDosage: mapped
+    natureComposant: mapped
+    numeroLiaison: mapped

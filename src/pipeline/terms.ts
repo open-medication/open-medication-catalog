@@ -55,6 +55,20 @@ export function termsChecksum(html: string, fragmentId?: string): string {
   return crypto.createHash("sha256").update(normalizeHtml(slice)).digest("hex");
 }
 
+export function looksLikePdf(buf: Buffer, url = ""): boolean {
+  const pathOnly = url.toLowerCase().split("?")[0] ?? "";
+  if (pathOnly.endsWith(".pdf")) return true;
+  return buf.subarray(0, 5).toString("latin1") === "%PDF-";
+}
+
+/** HTML pages: normalized text. PDFs: SHA-256 of the raw bytes. */
+export function termsChecksumBytes(buf: Buffer, opts?: { url?: string; fragment?: string }): string {
+  if (looksLikePdf(buf, opts?.url ?? "")) {
+    return crypto.createHash("sha256").update(buf).digest("hex");
+  }
+  return termsChecksum(buf.toString("utf8"), opts?.fragment);
+}
+
 export async function checkTerms(sourceDir: string): Promise<TermsStatus> {
   const desc = YAML.parse(fs.readFileSync(path.join(sourceDir, "source.yaml"), "utf8")) as {
     sourceId: string;
@@ -71,7 +85,7 @@ export async function checkTerms(sourceDir: string): Promise<TermsStatus> {
       maxBytes: 5 * 1024 * 1024,
       headers: TERMS_PAGE_HEADERS,
     });
-    current = termsChecksum(buf.toString("utf8"), desc.terms.fragment);
+    current = termsChecksumBytes(buf, { url: desc.terms.url, fragment: desc.terms.fragment });
   } catch (err) {
     fetchError = err instanceof Error ? err.message : String(err);
   }

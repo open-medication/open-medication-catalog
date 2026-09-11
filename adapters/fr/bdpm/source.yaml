@@ -1,0 +1,24 @@
+country: FR
+sourceId: bdpm
+identityAuthority: bdpm
+authority: ANSM / BDPM
+dataset: Base de données publique des médicaments
+sourceType: regulatory
+jurisdiction: FR
+updateFrequency: monthly
+commercialUse: allowed
+redistribution: allowed
+attributionRequired: true
+credentialsRequired: false
+required: true
+parserSchemaVersion: "0.1.1"
+downloadBase: "https://base-donnees-publique.medicaments.gouv.fr/download/file"
+terms:
+  url: "https://base-donnees-publique.medicaments.gouv.fr/docs/telechargement/licence_bdpm.pdf"
+  datasetUrl: "https://base-donnees-publique.medicaments.gouv.fr/telechargement"
+  reviewedAt: "2026-09-11"
+  checksum: "44ff23ae2b5cce0d729d1b53b20d17aae625189b131c2dd9cb98d1fe0d0a2a90"
+  notes: "Licence Ouverte (Etalab) as published by BDPM. Page-specific reuse rules on the download page: do not alter or denature the data; attribute the source (http://base-donnees-publique.medicaments.gouv.fr) and the update date; do not suggest endorsement by ANSM, HAS, or UNCAM. Checksum is SHA-256 of the licence PDF bytes, not the download-page chrome (file dates change monthly)."
+releasePolicy:
+  public: true
+  required: true
