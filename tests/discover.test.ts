@@ -134,6 +134,33 @@ describe("resolveNextDataMonth", () => {
     expect(lastShippedMonth(["ch-base-2026.07"], "ch-enriched")).toBeUndefined();
   });
 
+  it("forced month works for fr-base without probing Swissmedic", async () => {
+    const result = await resolveNextDataMonth({
+      artifactId: "fr-base",
+      tags: ["fr-base-2026.08"],
+      forcedMonth: "2026.09",
+      archiveAvailable: async () => {
+        throw new Error("must not probe when month is forced");
+      },
+    });
+    expect(result).toMatchObject({ skip: false, reason: "forced", month: "2026.09", tag: "fr-base-2026.09" });
+  });
+
+  it("treats a live BDPM dump as available for the current unpublished month", async () => {
+    const result = await resolveNextDataMonth({
+      artifactId: "fr-base",
+      tags: ["fr-base-2026.07"],
+      now: new Date("2026-09-09T07:00:00Z"),
+      archiveAvailable: async () => true,
+    });
+    expect(result).toMatchObject({
+      skip: false,
+      reason: "newer",
+      month: "2026.09",
+      tag: "fr-base-2026.09",
+    });
+  });
+
   it("writes GitHub Actions output fields", () => {
     expect(
       githubOutputLines({

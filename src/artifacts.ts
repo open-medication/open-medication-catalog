@@ -34,13 +34,13 @@ export function getRecipe(id: string): ArtifactRecipe {
   const recipe = loadRecipes().get(id);
   if (!recipe) {
     throw new Error(
-      `Unknown artifact '${id}'. Official builds use recipe ids from artifacts.yaml (e.g. ch-base, ch-enriched).`,
+      `Unknown artifact '${id}'. Official builds use recipe ids from artifacts.yaml (e.g. ch-base, ch-enriched, fr-base).`,
     );
   }
   return recipe;
 }
 
-export const OFFICIAL_ARTIFACT_IDS = ["ch-base", "ch-enriched"] as const;
+export const OFFICIAL_ARTIFACT_IDS = ["ch-base", "ch-enriched", "fr-base"] as const;
 
 export function isOfficialArtifactId(id: string): boolean {
   return loadRecipes().has(id);

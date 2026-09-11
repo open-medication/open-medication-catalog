@@ -59,6 +59,25 @@ describe("string identity invariant", () => {
     );
   });
 
+  it("France uses the same formula with FR|bdpm names", () => {
+    const fr = canonicalId({
+      jurisdiction: "FR",
+      identityAuthority: "bdpm",
+      entityType: "MedicinalProduct",
+      authorityKey: "60002283",
+    });
+    const ch = canonicalId({
+      jurisdiction: "CH",
+      identityAuthority: "swissmedic",
+      entityType: "MedicinalProduct",
+      authorityKey: "60002283",
+    });
+    expect(fr).not.toBe(ch);
+    expect(fr).toBe(
+      uuidv5("FR|bdpm|MedicinalProduct|60002283", PROJECT_NAMESPACE),
+    );
+  });
+
   it("project namespace is UUIDv5(DNS, openmedicationcatalog.org)", () => {
     const DNS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
     expect(PROJECT_NAMESPACE).toBe(uuidv5("openmedicationcatalog.org", DNS));

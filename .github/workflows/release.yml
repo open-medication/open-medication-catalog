@@ -6,10 +6,10 @@ on:
   workflow_dispatch:
     inputs:
       artifact:
-        description: "ch-base or ch-enriched"
+        description: "ch-base, ch-enriched, or fr-base"
         default: "ch-base"
       month:
-        description: "YYYY.MM (default: newest unpublished Swissmedic archive)"
+        description: "YYYY.MM (default: newest unpublished month for that artifact)"
         required: false
 jobs:
   release:
@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        artifact: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.artifact || 'ch-base')) || fromJSON('["ch-base","ch-enriched"]') }}
+        artifact: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.artifact || 'ch-base')) || fromJSON('["ch-base","ch-enriched","fr-base"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

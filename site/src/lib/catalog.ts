@@ -33,6 +33,12 @@ export const ARTIFACT_META: ArtifactMeta[] = [
     jurisdiction: "CH",
     blurb: "Swissmedic export plus GTIN, trade status, and pack names from Refdata.",
   },
+  {
+    id: "fr-base",
+    title: "France: base",
+    jurisdiction: "FR",
+    blurb: "BDPM specialties, presentations, composition, and reimbursement rates.",
+  },
 ];
 
 export function parseCatalogDoc(data: unknown): CatalogDoc {

@@ -166,6 +166,7 @@ describe("ch-enriched fixture build", () => {
     const ppd = fs.readFileSync(path.join(out, "release", "fhir-r5", "PackagedProductDefinition.ndjson"), "utf8");
     expect(ppd).toContain("StructureDefinition/reimbursement");
     expect(ppd).toContain("21529");
+    expect([...ppd.matchAll(/"url":"dossierNumber"/g)]).toHaveLength(1);
     const authz = fs.readFileSync(path.join(out, "release", "fhir-r5", "RegulatedAuthorization.ndjson"), "utf8");
     expect(authz).not.toContain("FOPH-21529");
 
@@ -188,5 +189,72 @@ describe("ch-enriched fixture build", () => {
         inputBySource: { swissmedic: swiss },
       }),
     ).rejects.toThrow(/ch-enriched/);
+  });
+});
+
+describe("fr-base fixture build", () => {
+  it("builds SQLite and FHIR from the BDPM fixture", async () => {
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-fr-"));
+    const result = await build({
+      artifactId: "fr-base",
+      inputBySource: { bdpm: repoPath("fixtures/fr/bdpm/BDPM_FIXTURE.zip") },
+      outDir: out,
+      dataMonth: "2026.09",
+    });
+    expect(result.official).toBe(true);
+    expect(result.catalogue.jurisdiction).toBe("FR");
+    expect(result.catalogue.schemaVersion).toBe("0.1.1");
+    expect(result.catalogue.productGroups).toHaveLength(0);
+    expect(result.catalogue.medicinalProducts).toHaveLength(3);
+    expect(result.catalogue.packages.length).toBeGreaterThan(0);
+
+    const ana = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "60002283");
+    expect(ana?.names[0]?.text).toMatch(/ANASTROZOLE/i);
+    expect(ana?.identifiers.some((i) => i.system.includes("/fr/bdpm/cis") && i.value === "60002283")).toBe(true);
+
+    const pack = result.catalogue.packages.find((p) => p.authorityKey === "3400949497294");
+    expect(pack?.gtin).toBe("3400949497294");
+    expect(pack?.jurisdiction).toBe("FR");
+
+    const beclo = result.catalogue.reimbursements.find((r) => {
+      const pkg = result.catalogue.packages.find((p) => p.id === r.packageId);
+      return pkg?.authorityKey === "3400936963504";
+    });
+    expect(beclo?.rates?.map((r) => r.rate)).toEqual(["65%", "15%"]);
+    expect(beclo?.rates?.[0]?.indications).toMatch(/Asthme/i);
+    expect(beclo?.price?.currency).toBe("EUR");
+
+    const med = fs.readFileSync(path.join(out, "release", "fhir-r4", "Medication.ndjson"), "utf8");
+    expect(med).toContain("https://www.gs1.org/gtin");
+    expect(med).toContain("fr/bdpm/cip");
+    expect(med).toContain("ANASTROZOLE");
+
+    const mpd = fs.readFileSync(
+      path.join(out, "release", "fhir-r5", "MedicinalProductDefinition.ndjson"),
+      "utf8",
+    );
+    expect(mpd).toContain("MedicinalProductDefinition");
+    expect(mpd).toContain("/sid/fr/bdpm/cis");
+
+    const ppd = fs.readFileSync(
+      path.join(out, "release", "fhir-r5", "PackagedProductDefinition.ndjson"),
+      "utf8",
+    );
+    expect(ppd).toContain("StructureDefinition/reimbursement");
+    expect(ppd).toContain("65%");
+
+    const sqlite = path.join(out, "release", "database", "medication.sqlite");
+    const hits = searchPackages(sqlite, "ANASTROZOLE");
+    expect(hits.length).toBeGreaterThan(0);
+    const db = new Database(sqlite, { readonly: true });
+    const rates = db.prepare("SELECT rates_json FROM reimbursement WHERE rates_json IS NOT NULL").all() as {
+      rates_json: string;
+    }[];
+    db.close();
+    expect(rates.some((r) => r.rates_json.includes("65%"))).toBe(true);
+
+    const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
+    expect(sourcesMd).toContain("licence_bdpm.pdf");
+    expect(sourcesMd).toContain("commercialUse: allowed");
   });
 });

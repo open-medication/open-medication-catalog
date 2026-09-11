@@ -14,11 +14,13 @@ describe("pins and terms snapshots", () => {
     expect(pins.sushi).toBe("3.20.1");
   });
 
-  it("has terms snapshots for every CH source", () => {
+  it("has terms snapshots for every committed source", () => {
     for (const src of ["swissmedic", "refdata", "bag"]) {
       const snap = fs.readFileSync(repoPath("adapters/ch", src, "terms.snapshot.txt"), "utf8").trim();
       expect(snap).toMatch(/^[a-f0-9]{64}$/);
     }
+    const bdpm = fs.readFileSync(repoPath("adapters/fr/bdpm/terms.snapshot.txt"), "utf8").trim();
+    expect(bdpm).toMatch(/^[a-f0-9]{64}$/);
   });
 });
 

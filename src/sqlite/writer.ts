@@ -99,8 +99,9 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
       valid_to TEXT,
       first_listing_date TEXT,
       expiry_date TEXT,
-      cost_share INTEGER,
-      gamme_code TEXT,
+        cost_share INTEGER,
+        rates_json TEXT,
+        gamme_code TEXT,
       gamme_system TEXT,
       gamme_display TEXT,
       dossier_number TEXT
@@ -154,7 +155,7 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
   );
   const insName = db.prepare(`INSERT INTO package_name VALUES (@package_id,@language,@text)`);
   const insR = db.prepare(
-    `INSERT INTO reimbursement VALUES (@package_id,@status_code,@status_system,@status_display,@price_value,@price_currency,@prices_json,@limitations,@valid_from,@valid_to,@first_listing_date,@expiry_date,@cost_share,@gamme_code,@gamme_system,@gamme_display,@dossier_number)`,
+    `INSERT INTO reimbursement VALUES (@package_id,@status_code,@status_system,@status_display,@price_value,@price_currency,@prices_json,@limitations,@valid_from,@valid_to,@first_listing_date,@expiry_date,@cost_share,@rates_json,@gamme_code,@gamme_system,@gamme_display,@dossier_number)`,
   );
   const insFts = db.prepare(
     `INSERT INTO package_fts (package_id, name, description, gtin, identifiers) VALUES (?,?,?,?,?)`,
@@ -258,6 +259,7 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
         first_listing_date: r.firstListingDate ?? null,
         expiry_date: r.expiryDate ?? null,
         cost_share: r.costShare ?? null,
+        rates_json: r.rates?.length ? JSON.stringify(r.rates) : null,
         gamme_code: r.gamme?.code ?? null,
         gamme_system: r.gamme?.system ?? null,
         gamme_display: r.gamme?.display ?? null,

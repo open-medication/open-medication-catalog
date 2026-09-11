@@ -37,6 +37,7 @@ A source may have `redistribution: allowed` for **derived fields only** while `r
 | Swissmedic OGD | allowed (`terms_open`) | allowed | required | [opendata.swiss terms_open](https://opendata.swiss/en/terms-of-use#terms_open) |
 | Refdata | allowed | derived fields; not the credential-gated ZIP | required if fields unchanged | [Refdata article terms](https://www.refdata.ch/de/artikel/abfrage/artikel-refdatabase-gtin) |
 | BAG SL | review-required | review-required | TBD | [BAG SL data](https://sl.bag.admin.ch/resources/current-and-archived-data) |
+| BDPM | allowed (Licence Ouverte) | allowed | required | [BDPM Licence Ouverte PDF](https://base-donnees-publique.medicaments.gouv.fr/docs/telechargement/licence_bdpm.pdf) |
 
 BAG flags stay `review-required` until a written reuse grant. Outreach to `epl@bag.admin.ch` (Cc `Arzneimittel-Krankenversicherung@bag.admin.ch`) is in progress. Fetch still requires `--input`. Do not treat the download SPA or CH EPL IG CC0 as a data licence.
 

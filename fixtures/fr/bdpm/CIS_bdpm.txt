@@ -1,0 +1,3 @@
+61266250	A 313 200 000 UI POUR CENT, pommade	pommade	cutanée	Autorisation active	Procédure nationale	Commercialisée	12/03/1998			 PHARMA DEVELOPPEMENT	Non
+60002283	ANASTROZOLE ACCORD 1 mg, comprimé pelliculé	comprimé pelliculé	orale	Autorisation active	Procédure de reconnaissance mutuelle	Commercialisée	28/10/2010			 ACCORD HEALTHCARE FRANCE	Non
+60003620	BECLOSPIN 800 microgrammes/2ml suspension pour inhalation par nébuliseur	suspension pour inhalation par nébuliseur	inhalée	Autorisation active	Procédure de reconnaissance mutuelle	Commercialisée	06/01/2006			 CHIESI	Non

@@ -1,5 +1,6 @@
-import { isOfficialArtifactId } from "../artifacts.js";
+import { isOfficialArtifactId, getRecipe } from "../artifacts.js";
 import { swissmedicArchiveCandidates } from "../adapters/ch/swissmedic.js";
+import { bdpmDumpAvailable } from "../adapters/fr/bdpm.js";
 import { httpExists } from "../security.js";
 import { calendarForDate, monthsToProbe, parseDataMonth } from "./dates.js";
 import { catalogFromReleaseTags, fetchGithubReleaseTags } from "./packager.js";
@@ -26,6 +27,12 @@ export async function swissmedicDataMonthAvailable(dataMonth: string): Promise<b
   return false;
 }
 
+export async function dataMonthAvailable(artifactId: string, dataMonth: string): Promise<boolean> {
+  const recipe = getRecipe(artifactId);
+  if (recipe.jurisdiction === "FR") return bdpmDumpAvailable();
+  return swissmedicDataMonthAvailable(dataMonth);
+}
+
 export function lastShippedMonth(tags: string[], artifactId: string): string | undefined {
   return catalogFromReleaseTags(tags).artifacts[artifactId]?.latest;
 }
@@ -41,7 +48,7 @@ export async function resolveNextDataMonth(opts: {
     throw new Error(`Unknown artifact '${opts.artifactId}'`);
   }
   const lastShipped = lastShippedMonth(opts.tags, opts.artifactId);
-  const available = opts.archiveAvailable ?? swissmedicDataMonthAvailable;
+  const available = opts.archiveAvailable ?? ((month) => dataMonthAvailable(opts.artifactId, month));
 
   if (opts.forcedMonth) {
     parseDataMonth(opts.forcedMonth);

@@ -1,5 +1,5 @@
 import { FHIR_CANONICAL_BASE } from "../constants.js";
-import type { Catalogue, Package } from "../canonical/types.js";
+import type { Catalogue, MedicinalProduct, Package } from "../canonical/types.js";
 import { jsonLine, parseFhirDecimal } from "./serialize.js";
 import { packageDisplayName, translationExtensions } from "./translation.js";
 import { reimbursementDetailExtension } from "./reimbursement.js";
@@ -11,6 +11,9 @@ export function medicationStatus(pkg: Package): "active" | "inactive" | undefine
   const code = pkg.regulatoryStatus.code;
   if (code === "D" || code === "BA" || code === "U") return "inactive";
   if (code === "Z" || code === "B" || code === "S" || code === "N" || code === "A") return "active";
+  const lower = code.toLowerCase();
+  if (/abrog|retir|suspend|inactiv/.test(lower)) return "inactive";
+  if (/active/.test(lower)) return "active";
   return undefined;
 }
 
@@ -61,16 +64,17 @@ export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<str
         _text: translations ? { extension: translations } : undefined,
         coding: pkg.gtin
           ? [{ system: "https://www.gs1.org/gtin", code: pkg.gtin }]
-          : mp
-            ? [{ system: `${FHIR_CANONICAL_BASE}/sid/ch/swissmedic/sequence`, code: mp.authorityKey }]
-            : undefined,
+          : productCoding(mp),
       },
       form: mp?.doseForm
         ? { coding: [mp.doseForm], text: mp.doseForm.display ?? mp.doseForm.code }
         : undefined,
       amount: fhirRatio(pkg.quantity.structured ? pkg.quantity.value : undefined, pkg.quantity.unit?.display ?? pkg.quantity.unit?.code, "1"),
       ingredient: mp?.ingredients
-        .filter((i) => i.role.code === "WIRKS" || i.role.code === "WIIS" || i.role.code === "WIZUS")
+        .filter((i) => {
+          const code = i.role.code;
+          return code === "WIRKS" || code === "WIIS" || code === "WIZUS" || code === "SA" || code === "FT";
+        })
         .map((i) => ({
           itemCodeableConcept: { text: i.name, coding: i.role ? [i.role] : undefined },
           strength: fhirRatio(
@@ -125,6 +129,14 @@ function ext(urlLeaf: string, value: string, system?: string): Record<string, un
   const url = `${FHIR_CANONICAL_BASE}/StructureDefinition/${urlLeaf}`;
   if (system) return { url, valueCoding: { system, code: value } };
   return { url, valueString: value };
+}
+
+function productCoding(mp: MedicinalProduct | undefined): { system: string; code: string }[] | undefined {
+  if (!mp) return undefined;
+  const id =
+    mp.identifiers.find((i) => i.system.includes("/sequence") || i.system.includes("/cis")) ?? mp.identifiers[0];
+  if (!id) return undefined;
+  return [{ system: id.system, code: id.value }];
 }
 
 function metaSource(catalogue: Catalogue, identityAuthority: string): string {
