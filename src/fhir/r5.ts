@@ -1,7 +1,7 @@
 import { edqmRouteCoding } from "../adapters/ch/route-edqm.js";
 import { SWISSMEDIC_SYSTEMS, type Catalogue, type CodedValue } from "../canonical/types.js";
 import { FHIR_CANONICAL_BASE } from "../constants.js";
-import { jsonLine, parseFhirDecimal } from "./serialize.js";
+import { fhirCode, jsonLine, parseFhirDecimal } from "./serialize.js";
 import { packageDisplayName, translationExtensions } from "./translation.js";
 import { reimbursementDetailExtension } from "./reimbursement.js";
 
@@ -43,7 +43,10 @@ export function exportR5(catalogue: Catalogue, releaseLabel: string): Record<str
         ],
         name: [{ productName: mp.names[0]?.text }],
         combinedPharmaceuticalDoseForm: mp.doseForm
-          ? { coding: [mp.doseForm], text: mp.doseForm.display }
+          ? {
+              coding: [{ ...mp.doseForm, code: fhirCode(mp.doseForm.code) }],
+              text: mp.doseForm.display,
+            }
           : undefined,
         route: mp.routes.length ? mp.routes.map(routeCodeableConcept) : undefined,
         status: { coding: [mp.regulatoryStatus] },

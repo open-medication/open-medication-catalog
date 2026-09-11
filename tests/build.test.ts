@@ -211,6 +211,8 @@ describe("fr-base fixture build", () => {
     const ana = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "60002283");
     expect(ana?.names[0]?.text).toMatch(/ANASTROZOLE/i);
     expect(ana?.identifiers.some((i) => i.system.includes("/fr/bdpm/cis") && i.value === "60002283")).toBe(true);
+    expect(ana?.doseForm?.code).toBe("poudre et solvant pour suspension injectable à libération prolongée");
+    expect(ana?.doseForm?.display).toBe("poudre et  solvant pour suspension injectable à libération prolongée");
 
     const pack = result.catalogue.packages.find((p) => p.authorityKey === "3400949497294");
     expect(pack?.gtin).toBe("3400949497294");
@@ -232,6 +234,8 @@ describe("fr-base fixture build", () => {
     expect(med).toContain("ANASTROZOLE");
     expect(med).toContain("12,81");
     expect(med).toContain("24,34");
+    expect(med).toContain("poudre et solvant pour suspension injectable à libération prolongée");
+    expect(med).not.toMatch(/"code"\s*:\s*"poudre et {2}solvant/);
 
     const mpd = fs.readFileSync(
       path.join(out, "release", "fhir-r5", "MedicinalProductDefinition.ndjson"),
@@ -239,6 +243,7 @@ describe("fr-base fixture build", () => {
     );
     expect(mpd).toContain("MedicinalProductDefinition");
     expect(mpd).toContain("/sid/fr/bdpm/cis");
+    expect(mpd).toContain("poudre et solvant pour suspension injectable à libération prolongée");
 
     const ppd = fs.readFileSync(
       path.join(out, "release", "fhir-r5", "PackagedProductDefinition.ndjson"),
