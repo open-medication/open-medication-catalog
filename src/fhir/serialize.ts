@@ -1,6 +1,14 @@
 /** Deterministic JSON / NDJSON helpers. */
 
 /**
+ * FHIR `code` / token: at least one character, no leading/trailing whitespace,
+ * and no whitespace other than single spaces.
+ */
+export function fhirCode(value: string): string {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+/**
  * Swissmedic quantities use a comma decimal (`1,5`). FHIR JSON numbers must be
  * IEEE decimals; `Number("1,5")` is NaN and would serialize as null.
  */

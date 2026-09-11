@@ -1,6 +1,6 @@
 import { FHIR_CANONICAL_BASE } from "../constants.js";
 import type { Catalogue, MedicinalProduct, Package } from "../canonical/types.js";
-import { jsonLine, parseFhirDecimal } from "./serialize.js";
+import { fhirCode, jsonLine, parseFhirDecimal } from "./serialize.js";
 import { packageDisplayName, translationExtensions } from "./translation.js";
 import { reimbursementDetailExtension } from "./reimbursement.js";
 
@@ -67,7 +67,10 @@ export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<str
           : productCoding(mp),
       },
       form: mp?.doseForm
-        ? { coding: [mp.doseForm], text: mp.doseForm.display ?? mp.doseForm.code }
+        ? {
+            coding: [{ ...mp.doseForm, code: fhirCode(mp.doseForm.code) }],
+            text: mp.doseForm.display ?? mp.doseForm.code,
+          }
         : undefined,
       amount: fhirRatio(pkg.quantity.structured ? pkg.quantity.value : undefined, pkg.quantity.unit?.display ?? pkg.quantity.unit?.code, "1"),
       ingredient: mp?.ingredients

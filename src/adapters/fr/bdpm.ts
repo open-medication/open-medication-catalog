@@ -18,6 +18,7 @@ import {
   type SourceSnapshot,
   type Substance,
 } from "../../canonical/types.js";
+import { fhirCode } from "../../fhir/serialize.js";
 import { canonicalId } from "../../identity.js";
 import { repoPath } from "../../paths.js";
 import {
@@ -429,9 +430,9 @@ function ref(snapshot: SourceSnapshot, recordKey: string) {
 }
 
 function coded(system: string, value?: string): CodedValue | undefined {
-  const code = value?.trim();
-  if (!code) return undefined;
-  return { system, code, display: code };
+  const display = value?.trim();
+  if (!display) return undefined;
+  return { system, code: fhirCode(display), display };
 }
 
 function splitList(value?: string): string[] {
