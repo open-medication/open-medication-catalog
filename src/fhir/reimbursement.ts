@@ -1,4 +1,4 @@
-import type { Reimbursement } from "../canonical/types.js";
+import type { ProductPrice, Reimbursement } from "../canonical/types.js";
 import { FHIR_CANONICAL_BASE } from "../constants.js";
 
 export function reimbursementDetailExtension(row: Reimbursement): Record<string, unknown> {
@@ -16,7 +16,7 @@ export function reimbursementDetailExtension(row: Reimbursement): Record<string,
   if (row.dossierNumber) parts.push({ url: "dossierNumber", valueString: row.dossierNumber });
   if (row.limitations) parts.push({ url: "limitations", valueString: row.limitations });
   if (row.gamme) parts.push({ url: "gamme", valueCoding: row.gamme });
-  for (const p of row.prices ?? []) {
+  for (const p of fhirPrices(row)) {
     const priceParts: Record<string, unknown>[] = [
       { url: "value", valueString: p.value },
       { url: "currency", valueString: p.currency },
@@ -27,4 +27,10 @@ export function reimbursementDetailExtension(row: Reimbursement): Record<string,
     parts.push({ url: "price", extension: priceParts });
   }
   return { url: `${FHIR_CANONICAL_BASE}/StructureDefinition/reimbursement`, extension: parts };
+}
+
+function fhirPrices(row: Reimbursement): ProductPrice[] {
+  if (row.prices?.length) return row.prices;
+  if (row.price) return [{ value: row.price.value, currency: row.price.currency }];
+  return [];
 }

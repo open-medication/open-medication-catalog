@@ -373,6 +373,7 @@ export class BdpmAdapter implements Adapter {
             code: "inconnu",
           },
           price: prix ? { value: prix, currency: "EUR" } : undefined,
+          prices: prix ? [{ value: prix, currency: "EUR" }] : undefined,
           rates: rates.length ? rates : undefined,
           limitations: stripHtml(row.indicationsRemboursement) || undefined,
           fieldProvenance: { sourceId: "bdpm", snapshotId: snapshot.id, originalField: "tauxRemboursement" },

@@ -17,8 +17,8 @@ terms:
   url: "https://base-donnees-publique.medicaments.gouv.fr/docs/telechargement/licence_bdpm.pdf"
   datasetUrl: "https://base-donnees-publique.medicaments.gouv.fr/telechargement"
   reviewedAt: "2026-09-11"
-  checksum: "247e7e0a6fae7b8b3f4944e16b3ca4a432e50494f72329600cbffc8c6f839055"
-  notes: "Licence Ouverte (Etalab) as published by BDPM. Page-specific reuse rules on the download page: do not alter or denature the data; attribute the source (http://base-donnees-publique.medicaments.gouv.fr) and the update date; do not suggest endorsement by ANSM, HAS, or UNCAM. Checksum covers the licence PDF, not the download-page chrome (file dates change monthly)."
+  checksum: "44ff23ae2b5cce0d729d1b53b20d17aae625189b131c2dd9cb98d1fe0d0a2a90"
+  notes: "Licence Ouverte (Etalab) as published by BDPM. Page-specific reuse rules on the download page: do not alter or denature the data; attribute the source (http://base-donnees-publique.medicaments.gouv.fr) and the update date; do not suggest endorsement by ANSM, HAS, or UNCAM. Checksum is SHA-256 of the licence PDF bytes, not the download-page chrome (file dates change monthly)."
 releasePolicy:
   public: true
   required: true

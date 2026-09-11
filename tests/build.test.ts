@@ -223,11 +223,15 @@ describe("fr-base fixture build", () => {
     expect(beclo?.rates?.map((r) => r.rate)).toEqual(["65%", "15%"]);
     expect(beclo?.rates?.[0]?.indications).toMatch(/Asthme/i);
     expect(beclo?.price?.currency).toBe("EUR");
+    expect(beclo?.price?.value).toBe("12,81");
+    expect(beclo?.prices).toEqual([{ value: "12,81", currency: "EUR" }]);
 
     const med = fs.readFileSync(path.join(out, "release", "fhir-r4", "Medication.ndjson"), "utf8");
     expect(med).toContain("https://www.gs1.org/gtin");
     expect(med).toContain("fr/bdpm/cip");
     expect(med).toContain("ANASTROZOLE");
+    expect(med).toContain("12,81");
+    expect(med).toContain("24,34");
 
     const mpd = fs.readFileSync(
       path.join(out, "release", "fhir-r5", "MedicinalProductDefinition.ndjson"),
@@ -242,6 +246,8 @@ describe("fr-base fixture build", () => {
     );
     expect(ppd).toContain("StructureDefinition/reimbursement");
     expect(ppd).toContain("65%");
+    expect(ppd).toContain("12,81");
+    expect(ppd).toContain("24,34");
 
     const sqlite = path.join(out, "release", "database", "medication.sqlite");
     const hits = searchPackages(sqlite, "ANASTROZOLE");

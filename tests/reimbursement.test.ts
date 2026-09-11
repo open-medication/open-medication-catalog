@@ -40,4 +40,19 @@ describe("reimbursementDetailExtension", () => {
     );
     expect(children(rates[1]!)).toEqual([{ url: "rate", valueString: "15%" }]);
   });
+
+  it("emits nested price from singular price when prices is empty", () => {
+    const row: Reimbursement = {
+      packageId: "pkg",
+      status: { system: "https://example.org/status", code: "oui" },
+      price: { value: "12,81", currency: "EUR" },
+      fieldProvenance: { sourceId: "bdpm", snapshotId: "s" },
+    };
+    const prices = children(reimbursementDetailExtension(row)).filter((c) => c.url === "price");
+    expect(prices).toHaveLength(1);
+    expect(children(prices[0]!)).toEqual([
+      { url: "value", valueString: "12,81" },
+      { url: "currency", valueString: "EUR" },
+    ]);
+  });
 });
