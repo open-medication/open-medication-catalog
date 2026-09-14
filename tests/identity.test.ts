@@ -78,6 +78,23 @@ describe("string identity invariant", () => {
     );
   });
 
+  it("Poland uses the same formula with PL|rpl names", () => {
+    const pl = canonicalId({
+      jurisdiction: "PL",
+      identityAuthority: "rpl",
+      entityType: "MedicinalProduct",
+      authorityKey: "100000014",
+    });
+    const fr = canonicalId({
+      jurisdiction: "FR",
+      identityAuthority: "bdpm",
+      entityType: "MedicinalProduct",
+      authorityKey: "100000014",
+    });
+    expect(pl).not.toBe(fr);
+    expect(pl).toBe(uuidv5("PL|rpl|MedicinalProduct|100000014", PROJECT_NAMESPACE));
+  });
+
   it("project namespace is UUIDv5(DNS, openmedicationcatalog.org)", () => {
     const DNS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
     expect(PROJECT_NAMESPACE).toBe(uuidv5("openmedicationcatalog.org", DNS));

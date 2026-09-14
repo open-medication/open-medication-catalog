@@ -342,3 +342,65 @@ describe("fr-base fixture build", () => {
     expect(sourcesMd).toContain("commercialUse: allowed");
   });
 });
+
+describe("pl-base fixture build", () => {
+  it("builds SQLite and FHIR from the RPL fixture", async () => {
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-pl-"));
+    const result = await build({
+      artifactId: "pl-base",
+      inputBySource: { rpl: repoPath("fixtures/pl/rpl/RPL_FIXTURE.zip") },
+      outDir: out,
+      dataMonth: "2026.09",
+    });
+    expect(result.official).toBe(true);
+    expect(result.catalogue.jurisdiction).toBe("PL");
+    expect(result.catalogue.productGroups).toHaveLength(0);
+    expect(result.catalogue.medicinalProducts).toHaveLength(2);
+    expect(result.catalogue.packages).toHaveLength(5);
+    expect(result.catalogue.reimbursements).toHaveLength(0);
+
+    const zol = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000014");
+    expect(zol?.names[0]?.text).toBe("Zoledronic acid Fresenius Kabi");
+    expect(zol?.identifiers.some((i) => i.system.includes("/pl/rpl/product") && i.value === "100000014")).toBe(true);
+    expect(zol?.identifiers.some((i) => i.system === "http://www.whocc.no/atc" && i.value === "M05BA08")).toBe(true);
+    expect(zol?.doseForm?.display).toBe("Koncentrat do sporządzania roztworu do infuzji");
+    expect(zol?.declarationRows[0]?.quantity).toBe("4");
+    expect(zol?.declarationRows[0]?.quantityUnit?.display).toBe("mg");
+    expect(zol?.metadata?.moc).toBe("4 mg/5 ml");
+
+    const pack = result.catalogue.packages.find((p) => p.authorityKey === "05909991023652");
+    expect(pack?.gtin).toBe("05909991023652");
+    expect(pack?.jurisdiction).toBe("PL");
+    expect(pack?.quantity?.unit?.system).toContain("pl-rpl-package-unit");
+    expect(pack?.fieldProvenance?.description?.originalField).toBe("jednostkiOpakowania");
+
+    const med = fs.readFileSync(path.join(out, "release", "fhir-r4", "Medication.ndjson"), "utf8");
+    expect(med).toContain("https://www.gs1.org/gtin");
+    expect(med).toContain("pl/rpl/package");
+    expect(med).toContain("1× fiol. 5 ml");
+    expect(med).toContain("05909991023652");
+
+    const mpd = fs.readFileSync(
+      path.join(out, "release", "fhir-r5", "MedicinalProductDefinition.ndjson"),
+      "utf8",
+    );
+    expect(mpd).toContain("MedicinalProductDefinition");
+    expect(mpd).toContain("/sid/pl/rpl/product");
+    expect(mpd).toContain("Edelan");
+
+    const ppd = fs.readFileSync(
+      path.join(out, "release", "fhir-r5", "PackagedProductDefinition.ndjson"),
+      "utf8",
+    );
+    expect(ppd).toContain("packageFor");
+    expect(ppd).toContain("05909991023683");
+
+    const sqlite = path.join(out, "release", "database", "medication.sqlite");
+    const hits = searchPackages(sqlite, "Edelan");
+    expect(hits.length).toBeGreaterThan(0);
+
+    const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
+    expect(sourcesMd).toContain("creativecommons.org/licenses/by/4.0");
+    expect(sourcesMd).toContain("commercialUse: allowed");
+  });
+});

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<produktyLecznicze stanNaDzien="2026-09-14" xmlns="http://rejestry.ezdrowie.gov.pl/rpl/eksport-danych-v6.0.0">
+    <produktLeczniczy nazwaProduktu="Zoledronic acid Fresenius Kabi" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Acidum zoledronicum" nazwaPoprzedniaProduktu="brak" moc="4 mg/5 ml" nazwaPostaciFarmaceutycznej="Koncentrat do sporządzania roztworu do infuzji" podmiotOdpowiedzialny="Fresenius Kabi Polska Sp. z o.o." typProcedury="DCP" numerPozwolenia="20708" waznoscPozwolenia="Bezterminowe" podstawaPrawna="art. 15 ust. 1 pkt 2" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/1/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/1/characteristic" id="100000014">
+        <kodyATC>
+            <kodATC>M05BA08</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="dożylna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Acidum zoledronicum" iloscSubstancji="4" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="5" jednostkaMiaryIlosciPreparatu="ml" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991023652" kategoriaDostepnosci="Rpz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="2">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="fiol." pojemnosc="5" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909991023669" kategoriaDostepnosci="Rpz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="3">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="4" rodzajOpakowania="fiol." pojemnosc="5" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909991023676" kategoriaDostepnosci="Rpz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="4">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="10" rodzajOpakowania="fiol." pojemnosc="5" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Fresenius Kabi Austria GmbH" krajWytworcyImportera="Austria"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Edelan" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Mometasoni furoas" nazwaPoprzedniaProduktu="brak" moc="1 mg/g" nazwaPostaciFarmaceutycznej="Krem" podmiotOdpowiedzialny="Zakłady Farmaceutyczne POLPHARMA S.A." typProcedury="NAR" numerPozwolenia="20899" waznoscPozwolenia="Bezterminowe" podstawaPrawna="art. 15 ust. 12" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/2/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/2/characteristic" id="100000020">
+        <kodyATC>
+            <kodATC>D07AC13</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="na skórę"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Mometasoni furoas" iloscSubstancji="1" jednostkaMiaryIlosciSubstancji="mg/g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991023683" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="5">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="tuba" pojemnosc="15" jednostkaPojemnosci="g" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909991023690" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="6">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="tuba" pojemnosc="30" jednostkaPojemnosci="g" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Glenmark Pharmaceuticals s.r.o." krajWytworcyImportera="Czechy"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+</produktyLecznicze>
