@@ -6,6 +6,7 @@ import { SwissmedicAdapter, SourceNotYetAvailableError } from "../adapters/ch/sw
 import { RefdataAdapter } from "../adapters/ch/refdata.js";
 import { BagAdapter, loadFhirResources } from "../adapters/ch/bag.js";
 import { BdpmAdapter } from "../adapters/fr/bdpm.js";
+import { RplAdapter } from "../adapters/pl/rpl.js";
 import type { Adapter, AdapterContext, FetchResult } from "../adapters/types.js";
 import { assertValidCatalogue } from "../canonical/validate.js";
 import { repoPath } from "../paths.js";
@@ -43,6 +44,7 @@ const adapters: Record<string, Adapter> = {
   refdata: new RefdataAdapter(),
   bag: new BagAdapter(),
   bdpm: new BdpmAdapter(),
+  rpl: new RplAdapter(),
 };
 
 export async function build(opts: BuildOptions): Promise<BuildResult> {
