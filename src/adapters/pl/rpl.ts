@@ -415,7 +415,7 @@ function packQuantity(pack: Record<string, unknown>): Package["quantity"] {
   const unit = first ? attr(first, RplXml.capacityUnit) : undefined;
   return {
     value: size,
-    unit: unit ? coded(RPL_SYSTEMS.doseForm, unit) : undefined,
+    unit: unit ? coded(RPL_SYSTEMS.packageUnit, unit) : undefined,
     structured: Boolean(size && unit && /^\d+([.,]\d+)?$/.test(size)),
   };
 }
