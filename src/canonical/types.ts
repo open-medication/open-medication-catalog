@@ -62,6 +62,7 @@ export const RPL_SYSTEMS = {
   substance: "https://fhir.openmedicationcatalog.org/sid/pl/rpl/substance",
   doseForm: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-dose-form",
   packageUnit: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-package-unit",
+  quantityUnit: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-quantity-unit",
   route: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-route",
   regulatoryStatus: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-regulatory-status",
   ingredientRole: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-ingredient-role",

@@ -508,6 +508,7 @@ function buildComposition(
       substanceName: name,
       roleCode: role,
       quantity: qty,
+      quantityUnit: qtyUnit ? coded(RPL_SYSTEMS.quantityUnit, qtyUnit) : undefined,
       sourceText: strengthText,
     });
     ingredients.push({
