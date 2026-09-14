@@ -52,6 +52,20 @@ export const SWISSMEDIC_SYSTEMS = {
   ingredientRole: "https://fhir.openmedicationcatalog.org/CodeSystem/ch-swissmedic-ingredient-role",
 } as const;
 
+export const WHO_ATC_SYSTEM = "http://www.whocc.no/atc";
+
+export const RPL_SYSTEMS = {
+  product: "https://fhir.openmedicationcatalog.org/sid/pl/rpl/product",
+  package: "https://fhir.openmedicationcatalog.org/sid/pl/rpl/package",
+  authorisation: "https://fhir.openmedicationcatalog.org/sid/pl/rpl/authorisation",
+  organization: "https://fhir.openmedicationcatalog.org/sid/pl/rpl/organization",
+  substance: "https://fhir.openmedicationcatalog.org/sid/pl/rpl/substance",
+  doseForm: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-dose-form",
+  route: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-route",
+  regulatoryStatus: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-regulatory-status",
+  ingredientRole: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-ingredient-role",
+} as const;
+
 export const BDPM_SYSTEMS = {
   cis: "https://fhir.openmedicationcatalog.org/sid/fr/bdpm/cis",
   cip: "https://fhir.openmedicationcatalog.org/sid/fr/bdpm/cip",

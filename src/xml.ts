@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { XMLParser } from "fast-xml-parser";
+import { RplXml } from "./adapters/pl/rpl-xml.js";
 
 const XML_ARRAY_TAGS = new Set([
   "PRAEPARAT",
@@ -16,6 +17,7 @@ const XML_ARRAY_TAGS = new Set([
   "DATUM",
   "ARTICLE",
   "ARTICLES",
+  ...RplXml.repeating,
 ]);
 
 /** XML values stay strings. Never let the parser turn 001 into 1. */

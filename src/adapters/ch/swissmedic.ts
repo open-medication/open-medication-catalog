@@ -20,6 +20,7 @@ import {
   type Package,
   type ProductGroup,
   SWISSMEDIC_SYSTEMS,
+  WHO_ATC_SYSTEM,
   medicinalProductDomain,
   type SourceSnapshot,
   type Substance,
@@ -275,7 +276,7 @@ export class SwissmedicAdapter implements Adapter {
         names: [{ text: text(row.PRAEPARATENAME), language: "de" }],
         domain,
         atc: atcCode
-          ? { system: "http://www.whocc.no/atc", code: atcCode, display: atcDesc.get(atcCode) }
+          ? { system: WHO_ATC_SYSTEM, code: atcCode, display: atcDesc.get(atcCode) }
           : undefined,
         regulatoryStatus: coded(SWISSMEDIC_SYSTEMS.regulatoryStatus, text(row.ZULASSUNGSSTATUS), udc, "MA_STATUS"),
         authorizationHolderId: holder ? orgByPartner.get(holder)?.id : undefined,
