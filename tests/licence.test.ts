@@ -25,7 +25,7 @@ describe("licence flags from source.yaml", () => {
   });
 
   it("discovers every committed source.yaml", () => {
-    expect(listSourceDirs().map((s) => s.sourceId).sort()).toEqual(["bag", "bdpm", "refdata", "swissmedic"]);
+    expect(listSourceDirs().map((s) => s.sourceId).sort()).toEqual(["bag", "bdpm", "refdata", "rpl", "swissmedic"]);
   });
 
   it("artifact recipes list sources that have licence descriptors", () => {

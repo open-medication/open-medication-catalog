@@ -1,0 +1,24 @@
+country: PL
+sourceId: rpl
+identityAuthority: rpl
+authority: Centrum e-Zdrowia / URPL
+dataset: Rejestr Produktów Leczniczych
+sourceType: regulatory
+jurisdiction: PL
+updateFrequency: daily
+commercialUse: allowed
+redistribution: allowed
+attributionRequired: true
+credentialsRequired: false
+required: true
+parserSchemaVersion: "0.1.0"
+downloadUrl: "https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/public-pl-report/6.0.0/overall.xml"
+terms:
+  url: "https://creativecommons.org/licenses/by/4.0/legalcode.txt"
+  datasetUrl: "https://dane.gov.pl/pl/dataset/397,rejestr-produktow-leczniczych"
+  reviewedAt: "2026-09-14"
+  checksum: "642a320dc26af6ffe339195e40f148a21f969614dfe28bec30757f32ef1b2062"
+  notes: "dane.gov.pl dataset 397 (Rejestr Produktów Leczniczych) publishes license_name CC BY 4.0 with license_condition_default_cc40. CC BY 4.0 Section 2(a) grants worldwide reproduction and sharing of the Licensed Material and Adapted Material (commercial use included); Section 3(a) requires attribution. Institution is Centrum e-Zdrowia; the register is maintained with URPL. Portal flag license_condition_timestamp requires citing the dump date (czas wytworzenia / pozyskania). Incremental XML was withdrawn Nov 2024 — use the pinned 6.0.0 overall.xml only. Checksum is SHA-256 of the CC BY 4.0 legalcode.txt (not the dane.gov.pl CMS chrome)."
+releasePolicy:
+  public: true
+  required: true

@@ -21,6 +21,8 @@ describe("pins and terms snapshots", () => {
     }
     const bdpm = fs.readFileSync(repoPath("adapters/fr/bdpm/terms.snapshot.txt"), "utf8").trim();
     expect(bdpm).toMatch(/^[a-f0-9]{64}$/);
+    const rpl = fs.readFileSync(repoPath("adapters/pl/rpl/terms.snapshot.txt"), "utf8").trim();
+    expect(rpl).toMatch(/^[a-f0-9]{64}$/);
   });
 });
 
