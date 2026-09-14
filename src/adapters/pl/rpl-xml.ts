@@ -57,16 +57,6 @@ export class RplXml {
 
   static readonly veterinaryIgnored = `${RplXml.medicinalProduct}.${RplXml.preparationType}[veterinary]`;
   static readonly incompleteIgnored = `${RplXml.medicinalProduct}[incomplete]`;
-
-  static readonly repeating = [
-    RplXml.medicinalProduct,
-    RplXml.atcCode,
-    RplXml.routeOfAdministration,
-    RplXml.activeSubstance,
-    RplXml.pack,
-    RplXml.packUnit,
-    RplXml.manufacturer,
-  ] as const;
 }
 
 /** Recurring coded values in the RPL dump (not element names). */
