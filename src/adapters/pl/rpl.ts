@@ -270,7 +270,7 @@ export class RplAdapter implements Adapter {
           names: description ? [{ text: description, language: "pl" }] : undefined,
           identifiers: packIdentifiers(packKey, gtin, packId),
           fieldProvenance: {
-            description: { sourceId: "rpl", snapshotId: snapshot.id, originalField: RplXml.packUnit },
+            description: { sourceId: "rpl", snapshotId: snapshot.id, originalField: RplXml.packUnits },
           },
           sourceRecords: [ref(snapshot, packKey)],
           metadata: compactMeta({
