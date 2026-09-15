@@ -65,6 +65,6 @@ export class RplValue {
   static readonly none = "brak";
   static readonly yes = "TAK";
   static readonly cancelled = "skasowane";
-  static readonly parallelImport = "import-rownolegly";
+  static readonly active = "aktywne";
   static readonly activeSubstanceRole = "substancja czynna";
 }

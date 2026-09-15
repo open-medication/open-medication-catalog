@@ -371,6 +371,8 @@ describe("pl-base fixture build", () => {
     const pack = result.catalogue.packages.find((p) => p.authorityKey === "05909991023652");
     expect(pack?.gtin).toBe("05909991023652");
     expect(pack?.jurisdiction).toBe("PL");
+    expect(pack?.regulatoryStatus.display).toBe("aktywne");
+    expect(pack?.metadata?.kategoriaDostepnosci).toBe("Rpz");
     expect(pack?.quantity?.unit?.system).toContain("pl-rpl-package-unit");
     expect(pack?.fieldProvenance?.description?.originalField).toBe("jednostkiOpakowania");
 

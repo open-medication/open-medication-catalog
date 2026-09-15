@@ -36,10 +36,10 @@ files:
     opakowania: mapped
     opakowanie: mapped
     kodGTIN: mapped
-    kategoriaDostepnosci: mapped
+    kategoriaDostepnosci: retained-as-metadata
     skasowane: mapped
     numerEu: retained-as-metadata
-    dystrybutorRownolegly: mapped
+    dystrybutorRownolegly: retained-as-metadata
     jednostkiOpakowania: mapped
     jednostkaOpakowania: mapped
     liczbaOpakowan: mapped

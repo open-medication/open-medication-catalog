@@ -422,10 +422,7 @@ function packQuantity(pack: Record<string, unknown>): Package["quantity"] {
 
 function packStatus(pack: Record<string, unknown>): CodedValue {
   const withdrawn = (attr(pack, RplXml.cancelled) ?? "").trim().toUpperCase() === RplValue.yes;
-  const parallel = Boolean(attr(pack, RplXml.parallelDistributor));
-  if (withdrawn) return coded(RPL_SYSTEMS.regulatoryStatus, RplValue.cancelled)!;
-  if (parallel) return coded(RPL_SYSTEMS.regulatoryStatus, RplValue.parallelImport)!;
-  return coded(RPL_SYSTEMS.regulatoryStatus, attr(pack, RplXml.availabilityCategory) || "unknown")!;
+  return coded(RPL_SYSTEMS.regulatoryStatus, withdrawn ? RplValue.cancelled : RplValue.active)!;
 }
 
 function upsertOrg(
