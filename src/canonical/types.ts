@@ -1,3 +1,4 @@
+import type { CodedValue } from "./generated.js";
 export type {
   Authorization,
   Catalogue,
@@ -24,7 +25,19 @@ export type {
   Substance,
 } from "./generated.js";
 
-export const CANONICAL_SCHEMA_VERSION = "0.1.1" as const;
+export const CANONICAL_SCHEMA_VERSION = "0.1.2" as const;
+
+export const FHIR_MEDICINAL_PRODUCT_DOMAIN = "http://hl7.org/fhir/medicinal-product-domain" as const;
+
+export type MedicinalProductDomainCode = "Human" | "Veterinary";
+
+export function medicinalProductDomain(code: MedicinalProductDomainCode): CodedValue {
+  return {
+    system: FHIR_MEDICINAL_PRODUCT_DOMAIN,
+    code,
+    display: code === "Veterinary" ? "Veterinary use" : "Human use",
+  };
+}
 
 export const SWISSMEDIC_SYSTEMS = {
   authorisation: "https://fhir.openmedicationcatalog.org/sid/ch/swissmedic/authorisation",

@@ -102,6 +102,7 @@ export async function build(opts: BuildOptions): Promise<BuildResult> {
     releaseMonth: cal.dataMonth,
     cutoffDate: cal.cutoffDate,
     archiveMonth: cal.archiveMonth,
+    domain: recipe?.domain ?? "Human",
   });
 
   const catalogue = emptyCatalogue(artifactId, jurisdiction, GENERATOR_VERSION);

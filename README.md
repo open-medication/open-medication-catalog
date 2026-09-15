@@ -20,7 +20,7 @@ Landing page: [`https://openmedicationcatalog.org`](https://openmedicationcatalo
 | Jurisdiction | Sources | Adapter status | Public redistribution | Credentials |
 | --- | --- | --- | --- | --- |
 | CH | Swissmedic | production (this repo) | allowed (`terms_open`) | no |
-| CH | Refdata | optional enrichment (`ch-enriched`) | derived fields, not the raw ZIP | yes |
+| CH | Refdata | optional enrichment (`ch-enriched`, `ch-vet-enriched`) | derived fields, not the raw ZIP | yes |
 | CH | BAG SL | implemented; local `--enable-bag` only | review-required | no |
 | FR | BDPM | production (`fr-base`) | French Open Licence | no |
 | GB | dm+d | planned | review-required (TRUD) | yes |
@@ -40,16 +40,19 @@ A **global** database will be the union of national catalogues (`requiredArtifac
 Composition is declared in [`artifacts.yaml`](artifacts.yaml):
 
 ```text
-omc build ch-base          # Swissmedic only
-omc build ch-enriched      # Swissmedic + Refdata (all-or-nothing)
+omc build ch-base          # Swissmedic HAM only
+omc build ch-enriched      # Swissmedic HAM + Refdata (all-or-nothing)
+omc build ch-vet-base      # Swissmedic TAM only
+omc build ch-vet-enriched  # Swissmedic TAM + Refdata
 omc build fr-base          # BDPM only
 ```
 
-`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata.
+`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched` / `ch-vet-base` / `ch-vet-enriched`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata. BAG is not used on veterinary recipes.
 
 ```text
 pnpm install
 pnpm omc build ch-base --input fixtures/ch/swissmedic/OGD_FIXTURE.zip --month 2026.08
+pnpm omc build ch-vet-base --input fixtures/ch/swissmedic/OGD_FIXTURE.zip --month 2026.08
 pnpm omc build fr-base --input fixtures/fr/bdpm/BDPM_FIXTURE.zip --month 2026.09
 pnpm omc search output/ch-base/release/database/medication.sqlite Metformin
 ```

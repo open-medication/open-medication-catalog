@@ -75,6 +75,14 @@ describe("ch-base fixture build", () => {
     const snap = result.catalogue.sourceSnapshots.find((s) => s.sourceId === "swissmedic");
     expect(snap?.termsChecksum).toBe(swissLic?.checksum);
     expect(snap?.termsReviewedAt).toBeTruthy();
+
+    expect(result.catalogue.productGroups.every((g) => g.domain.code === "Human")).toBe(true);
+    expect(result.catalogue.medicinalProducts.every((p) => p.domain.code === "Human")).toBe(true);
+    expect(result.catalogue.packages.every((p) => p.domain.code === "Human")).toBe(true);
+    expect(result.catalogue.productGroups.some((g) => g.authorityKey === "90001")).toBe(false);
+    expect(medNdjson).toContain("http://hl7.org/fhir/medicinal-product-domain");
+    expect(medNdjson).toContain('"code":"Human"');
+    expect(mpd).toContain('"code":"Human"');
   });
 
   it("refuses to treat --source builds as official artifact ids", async () => {
@@ -192,6 +200,69 @@ describe("ch-enriched fixture build", () => {
   });
 });
 
+describe("ch-vet-base fixture build", () => {
+  const swiss = repoPath("fixtures/ch/swissmedic/OGD_FIXTURE.zip");
+  const refdata = repoPath("fixtures/ch/refdata/articles.xml");
+
+  it("includes only TAM products and emits Veterinary domain", async () => {
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-vet-"));
+    const result = await build({
+      artifactId: "ch-vet-base",
+      inputBySource: { swissmedic: swiss },
+      outDir: out,
+      dataMonth: "2026.08",
+    });
+    expect(result.official).toBe(true);
+    expect(result.catalogue.productGroups.map((g) => g.authorityKey)).toEqual(["90001"]);
+    expect(result.catalogue.medicinalProducts.map((p) => p.authorityKey)).toEqual(["90001|1"]);
+    expect(result.catalogue.packages.map((p) => p.authorityKey)).toEqual(["90001|1|1"]);
+    expect(result.catalogue.productGroups[0]?.domain).toMatchObject({
+      system: "http://hl7.org/fhir/medicinal-product-domain",
+      code: "Veterinary",
+    });
+    expect(result.catalogue.medicinalProducts.every((p) => p.domain.code === "Veterinary")).toBe(true);
+    expect(result.catalogue.packages.every((p) => p.domain.code === "Veterinary")).toBe(true);
+
+    const med = fs.readFileSync(path.join(out, "release", "fhir-r4", "Medication.ndjson"), "utf8");
+    expect(med).toContain("StructureDefinition/domain");
+    expect(med).toContain('"code":"Veterinary"');
+    expect(med).not.toContain('"code":"Human"');
+
+    const mpd = fs.readFileSync(path.join(out, "release", "fhir-r5", "MedicinalProductDefinition.ndjson"), "utf8");
+    expect(mpd).toContain('"code":"Veterinary"');
+    expect(mpd).toContain("Fixture Vet Drops");
+
+    const sqlite = path.join(out, "release", "database", "medication.sqlite");
+    const db = new Database(sqlite, { readonly: true });
+    const domains = db.prepare("SELECT DISTINCT domain FROM medication_packages").all() as { domain: string }[];
+    db.close();
+    expect(domains).toEqual([{ domain: "Veterinary" }]);
+  });
+
+  it("joins Refdata on ch-vet-enriched and refuses BAG", async () => {
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-vet-enr-"));
+    const result = await build({
+      artifactId: "ch-vet-enriched",
+      inputBySource: { swissmedic: swiss, refdata },
+      outDir: out,
+      dataMonth: "2026.08",
+    });
+    expect(result.official).toBe(true);
+    const pkg = result.catalogue.packages.find((p) => p.authorityKey === "90001|1|1");
+    expect(pkg?.gtin).toBe("7680900010018");
+    expect(pkg?.names?.map((n) => n.language)).toEqual(["de", "fr", "it", "en"]);
+    expect(pkg?.domain.code).toBe("Veterinary");
+
+    await expect(
+      build({
+        artifactId: "ch-vet-enriched",
+        enableBag: true,
+        inputBySource: { swissmedic: swiss, refdata },
+      }),
+    ).rejects.toThrow(/ch-enriched/);
+  });
+});
+
 describe("fr-base fixture build", () => {
   it("builds SQLite and FHIR from the BDPM fixture", async () => {
     const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-fr-"));
@@ -203,7 +274,7 @@ describe("fr-base fixture build", () => {
     });
     expect(result.official).toBe(true);
     expect(result.catalogue.jurisdiction).toBe("FR");
-    expect(result.catalogue.schemaVersion).toBe("0.1.1");
+    expect(result.catalogue.schemaVersion).toBe("0.1.2");
     expect(result.catalogue.productGroups).toHaveLength(0);
     expect(result.catalogue.medicinalProducts).toHaveLength(3);
     expect(result.catalogue.packages.length).toBeGreaterThan(0);
@@ -217,6 +288,8 @@ describe("fr-base fixture build", () => {
     const pack = result.catalogue.packages.find((p) => p.authorityKey === "3400949497294");
     expect(pack?.gtin).toBe("3400949497294");
     expect(pack?.jurisdiction).toBe("FR");
+    expect(result.catalogue.medicinalProducts.every((p) => p.domain.code === "Human")).toBe(true);
+    expect(result.catalogue.packages.every((p) => p.domain.code === "Human")).toBe(true);
 
     const beclo = result.catalogue.reimbursements.find((r) => {
       const pkg = result.catalogue.packages.find((p) => p.id === r.packageId);

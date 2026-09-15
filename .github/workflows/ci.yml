@@ -33,6 +33,10 @@ jobs:
         env:
           OMC_SKIP_TERMS: "1"
         run: pnpm omc build ch-base --input fixtures/ch/swissmedic/OGD_FIXTURE.zip --month 2026.08 --out /tmp/omc-ci
+      - name: Fixture official build (CH veterinary)
+        env:
+          OMC_SKIP_TERMS: "1"
+        run: pnpm omc build ch-vet-base --input fixtures/ch/swissmedic/OGD_FIXTURE.zip --month 2026.08 --out /tmp/omc-ci-vet
       - name: Fixture official build (France)
         env:
           OMC_SKIP_TERMS: "1"
@@ -45,6 +49,7 @@ jobs:
       - name: Java FHIR validate fixture
         run: |
           pnpm omc fhir-validate --dir /tmp/omc-ci/release --max 10
+          pnpm omc fhir-validate --dir /tmp/omc-ci-vet/release --max 10
           pnpm omc fhir-validate --dir /tmp/omc-ci-fr/release --max 10
       - name: Terms snapshots still match live pages
         run: pnpm omc terms

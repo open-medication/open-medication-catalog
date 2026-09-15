@@ -27,6 +27,7 @@ Do not set inactive merely because a pack is not marketed or not reimbursed."""
     OmcJurisdiction named jurisdiction 1..1 and
     OmcIdentityAuthority named identityAuthority 1..1 and
     OmcRelease named omcRelease 1..1 and
+    OmcDomain named domain 1..1 and
     OmcRegulatoryStatus named regulatoryStatus 0..1 and
     OmcMarketingStatus named marketingStatus 0..1 and
     OmcReimbursementStatus named reimbursementStatus 0..1 and
@@ -70,6 +71,16 @@ Description: "OMC artifact id and data month (e.g. ch-base-2026.08)."
 * ^context[=].expression = "Organization"
 * value[x] only string
 * valueString 1..1
+
+Extension: OmcDomain
+Id: domain
+Title: "Medicinal product domain"
+Description: "Human vs veterinary use. R4 backport of R5 MedicinalProductDefinition.domain (http://hl7.org/fhir/medicinal-product-domain)."
+* ^url = "https://fhir.openmedicationcatalog.org/StructureDefinition/domain"
+* ^context[+].type = #element
+* ^context[=].expression = "Medication"
+* value[x] only Coding
+* valueCoding 1..1
 
 Extension: OmcRegulatoryStatus
 Id: regulatory-status

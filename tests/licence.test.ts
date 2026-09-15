@@ -33,8 +33,13 @@ describe("licence flags from source.yaml", () => {
     expect(swiss.terms.url).toContain("#terms_open");
     expect(swiss.commercialUse).toBe("allowed");
     expect(getRecipe("ch-base").requiredSources).toEqual(["swissmedic"]);
+    expect(getRecipe("ch-base").domain).toBe("Human");
     expect(getRecipe("ch-enriched").requiredSources).toEqual(["swissmedic", "refdata"]);
     expect(getRecipe("ch-enriched").requiredSources).not.toContain("bag");
+    expect(getRecipe("ch-vet-base").requiredSources).toEqual(["swissmedic"]);
+    expect(getRecipe("ch-vet-base").domain).toBe("Veterinary");
+    expect(getRecipe("ch-vet-enriched").requiredSources).toEqual(["swissmedic", "refdata"]);
+    expect(getRecipe("ch-vet-enriched").domain).toBe("Veterinary");
     expect(getRecipe("fr-base").requiredSources).toEqual(["bdpm"]);
     expect(loadSourceDescriptorById("bdpm").commercialUse).toBe("allowed");
     expect(loadSourceDescriptorById("bdpm").redistribution).toBe("allowed");
