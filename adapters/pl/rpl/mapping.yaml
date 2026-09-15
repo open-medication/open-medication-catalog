@@ -37,7 +37,6 @@ files:
     stanNaDzien: mapped
     substancjaCzynna: mapped
     substancjeCzynne: mapped
-    waznoscPozwolenia: mapped
     GTINZagraniczne: retained-as-metadata
     GTINZagraniczny: retained-as-metadata
     charakterystyka: retained-as-metadata
@@ -65,6 +64,7 @@ files:
     typProcedury: retained-as-metadata
     ulotka: retained-as-metadata
     ulotkaImportRownolegly: retained-as-metadata
+    waznoscPozwolenia: retained-as-metadata
     wytworcy: retained-as-metadata
     zakazStosowaniaUZwierzat: retained-as-metadata
     zgodaPrezesa: retained-as-metadata

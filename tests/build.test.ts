@@ -367,6 +367,9 @@ describe("pl-base fixture build", () => {
     expect(zol?.declarationRows[0]?.quantity).toBe("4");
     expect(zol?.declarationRows[0]?.quantityUnit?.display).toBe("mg");
     expect(zol?.metadata?.moc).toBe("4 mg/5 ml");
+    expect(zol?.regulatoryStatus.display).toBe("aktywne");
+    expect(zol?.metadata?.waznoscPozwolenia).toBe("Bezterminowe");
+    expect(result.catalogue.authorizations.find((a) => a.authorityKey === "20708")?.status.display).toBe("aktywne");
 
     const pack = result.catalogue.packages.find((p) => p.authorityKey === "100000014|2");
     expect(pack?.gtin).toBe("05909991023652");
@@ -391,6 +394,12 @@ describe("pl-base fixture build", () => {
       result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000505")?.id,
     );
     expect(noGtin?.regulatoryStatus.display).toBe("skasowane");
+    const withdrawn = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000505");
+    expect(withdrawn?.regulatoryStatus.display).toBe("skasowane");
+    expect(withdrawn?.metadata?.waznoscPozwolenia).toBeUndefined();
+    expect(result.catalogue.authorizations.find((a) => a.authorityKey === "100000505")?.status.display).toBe(
+      "skasowane",
+    );
     expect(result.catalogue.medicinalProducts.some((p) => p.authorityKey === "100005709")).toBe(false);
 
     const sharedGtin = result.catalogue.packages.filter((p) => p.gtin === "05909990998203");
@@ -409,6 +418,9 @@ describe("pl-base fixture build", () => {
     expect(mpd).toContain("MedicinalProductDefinition");
     expect(mpd).toContain("/sid/pl/rpl/product");
     expect(mpd).toContain("Edelan");
+    expect(mpd).toContain('"code":"aktywne"');
+    expect(mpd).toContain('"code":"skasowane"');
+    expect(mpd).not.toContain("Bezterminowe");
 
     const ppd = fs.readFileSync(
       path.join(out, "release", "fhir-r5", "PackagedProductDefinition.ndjson"),

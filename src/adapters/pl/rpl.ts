@@ -192,7 +192,10 @@ export class RplAdapter implements Adapter {
         }
       }
 
-      const status = coded(RPL_SYSTEMS.regulatoryStatus, attr(row, RplXml.authorisationValidity) || "unknown")!;
+      const packRows = asArray(nested(row, RplXml.packages)?.[RplXml.pack]).filter(
+        (p): p is Record<string, unknown> => Boolean(p) && typeof p === "object" && !Array.isArray(p),
+      );
+      const status = productStatus(packRows);
       medicinalProducts.push({
         id: mpId,
         jurisdiction: JURISDICTION,
@@ -247,11 +250,9 @@ export class RplAdapter implements Adapter {
         authorizations.push(auth);
       } else {
         auth.medicinalProductIds.push(mpId);
+        if (status.code === RplValue.active) auth.status = status;
       }
 
-      const packRows = asArray(nested(row, RplXml.packages)?.[RplXml.pack]).filter(
-        (p): p is Record<string, unknown> => Boolean(p) && typeof p === "object" && !Array.isArray(p),
-      );
       for (const pack of packRows) {
         const packId = attr(pack, RplXml.id) || "";
         const gtinRaw = attr(pack, RplXml.gtinCode);
@@ -428,8 +429,16 @@ function packQuantity(pack: Record<string, unknown>): Package["quantity"] {
   };
 }
 
+function packWithdrawn(pack: Record<string, unknown>): boolean {
+  return (attr(pack, RplXml.cancelled) ?? "").trim().toUpperCase() === RplValue.yes;
+}
+
 function packStatus(pack: Record<string, unknown>): CodedValue {
-  const withdrawn = (attr(pack, RplXml.cancelled) ?? "").trim().toUpperCase() === RplValue.yes;
+  return coded(RPL_SYSTEMS.regulatoryStatus, packWithdrawn(pack) ? RplValue.cancelled : RplValue.active)!;
+}
+
+function productStatus(packRows: Record<string, unknown>[]): CodedValue {
+  const withdrawn = packRows.length > 0 && packRows.every(packWithdrawn);
   return coded(RPL_SYSTEMS.regulatoryStatus, withdrawn ? RplValue.cancelled : RplValue.active)!;
 }
 
