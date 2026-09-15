@@ -15,6 +15,7 @@ export type {
   Organization,
   Package,
   PackageQuantity,
+  PackageUnit,
   ProductGroup,
   ProductPrice,
   Reimbursement,
@@ -50,6 +51,24 @@ export const SWISSMEDIC_SYSTEMS = {
   packageUnit: "https://fhir.openmedicationcatalog.org/CodeSystem/ch-swissmedic-package-unit",
   route: "https://fhir.openmedicationcatalog.org/CodeSystem/ch-swissmedic-route",
   ingredientRole: "https://fhir.openmedicationcatalog.org/CodeSystem/ch-swissmedic-ingredient-role",
+} as const;
+
+export const WHO_ATC_SYSTEM = "http://www.whocc.no/atc";
+
+export const RPL_SYSTEMS = {
+  product: "https://fhir.openmedicationcatalog.org/sid/pl/rpl/product",
+  package: "https://fhir.openmedicationcatalog.org/sid/pl/rpl/package",
+  authorisation: "https://fhir.openmedicationcatalog.org/sid/pl/rpl/authorisation",
+  organization: "https://fhir.openmedicationcatalog.org/sid/pl/rpl/organization",
+  substance: "https://fhir.openmedicationcatalog.org/sid/pl/rpl/substance",
+  doseForm: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-dose-form",
+  packageUnit: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-package-unit",
+  quantityUnit: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-quantity-unit",
+  route: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-route",
+  regulatoryStatus: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-regulatory-status",
+  ingredientRole: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-ingredient-role",
+  preparationType: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-preparation-type",
+  species: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-species",
 } as const;
 
 export const BDPM_SYSTEMS = {

@@ -1,6 +1,7 @@
 import { isOfficialArtifactId, getRecipe } from "../artifacts.js";
 import { swissmedicArchiveCandidates } from "../adapters/ch/swissmedic.js";
 import { bdpmDumpAvailable } from "../adapters/fr/bdpm.js";
+import { rplDumpAvailable } from "../adapters/pl/rpl.js";
 import { httpExists } from "../security.js";
 import { calendarForDate, monthsToProbe, parseDataMonth } from "./dates.js";
 import { catalogFromReleaseTags, fetchGithubReleaseTags } from "./packager.js";
@@ -30,6 +31,7 @@ export async function swissmedicDataMonthAvailable(dataMonth: string): Promise<b
 export async function dataMonthAvailable(artifactId: string, dataMonth: string): Promise<boolean> {
   const recipe = getRecipe(artifactId);
   if (recipe.jurisdiction === "FR") return bdpmDumpAvailable();
+  if (recipe.jurisdiction === "PL") return rplDumpAvailable();
   return swissmedicDataMonthAvailable(dataMonth);
 }
 

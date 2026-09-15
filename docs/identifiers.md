@@ -9,3 +9,5 @@ Project namespace = UUIDv5(DNS, `openmedicationcatalog.org`) = `6f62c357-cf30-5f
 Example: `CH|swissmedic|MedicinalProduct|123456|01`
 
 France uses the same formula: `FR|bdpm|MedicinalProduct|{CIS}` / `FR|bdpm|Package|{CIP13}`.
+
+Poland uses the same formula: `PL|rpl|MedicinalProduct|{id}` / `PL|rpl|Package|{productId}|{packId}`.

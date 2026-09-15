@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<produktyLecznicze stanNaDzien="2026-09-14" xmlns="http://rejestry.ezdrowie.gov.pl/rpl/eksport-danych-v6.0.0">
+    <produktLeczniczy nazwaProduktu="Zoledronic acid Fresenius Kabi" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Acidum zoledronicum" nazwaPoprzedniaProduktu="brak" moc="4 mg/5 ml" nazwaPostaciFarmaceutycznej="Koncentrat do sporządzania roztworu do infuzji" podmiotOdpowiedzialny="Fresenius Kabi Polska Sp. z o.o." typProcedury="DCP" numerPozwolenia="20708" waznoscPozwolenia="Bezterminowe" podstawaPrawna="art. 15 ust. 1 pkt 2" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/1/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/1/characteristic" id="100000014">
+        <kodyATC>
+            <kodATC>M05BA08</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="dożylna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Acidum zoledronicum" iloscSubstancji="4" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="5" jednostkaMiaryIlosciPreparatu="ml" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991023652" kategoriaDostepnosci="Rpz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="2">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="fiol." pojemnosc="5" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909991023669" kategoriaDostepnosci="Rpz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="3">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="4" rodzajOpakowania="fiol." pojemnosc="5" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909991023676" kategoriaDostepnosci="Rpz" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="4">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="10" rodzajOpakowania="fiol." pojemnosc="5" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Fresenius Kabi Austria GmbH" krajWytworcyImportera="Austria"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Edelan" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Mometasoni furoas" nazwaPoprzedniaProduktu="brak" moc="1 mg/g" nazwaPostaciFarmaceutycznej="Krem" podmiotOdpowiedzialny="Zakłady Farmaceutyczne POLPHARMA S.A." typProcedury="NAR" numerPozwolenia="20899" waznoscPozwolenia="Bezterminowe" podstawaPrawna="art. 15 ust. 12" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/2/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/2/characteristic" id="100000020">
+        <kodyATC>
+            <kodATC>D07AC13</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="na skórę"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Mometasoni furoas" iloscSubstancji="1" jednostkaMiaryIlosciSubstancji="mg/g" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909991023683" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="5">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="tuba" pojemnosc="15" jednostkaPojemnosci="g" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909991023690" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="6">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="tuba" pojemnosc="30" jednostkaPojemnosci="g" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Glenmark Pharmaceuticals s.r.o." krajWytworcyImportera="Czechy"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Filgrastim Hexal" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Filgrastimum" nazwaPoprzedniaProduktu="brak" moc="30 mln j.m./0,5 ml (60 mln j.m./ml)" nazwaPostaciFarmaceutycznej="Roztwór do wstrzykiwań lub infuzji" podmiotOdpowiedzialny="Hexal AG" typProcedury="CEN" numerPozwolenia="" waznoscPozwolenia="" zakazStosowaniaUZwierzat="" id="100000505">
+        <kodyATC>
+            <kodATC>L03AA02</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="dożylna"/>
+            <drogaPodania drogaPodaniaNazwa="podskórna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Filgrastimum" iloscSubstancji="30" jednostkaMiaryIlosciSubstancji="mln j./ 0,5 ml" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kategoriaDostepnosci="Rpz" skasowane="TAK" numerEu="EU/1/08/496/009" dystrybutorRownolegly="" id="122162">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="amp.-strzyk." pojemnosc="0,5" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909991023706" kategoriaDostepnosci="Rpz" skasowane="NIE" numerEu="EU/1/08/496/010" dystrybutorRownolegly="" id="122163">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="amp.-strzyk." pojemnosc="50" jednostkaPojemnosci="mg" informacjeDodatkowe=""/>
+                    <jednostkaOpakowania liczbaOpakowan="2" rodzajOpakowania="igły" pojemnosc="" jednostkaPojemnosci="" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Novartis Pharmaceutical Manufacturing GmbH" krajWytworcyImportera="Austria"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Parvoerysin" rodzajPreparatu="weterynaryjny" nazwaPowszechnieStosowana="Szczepionka przeciw parwowirozie i różycy świń, inaktywowana" nazwaPoprzedniaProduktu="brak" moc="Każda dawka szczepionki (2 ml)" nazwaPostaciFarmaceutycznej="Emulsja do wstrzykiwań" podmiotOdpowiedzialny="Grabikowski-Grabikowska Przedsiębiorstwo Produkcyjno-Handlowo-Usługowe INEX Spółka Jawna" typProcedury="NAR" numerPozwolenia="2237" waznoscPozwolenia="Bezterminowe" podstawaPrawna="art. 10 ust. 2a" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/570/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/570/characteristic" id="100005709">
+        <kodyATC>
+            <kodATC>QI09AL01</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="Podanie domięśniowe">
+                <gatunki>
+                    <gatunek nazwaGatunku="świnia">
+                        <okresyKarencji>
+                            <okresKarencji nazwaTkanki="tkanki jadalne" wartoscMiary="0.0" jednostkaMiary="dni"/>
+                        </okresyKarencji>
+                    </gatunek>
+                </gatunki>
+            </drogaPodania>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Inaktywowany parwowirus świński CAPM V198, szczep S-27" iloscSubstancji="" jednostkaMiaryIlosciSubstancji="" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci="nie mniej niż 4 log2 HI"/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="5909991029876" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="52184">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="fiol." pojemnosc="10" jednostkaPojemnosci="ml" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Bioveta, a.s." krajWytworcyImportera="Czechy"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Normeg" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Levetiracetamum" nazwaPoprzedniaProduktu="brak" moc="500 mg" nazwaPostaciFarmaceutycznej="Tabletki powlekane" podmiotOdpowiedzialny="Zentiva, k.s." typProcedury="DCP" numerPozwolenia="20401" waznoscPozwolenia="Bezterminowe" podstawaPrawna="art. 15 ust. 1 pkt 2" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/28288/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/28288/characteristic" id="100282886">
+        <kodyATC>
+            <kodATC>N03AX14</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="doustna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Levetiracetamum" iloscSubstancji="500" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909990998203" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="78318">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="100" jednostkaPojemnosci="tabl." informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909990998203" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="151745">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="100" jednostkaPojemnosci="tabl." informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Zentiva, k.s." krajWytworcyImportera="Czechy"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Wpis bez identyfikatora" rodzajPreparatu="ludzki"/>
+    <produktLeczniczy nazwaProduktu="Bez dziedziny" rodzajPreparatu="inny" id="100009999"/>
+</produktyLecznicze>

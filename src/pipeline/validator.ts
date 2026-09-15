@@ -89,6 +89,31 @@ function requireIgDir(dir: string): string {
   return dir;
 }
 
+const FHIR_NDJSON_GROUPS = [
+  { dirName: "fhir-r4", version: "4.0.1", igSubdir: "fhir/r4/fsh-generated/resources" },
+  { dirName: "fhir-r5", version: "5.0.0", igSubdir: "fhir/r5/fsh-generated/resources" },
+] as const;
+
+/** NDJSON files under `fhir-r4/` and `fhir-r5/`, grouped by FHIR version. */
+export function listReleaseFhirNdjson(releaseDir: string): {
+  dirName: string;
+  version: string;
+  igSubdir: string;
+  ndjsonPaths: string[];
+}[] {
+  return FHIR_NDJSON_GROUPS.map((group) => {
+    const dir = path.join(releaseDir, group.dirName);
+    const ndjsonPaths = fs.existsSync(dir)
+      ? fs
+          .readdirSync(dir)
+          .filter((name) => name.endsWith(".ndjson"))
+          .sort()
+          .map((name) => path.join(dir, name))
+      : [];
+    return { ...group, ndjsonPaths };
+  }).filter((group) => group.ndjsonPaths.length > 0);
+}
+
 export function validateReleaseFhir(opts: {
   releaseDir: string;
   jar: string;
@@ -96,30 +121,24 @@ export function validateReleaseFhir(opts: {
 }): void {
   const max = opts.maxResources ?? 20;
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "omc-fhir-"));
-  const r4 = path.join(opts.releaseDir, "fhir-r4", "Medication.ndjson");
-  const r5 = path.join(opts.releaseDir, "fhir-r5", "MedicinalProductDefinition.ndjson");
+  const groups = listReleaseFhirNdjson(opts.releaseDir);
   let ran = 0;
-  if (fs.existsSync(r4)) {
-    const files = materialiseNdjson(r4, path.join(tmp, "r4"), max);
+  for (const group of groups) {
+    const files = group.ndjsonPaths.flatMap((ndjsonPath) =>
+      materialiseNdjson(ndjsonPath, path.join(tmp, group.dirName, path.basename(ndjsonPath, ".ndjson")), max),
+    );
+    if (files.length === 0) continue;
     runValidator({
       jar: opts.jar,
       files,
-      version: "4.0.1",
-      igDir: requireIgDir(repoPath("fhir/r4/fsh-generated/resources")),
-    });
-    ran += 1;
-  }
-  if (fs.existsSync(r5)) {
-    const files = materialiseNdjson(r5, path.join(tmp, "r5"), max);
-    runValidator({
-      jar: opts.jar,
-      files,
-      version: "5.0.0",
-      igDir: requireIgDir(repoPath("fhir/r5/fsh-generated/resources")),
+      version: group.version,
+      igDir: requireIgDir(repoPath(group.igSubdir)),
     });
     ran += 1;
   }
   if (ran === 0) {
-    throw new Error(`No FHIR NDJSON under ${opts.releaseDir} (expected fhir-r4/Medication.ndjson and/or fhir-r5/MedicinalProductDefinition.ndjson)`);
+    throw new Error(
+      `No FHIR NDJSON under ${opts.releaseDir} (expected *.ndjson in fhir-r4/ and/or fhir-r5/)`,
+    );
   }
 }

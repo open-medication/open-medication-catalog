@@ -245,6 +245,17 @@
         "structured": { "type": "boolean" }
       }
     },
+    "PackageUnit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "count": { "type": "string" },
+        "kind": { "$ref": "#/$defs/CodedValue" },
+        "capacityValue": { "type": "string" },
+        "capacityUnit": { "$ref": "#/$defs/CodedValue" },
+        "additionalInfo": { "type": "string" }
+      }
+    },
     "FieldProvenanceMap": {
       "type": "object",
       "additionalProperties": { "$ref": "#/$defs/FieldProvenance" }
@@ -275,6 +286,7 @@
         "productGroupId": { "$ref": "#/$defs/EntityId" },
         "description": { "type": "string" },
         "quantity": { "$ref": "#/$defs/PackageQuantity" },
+        "packUnits": { "type": "array", "items": { "$ref": "#/$defs/PackageUnit" } },
         "domain": { "$ref": "#/$defs/CodedValue" },
         "packageType": { "$ref": "#/$defs/CodedValue" },
         "regulatoryStatus": { "$ref": "#/$defs/CodedValue" },

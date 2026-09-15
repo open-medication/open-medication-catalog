@@ -42,6 +42,12 @@ artifacts:
       - bdpm
     attachRawSources:
       - bdpm
+  pl-base:
+    jurisdiction: PL
+    requiredSources:
+      - rpl
+    attachRawSources:
+      - rpl
   # Future (not this delivery):
   # global-base:
-  #   requiredArtifacts: [ch-base, fr-base, no-base, ca-base, us-base]
+  #   requiredArtifacts: [ch-base, fr-base, pl-base, no-base, ca-base, us-base]

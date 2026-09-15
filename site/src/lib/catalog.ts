@@ -51,6 +51,12 @@ export const ARTIFACT_META: ArtifactMeta[] = [
     jurisdiction: "FR",
     blurb: "BDPM specialties, presentations, composition, and reimbursement rates.",
   },
+  {
+    id: "pl-base",
+    title: "Poland: base",
+    jurisdiction: "PL",
+    blurb: "RPL medicinal products, packs, composition, and marketing-authorisation holders.",
+  },
 ];
 
 export function parseCatalogDoc(data: unknown): CatalogDoc {

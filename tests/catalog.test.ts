@@ -30,6 +30,7 @@ describe("catalogFromReleaseTags", () => {
       "ch-vet-enriched-2026.07",
       "ch-base-2026.09",
       "fr-base-2026.09",
+      "pl-base-2026.09",
       "v1.0.0",
     ]);
     expect(doc.artifacts["ch-base"]?.latest).toBe("2026.09");
@@ -43,6 +44,8 @@ describe("catalogFromReleaseTags", () => {
     expect(doc.artifacts["ch-vet-enriched"]?.latest).toBe("2026.07");
     expect(doc.artifacts["fr-base"]?.latest).toBe("2026.09");
     expect(doc.artifacts["fr-base"]?.tag).toBe("fr-base-2026.09");
+    expect(doc.artifacts["pl-base"]?.latest).toBe("2026.09");
+    expect(doc.artifacts["pl-base"]?.tag).toBe("pl-base-2026.09");
   });
 });
 

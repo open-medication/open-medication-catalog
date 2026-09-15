@@ -342,3 +342,269 @@ describe("fr-base fixture build", () => {
     expect(sourcesMd).toContain("commercialUse: allowed");
   });
 });
+
+describe("pl-base fixture build", () => {
+  it("builds SQLite and FHIR from the RPL fixture", async () => {
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-pl-"));
+    const result = await build({
+      artifactId: "pl-base",
+      inputBySource: { rpl: repoPath("fixtures/pl/rpl/RPL_FIXTURE.zip") },
+      outDir: out,
+      dataMonth: "2026.09",
+    });
+    expect(result.official).toBe(true);
+    expect(result.catalogue.jurisdiction).toBe("PL");
+    expect(result.catalogue.productGroups).toHaveLength(0);
+    expect(result.catalogue.medicinalProducts).toHaveLength(5);
+    expect(result.catalogue.packages).toHaveLength(10);
+    expect(result.catalogue.reimbursements).toHaveLength(0);
+
+    const zol = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000014");
+    expect(zol?.names[0]?.text).toBe("Zoledronic acid Fresenius Kabi");
+    expect(zol?.domain).toMatchObject({
+      system: "http://hl7.org/fhir/medicinal-product-domain",
+      code: "Human",
+    });
+    expect(zol?.identifiers.some((i) => i.system.includes("/pl/rpl/product") && i.value === "100000014")).toBe(true);
+    expect(zol?.identifiers.some((i) => i.system === "http://www.whocc.no/atc" && i.value === "M05BA08")).toBe(true);
+    expect(zol?.doseForm?.display).toBe("Koncentrat do sporządzania roztworu do infuzji");
+    expect(zol?.declarationRows[0]?.quantity).toBe("4");
+    expect(zol?.declarationRows[0]?.quantityUnit?.display).toBe("mg");
+    expect(zol?.metadata?.moc).toBe("4 mg/5 ml");
+    expect(zol?.regulatoryStatus.display).toBe("aktywne");
+    expect(zol?.metadata?.waznoscPozwolenia).toBe("Bezterminowe");
+    expect(result.catalogue.authorizations.find((a) => a.authorityKey === "20708")?.status.display).toBe("aktywne");
+
+    const pack = result.catalogue.packages.find((p) => p.authorityKey === "100000014|2");
+    expect(pack?.gtin).toBe("05909991023652");
+    expect(pack?.jurisdiction).toBe("PL");
+    expect(pack?.domain.code).toBe("Human");
+    expect(pack?.regulatoryStatus.display).toBe("aktywne");
+    expect(pack?.metadata?.kategoriaDostepnosci).toBe("Rpz");
+    expect(pack?.description).toBe("1× fiol. 5 ml");
+    expect(pack?.quantity).toEqual({
+      value: "5",
+      unit: { system: expect.stringContaining("pl-rpl-package-unit"), code: "ml", display: "ml" },
+      structured: true,
+    });
+    expect(pack?.packageType?.display).toBe("fiol.");
+    expect(pack?.packUnits).toEqual([
+      {
+        count: "1",
+        kind: { system: expect.stringContaining("pl-rpl-package-unit"), code: "fiol.", display: "fiol." },
+        capacityValue: "5",
+        capacityUnit: { system: expect.stringContaining("pl-rpl-package-unit"), code: "ml", display: "ml" },
+      },
+    ]);
+    const fourVials = result.catalogue.packages.find((p) => p.authorityKey === "100000014|3");
+    expect(fourVials?.description).toBe("4× fiol. 5 ml");
+    expect(fourVials?.quantity).toEqual({
+      value: "4",
+      unit: { system: expect.stringContaining("pl-rpl-package-unit"), code: "fiol.", display: "fiol." },
+      structured: true,
+    });
+    expect(fourVials?.packUnits?.[0]?.capacityValue).toBe("5");
+    const tenVials = result.catalogue.packages.find((p) => p.authorityKey === "100000014|4");
+    expect(tenVials?.description).toBe("10× fiol. 5 ml");
+    expect(tenVials?.quantity.value).toBe("10");
+    expect(tenVials?.quantity.unit?.display).toBe("fiol.");
+    expect(tenVials?.quantity.structured).toBe(true);
+    const tablets = result.catalogue.packages.find((p) => p.authorityKey === "100282886|78318");
+    expect(tablets?.quantity).toEqual({
+      value: "100",
+      unit: { system: expect.stringContaining("pl-rpl-package-unit"), code: "tabl.", display: "tabl." },
+      structured: true,
+    });
+    const kit = result.catalogue.packages.find((p) => p.authorityKey === "100000505|122163");
+    expect(kit?.description).toBe("1× amp.-strzyk. 50 mg; 2× igły");
+    expect(kit?.quantity).toEqual({ structured: false });
+    expect(kit?.packUnits).toHaveLength(2);
+    expect(pack?.fieldProvenance?.description?.originalField).toBe("jednostkiOpakowania");
+    expect(result.catalogue.mappingCoverage[0]?.unknownFields).toEqual([]);
+    expect(
+      result.catalogue.mappingCoverage[0]?.fields.find((f) => f.name.endsWith("produktLeczniczy[incomplete]"))?.count,
+    ).toBe(1);
+    expect(
+      result.catalogue.mappingCoverage[0]?.fields.find((f) => f.name.endsWith("produktLeczniczy[unknown-domain]"))
+        ?.count,
+    ).toBe(1);
+    expect(result.catalogue.medicinalProducts.some((p) => p.authorityKey === "100009999")).toBe(false);
+    expect(
+      result.catalogue.mappingCoverage[0]?.fields.some((f) =>
+        f.name.endsWith("produktLeczniczy.rodzajPreparatu[veterinary]"),
+      ),
+    ).toBe(false);
+
+    const noGtin = result.catalogue.packages.find((p) => p.authorityKey === "100000505|122162");
+    expect(noGtin?.gtin).toBeUndefined();
+    expect(noGtin?.medicinalProductId).toBe(
+      result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000505")?.id,
+    );
+    expect(noGtin?.regulatoryStatus.display).toBe("skasowane");
+    const listed = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000505");
+    expect(listed?.regulatoryStatus.display).toBe("aktywne");
+    expect(listed?.metadata?.waznoscPozwolenia).toBeUndefined();
+    expect(result.catalogue.authorizations.find((a) => a.authorityKey === "100000505")?.status.display).toBe("aktywne");
+    expect(result.catalogue.medicinalProducts.every((p) => p.regulatoryStatus.display === "aktywne")).toBe(true);
+    const vet = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100005709");
+    expect(vet?.names[0]?.text).toBe("Parvoerysin");
+    expect(vet?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type") && i.value === "weterynaryjny")).toBe(
+      true,
+    );
+    expect(zol?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type") && i.value === "ludzki")).toBe(true);
+    expect(vet?.domain).toMatchObject({
+      system: "http://hl7.org/fhir/medicinal-product-domain",
+      code: "Veterinary",
+    });
+    expect(result.catalogue.medicinalProducts.every((p) => p.domain.code === "Human" || p.domain.code === "Veterinary")).toBe(
+      true,
+    );
+    expect(result.catalogue.packages.every((p) => p.domain.code === "Human" || p.domain.code === "Veterinary")).toBe(true);
+    expect(vet?.identifiers.some((i) => i.system === "http://www.whocc.no/atc" && i.value === "QI09AL01")).toBe(true);
+    expect(vet?.identifiers.some((i) => i.system.includes("pl-rpl-species") && i.value === "świnia")).toBe(true);
+    expect(vet?.routes[0]?.display).toBe("Podanie domięśniowe");
+    expect(vet?.metadata?.okresyKarencji).toBe("świnia | tkanki jadalne: 0.0 dni");
+    const vetPack = result.catalogue.packages.find((p) => p.authorityKey === "100005709|52184");
+    expect(vetPack?.gtin).toBe("5909991029876");
+    expect(vetPack?.description).toBe("1× fiol. 10 ml");
+    expect(vetPack?.domain.code).toBe("Veterinary");
+    expect(vetPack?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type"))).toBe(false);
+    expect(pack?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type"))).toBe(false);
+
+    const sharedGtin = result.catalogue.packages.filter((p) => p.gtin === "05909990998203");
+    expect(sharedGtin.map((p) => p.authorityKey).sort()).toEqual(["100282886|151745", "100282886|78318"]);
+
+    const med = fs.readFileSync(path.join(out, "release", "fhir-r4", "Medication.ndjson"), "utf8");
+    expect(med).toContain("https://www.gs1.org/gtin");
+    expect(med).toContain("pl/rpl/package");
+    expect(med).toContain("1× fiol. 5 ml");
+    expect(med).toContain("05909991023652");
+    expect(med).toContain("StructureDefinition/domain");
+    expect(med).toContain("http://hl7.org/fhir/medicinal-product-domain");
+    expect(med).not.toContain("weterynaryjny");
+    expect(med).not.toContain("pl-rpl-species");
+    expect(medicationStatus(pack!)).toBe("active");
+    expect(medicationStatus(noGtin!)).toBe("inactive");
+    const r4 = med
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line) as {
+        identifier?: { system?: string; value: string }[];
+        extension?: { url?: string; valueCoding?: { system?: string; code?: string } }[];
+        status?: string;
+        amount?: unknown;
+        ingredient?: { itemCodeableConcept?: { text?: string } }[];
+      });
+    const zolR4 = r4.find((m) => m.identifier?.some((i) => i.value === "100000014|2"));
+    expect(zolR4?.identifier?.some((i) => i.system?.includes("pl-rpl-preparation-type"))).toBe(false);
+    expect(
+      zolR4?.extension?.some(
+        (e) => e.url?.includes("StructureDefinition/domain") && e.valueCoding?.code === "Human",
+      ),
+    ).toBe(true);
+    const vetR4 = r4.find((m) => m.identifier?.some((i) => i.value === "100005709|52184"));
+    expect(vetR4?.identifier?.some((i) => i.system?.includes("pl-rpl-preparation-type"))).toBe(false);
+    expect(
+      vetR4?.extension?.some(
+        (e) => e.url?.includes("StructureDefinition/domain") && e.valueCoding?.code === "Veterinary",
+      ),
+    ).toBe(true);
+    expect(vetR4?.identifier?.some((i) => i.system?.includes("pl-rpl-species"))).toBe(false);
+    expect(vetR4?.identifier?.some((i) => i.system === "http://www.whocc.no/atc")).toBe(false);
+    expect(zolR4?.status).toBe("active");
+    expect(zolR4?.ingredient?.some((i) => i.itemCodeableConcept?.text === "Acidum zoledronicum")).toBe(true);
+    expect(
+      r4.find((m) => m.identifier?.some((i) => i.value === "100000014|3"))?.amount,
+    ).toEqual({
+      numerator: { value: 4, unit: "fiol." },
+      denominator: { value: 1 },
+    });
+    expect(
+      r4.find((m) => m.identifier?.some((i) => i.value === "100000505|122163"))?.amount,
+    ).toBeUndefined();
+    const withdrawnR4 = r4.find((m) => m.identifier?.some((i) => i.value === "100000505|122162"));
+    expect(withdrawnR4?.status).toBe("inactive");
+    expect(withdrawnR4?.ingredient?.some((i) => i.itemCodeableConcept?.text === "Filgrastimum")).toBe(true);
+
+    const mpd = fs.readFileSync(
+      path.join(out, "release", "fhir-r5", "MedicinalProductDefinition.ndjson"),
+      "utf8",
+    );
+    expect(mpd).toContain("MedicinalProductDefinition");
+    expect(mpd).toContain("/sid/pl/rpl/product");
+    expect(mpd).toContain("Edelan");
+    expect(mpd).toContain("Parvoerysin");
+    expect(mpd).toContain("http://hl7.org/fhir/medicinal-product-domain");
+    expect(mpd).toContain('"code":"Veterinary"');
+    expect(mpd).toContain('"code":"Human"');
+    expect(mpd).toContain("weterynaryjny");
+    expect(mpd).toContain('"code":"aktywne"');
+    expect(mpd).not.toContain('"code":"skasowane"');
+    expect(mpd).not.toContain("Bezterminowe");
+
+    const ppd = fs.readFileSync(
+      path.join(out, "release", "fhir-r5", "PackagedProductDefinition.ndjson"),
+      "utf8",
+    );
+    expect(ppd).toContain("packageFor");
+    expect(ppd).toContain("05909991023683");
+    const ppdRows = ppd
+      .trim()
+      .split("\n")
+      .map(
+        (line) =>
+          JSON.parse(line) as {
+            identifier?: { value: string }[];
+            containedItemQuantity?: { value: number; unit?: string }[];
+          },
+      );
+    expect(
+      ppdRows.find((p) => p.identifier?.some((i) => i.value === "100000014|3"))?.containedItemQuantity,
+    ).toEqual([{ value: 4, unit: "fiol." }]);
+    expect(
+      ppdRows.find((p) => p.identifier?.some((i) => i.value === "100000505|122163"))?.containedItemQuantity,
+    ).toBeUndefined();
+
+    const r5Dir = path.join(out, "release", "fhir-r5");
+    for (const name of [
+      "MedicinalProductDefinition.ndjson",
+      "PackagedProductDefinition.ndjson",
+      "RegulatedAuthorization.ndjson",
+      "Ingredient.ndjson",
+      "Organization.ndjson",
+    ]) {
+      expect(fs.existsSync(path.join(r5Dir, name))).toBe(true);
+    }
+    const ingredients = fs
+      .readFileSync(path.join(r5Dir, "Ingredient.ndjson"), "utf8")
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line) as { resourceType: string; substance?: { strength?: Record<string, unknown>[] } });
+    expect(ingredients.length).toBeGreaterThan(0);
+    for (const ing of ingredients) {
+      expect(ing.resourceType).toBe("Ingredient");
+      for (const strength of ing.substance?.strength ?? []) {
+        expect(strength).not.toHaveProperty("text");
+      }
+    }
+    expect(
+      ingredients.some((ing) =>
+        ing.substance?.strength?.some((s) => s.textPresentation === "Acidum zoledronicum 4 mg / 5 ml"),
+      ),
+    ).toBe(true);
+
+    const sqlite = path.join(out, "release", "database", "medication.sqlite");
+    const hits = searchPackages(sqlite, "Edelan");
+    expect(hits.length).toBeGreaterThan(0);
+    const db = new Database(sqlite, { readonly: true });
+    const domains = db.prepare("SELECT DISTINCT domain FROM medication_packages ORDER BY domain").all() as {
+      domain: string;
+    }[];
+    db.close();
+    expect(domains).toEqual([{ domain: "Human" }, { domain: "Veterinary" }]);
+
+    const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
+    expect(sourcesMd).toContain("creativecommons.org/licenses/by/4.0");
+    expect(sourcesMd).toContain("commercialUse: allowed");
+  });
+});
