@@ -43,23 +43,23 @@ files:
     GTINZagraniczne: retained-as-metadata
     GTINZagraniczny: retained-as-metadata
     charakterystyka: retained-as-metadata
-    daneOWytworcy: retained-as-metadata
-    dlaMedyka: retained-as-metadata
-    dlaPacjenta: retained-as-metadata
+    daneOWytworcy: intentionally-ignored
+    dlaMedyka: intentionally-ignored
+    dlaPacjenta: intentionally-ignored
     dystrybutorRownolegly: retained-as-metadata
     etykietoUlotka: retained-as-metadata
     etykietoUlotkaImportRownolegly: retained-as-metadata
     jednostkaMiary: retained-as-metadata
     kategoriaDostepnosci: retained-as-metadata
     krajEksportu: retained-as-metadata
-    krajWytworcyImportera: retained-as-metadata
-    material: retained-as-metadata
-    materialEdukacyjny: retained-as-metadata
-    materialyEdukacyjne: retained-as-metadata
-    nazwaMaterialu: retained-as-metadata
+    krajWytworcyImportera: intentionally-ignored
+    material: intentionally-ignored
+    materialEdukacyjny: intentionally-ignored
+    materialyEdukacyjne: intentionally-ignored
+    nazwaMaterialu: intentionally-ignored
     nazwaPoprzedniaProduktu: retained-as-metadata
     nazwaTkanki: retained-as-metadata
-    nazwaWytworcyImportera: retained-as-metadata
+    nazwaWytworcyImportera: intentionally-ignored
     nrZgodyPrezesa: retained-as-metadata
     numer: retained-as-metadata
     numerEu: retained-as-metadata
@@ -73,9 +73,10 @@ files:
     ulotkaImportRownolegly: retained-as-metadata
     wartoscMiary: retained-as-metadata
     waznoscPozwolenia: retained-as-metadata
-    wytworcy: retained-as-metadata
+    wytworcy: intentionally-ignored
     zakazStosowaniaUZwierzat: retained-as-metadata
     zgodaPrezesa: retained-as-metadata
     zgodyPrezesa: retained-as-metadata
     "produktLeczniczy[incomplete]": intentionally-ignored
+    "produktLeczniczy[unknown-domain]": intentionally-ignored
     xmlns: intentionally-ignored

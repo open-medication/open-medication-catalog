@@ -49,6 +49,7 @@ describe("licence flags from source.yaml", () => {
     expect(getRecipe("ch-vet-enriched").domain).toBe("Veterinary");
     expect(getRecipe("fr-base").requiredSources).toEqual(["bdpm"]);
     expect(getRecipe("pl-base").requiredSources).toEqual(["rpl"]);
+    expect(getRecipe("pl-base").domain).toBeUndefined();
     expect(loadSourceDescriptorById("bdpm").commercialUse).toBe("allowed");
     expect(loadSourceDescriptorById("bdpm").redistribution).toBe("allowed");
     expect(loadSourceDescriptorById("bdpm").attributionRequired).toBe(true);

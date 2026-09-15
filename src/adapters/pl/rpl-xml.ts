@@ -78,6 +78,7 @@ export class RplXml {
   static readonly measureUnit = "jednostkaMiary";
 
   static readonly incompleteIgnored = `${RplXml.medicinalProduct}[incomplete]`;
+  static readonly unknownDomainIgnored = `${RplXml.medicinalProduct}[unknown-domain]`;
 }
 
 /** Recurring coded values in the RPL dump (not element names). */
@@ -86,5 +87,7 @@ export class RplValue {
   static readonly yes = "TAK";
   static readonly cancelled = "skasowane";
   static readonly active = "aktywne";
+  static readonly human = "ludzki";
+  static readonly veterinary = "weterynaryjny";
   static readonly activeSubstanceRole = "substancja czynna";
 }

@@ -361,6 +361,10 @@ describe("pl-base fixture build", () => {
 
     const zol = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000014");
     expect(zol?.names[0]?.text).toBe("Zoledronic acid Fresenius Kabi");
+    expect(zol?.domain).toMatchObject({
+      system: "http://hl7.org/fhir/medicinal-product-domain",
+      code: "Human",
+    });
     expect(zol?.identifiers.some((i) => i.system.includes("/pl/rpl/product") && i.value === "100000014")).toBe(true);
     expect(zol?.identifiers.some((i) => i.system === "http://www.whocc.no/atc" && i.value === "M05BA08")).toBe(true);
     expect(zol?.doseForm?.display).toBe("Koncentrat do sporządzania roztworu do infuzji");
@@ -374,6 +378,7 @@ describe("pl-base fixture build", () => {
     const pack = result.catalogue.packages.find((p) => p.authorityKey === "100000014|2");
     expect(pack?.gtin).toBe("05909991023652");
     expect(pack?.jurisdiction).toBe("PL");
+    expect(pack?.domain.code).toBe("Human");
     expect(pack?.regulatoryStatus.display).toBe("aktywne");
     expect(pack?.metadata?.kategoriaDostepnosci).toBe("Rpz");
     expect(pack?.description).toBe("1× fiol. 5 ml");
@@ -420,6 +425,11 @@ describe("pl-base fixture build", () => {
       result.catalogue.mappingCoverage[0]?.fields.find((f) => f.name.endsWith("produktLeczniczy[incomplete]"))?.count,
     ).toBe(1);
     expect(
+      result.catalogue.mappingCoverage[0]?.fields.find((f) => f.name.endsWith("produktLeczniczy[unknown-domain]"))
+        ?.count,
+    ).toBe(1);
+    expect(result.catalogue.medicinalProducts.some((p) => p.authorityKey === "100009999")).toBe(false);
+    expect(
       result.catalogue.mappingCoverage[0]?.fields.some((f) =>
         f.name.endsWith("produktLeczniczy.rodzajPreparatu[veterinary]"),
       ),
@@ -442,6 +452,14 @@ describe("pl-base fixture build", () => {
       true,
     );
     expect(zol?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type") && i.value === "ludzki")).toBe(true);
+    expect(vet?.domain).toMatchObject({
+      system: "http://hl7.org/fhir/medicinal-product-domain",
+      code: "Veterinary",
+    });
+    expect(result.catalogue.medicinalProducts.every((p) => p.domain.code === "Human" || p.domain.code === "Veterinary")).toBe(
+      true,
+    );
+    expect(result.catalogue.packages.every((p) => p.domain.code === "Human" || p.domain.code === "Veterinary")).toBe(true);
     expect(vet?.identifiers.some((i) => i.system === "http://www.whocc.no/atc" && i.value === "QI09AL01")).toBe(true);
     expect(vet?.identifiers.some((i) => i.system.includes("pl-rpl-species") && i.value === "świnia")).toBe(true);
     expect(vet?.routes[0]?.display).toBe("Podanie domięśniowe");
@@ -449,12 +467,9 @@ describe("pl-base fixture build", () => {
     const vetPack = result.catalogue.packages.find((p) => p.authorityKey === "100005709|52184");
     expect(vetPack?.gtin).toBe("5909991029876");
     expect(vetPack?.description).toBe("1× fiol. 10 ml");
-    expect(
-      vetPack?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type") && i.value === "weterynaryjny"),
-    ).toBe(true);
-    expect(pack?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type") && i.value === "ludzki")).toBe(
-      true,
-    );
+    expect(vetPack?.domain.code).toBe("Veterinary");
+    expect(vetPack?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type"))).toBe(false);
+    expect(pack?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type"))).toBe(false);
 
     const sharedGtin = result.catalogue.packages.filter((p) => p.gtin === "05909990998203");
     expect(sharedGtin.map((p) => p.authorityKey).sort()).toEqual(["100282886|151745", "100282886|78318"]);
@@ -464,7 +479,9 @@ describe("pl-base fixture build", () => {
     expect(med).toContain("pl/rpl/package");
     expect(med).toContain("1× fiol. 5 ml");
     expect(med).toContain("05909991023652");
-    expect(med).toContain("weterynaryjny");
+    expect(med).toContain("StructureDefinition/domain");
+    expect(med).toContain("http://hl7.org/fhir/medicinal-product-domain");
+    expect(med).not.toContain("weterynaryjny");
     expect(med).not.toContain("pl-rpl-species");
     expect(medicationStatus(pack!)).toBe("active");
     expect(medicationStatus(noGtin!)).toBe("inactive");
@@ -473,18 +490,25 @@ describe("pl-base fixture build", () => {
       .split("\n")
       .map((line) => JSON.parse(line) as {
         identifier?: { system?: string; value: string }[];
+        extension?: { url?: string; valueCoding?: { system?: string; code?: string } }[];
         status?: string;
         amount?: unknown;
         ingredient?: { itemCodeableConcept?: { text?: string } }[];
       });
     const zolR4 = r4.find((m) => m.identifier?.some((i) => i.value === "100000014|2"));
-    expect(zolR4?.identifier?.some((i) => i.system?.includes("pl-rpl-preparation-type") && i.value === "ludzki")).toBe(
-      true,
-    );
+    expect(zolR4?.identifier?.some((i) => i.system?.includes("pl-rpl-preparation-type"))).toBe(false);
+    expect(
+      zolR4?.extension?.some(
+        (e) => e.url?.includes("StructureDefinition/domain") && e.valueCoding?.code === "Human",
+      ),
+    ).toBe(true);
     const vetR4 = r4.find((m) => m.identifier?.some((i) => i.value === "100005709|52184"));
-    expect(vetR4?.identifier?.some((i) => i.system?.includes("pl-rpl-preparation-type") && i.value === "weterynaryjny")).toBe(
-      true,
-    );
+    expect(vetR4?.identifier?.some((i) => i.system?.includes("pl-rpl-preparation-type"))).toBe(false);
+    expect(
+      vetR4?.extension?.some(
+        (e) => e.url?.includes("StructureDefinition/domain") && e.valueCoding?.code === "Veterinary",
+      ),
+    ).toBe(true);
     expect(vetR4?.identifier?.some((i) => i.system?.includes("pl-rpl-species"))).toBe(false);
     expect(vetR4?.identifier?.some((i) => i.system === "http://www.whocc.no/atc")).toBe(false);
     expect(zolR4?.status).toBe("active");
@@ -510,6 +534,9 @@ describe("pl-base fixture build", () => {
     expect(mpd).toContain("/sid/pl/rpl/product");
     expect(mpd).toContain("Edelan");
     expect(mpd).toContain("Parvoerysin");
+    expect(mpd).toContain("http://hl7.org/fhir/medicinal-product-domain");
+    expect(mpd).toContain('"code":"Veterinary"');
+    expect(mpd).toContain('"code":"Human"');
     expect(mpd).toContain("weterynaryjny");
     expect(mpd).toContain('"code":"aktywne"');
     expect(mpd).not.toContain('"code":"skasowane"');
@@ -569,6 +596,12 @@ describe("pl-base fixture build", () => {
     const sqlite = path.join(out, "release", "database", "medication.sqlite");
     const hits = searchPackages(sqlite, "Edelan");
     expect(hits.length).toBeGreaterThan(0);
+    const db = new Database(sqlite, { readonly: true });
+    const domains = db.prepare("SELECT DISTINCT domain FROM medication_packages ORDER BY domain").all() as {
+      domain: string;
+    }[];
+    db.close();
+    expect(domains).toEqual([{ domain: "Human" }, { domain: "Veterinary" }]);
 
     const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
     expect(sourcesMd).toContain("creativecommons.org/licenses/by/4.0");

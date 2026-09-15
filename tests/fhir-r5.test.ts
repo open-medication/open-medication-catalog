@@ -12,6 +12,7 @@ function productWithIngredients(
     identityAuthority: "rpl",
     authorityKey: "1",
     names: [{ text: "Example" }],
+    domain: { system: "http://hl7.org/fhir/medicinal-product-domain", code: "Human", display: "Human use" },
     routes: [],
     regulatoryStatus: { system: "https://example.org/status", code: "aktywne" },
     identifiers: [],

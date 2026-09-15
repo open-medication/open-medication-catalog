@@ -6,6 +6,7 @@ import {
   OMC_SYSTEMS,
   RPL_SYSTEMS,
   WHO_ATC_SYSTEM,
+  medicinalProductDomain,
   type Authorization,
   type Catalogue,
   type CodedValue,
@@ -115,10 +116,13 @@ export class RplAdapter implements Adapter {
     );
 
     let ignoredIncomplete = 0;
+    let ignoredUnknownDomain = 0;
     for (const product of products) {
       if (!attr(product, RplXml.id)) ignoredIncomplete += 1;
+      else if (!rplDomain(product)) ignoredUnknownDomain += 1;
     }
     seen.set(RplXml.incompleteIgnored, ignoredIncomplete);
+    seen.set(RplXml.unknownDomainIgnored, ignoredUnknownDomain);
 
     for (const key of seen.keys()) {
       if (!expected.has(key) && !coverage.unknownFields.includes(key)) {
@@ -151,6 +155,8 @@ export class RplAdapter implements Adapter {
     for (const row of data.products) {
       const productId = attr(row, RplXml.id);
       if (!productId) continue;
+      const domain = rplDomain(row);
+      if (!domain) continue;
 
       const holderName = attr(row, RplXml.marketingAuthorisationHolder);
       const holder = holderName ? upsertOrg(orgByKey, organizations, holderName, snapshot) : undefined;
@@ -203,6 +209,7 @@ export class RplAdapter implements Adapter {
         identityAuthority: AUTHORITY,
         authorityKey: productId,
         names,
+        domain,
         doseForm: coded(RPL_SYSTEMS.doseForm, attr(row, RplXml.doseFormName)),
         routes,
         regulatoryStatus: listed,
@@ -278,13 +285,14 @@ export class RplAdapter implements Adapter {
           authorityKey: packKey,
           medicinalProductId: mpId,
           description,
+          domain,
           quantity: packQuantity(units),
           packUnits: units.length ? units : undefined,
           packageType: units.length === 1 ? units[0]?.kind : undefined,
           regulatoryStatus: packStatus(pack),
           gtin,
           names: description ? [{ text: description, language: "pl" }] : undefined,
-          identifiers: [...packIdentifiers(packKey, gtin, packId), ...preparationTypeIdentifier(row)],
+          identifiers: packIdentifiers(packKey, gtin, packId),
           fieldProvenance: {
             description: { sourceId: "rpl", snapshotId: snapshot.id, originalField: RplXml.packUnits },
           },
@@ -371,9 +379,18 @@ function nested(node: Record<string, unknown>, name: string): Record<string, unk
   return value as Record<string, unknown>;
 }
 
+function rplDomain(row: Record<string, unknown>): CodedValue | undefined {
+  const value = attr(row, RplXml.preparationType)?.trim();
+  if (value === RplValue.human) return medicinalProductDomain("Human");
+  if (value === RplValue.veterinary) return medicinalProductDomain("Veterinary");
+  return undefined;
+}
+
 function preparationTypeIdentifier(row: Record<string, unknown>): { system: string; value: string }[] {
   const value = attr(row, RplXml.preparationType)?.trim();
-  return value ? [{ system: RPL_SYSTEMS.preparationType, value }] : [];
+  return value === RplValue.human || value === RplValue.veterinary
+    ? [{ system: RPL_SYSTEMS.preparationType, value }]
+    : [];
 }
 
 function speciesFromRoutes(routes: Record<string, unknown>[]): string[] {

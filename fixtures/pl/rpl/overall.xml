@@ -171,4 +171,5 @@
         </materialyEdukacyjne>
     </produktLeczniczy>
     <produktLeczniczy nazwaProduktu="Wpis bez identyfikatora" rodzajPreparatu="ludzki"/>
+    <produktLeczniczy nazwaProduktu="Bez dziedziny" rodzajPreparatu="inny" id="100009999"/>
 </produktyLecznicze>
