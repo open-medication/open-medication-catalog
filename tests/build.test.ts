@@ -449,6 +449,12 @@ describe("pl-base fixture build", () => {
     const vetPack = result.catalogue.packages.find((p) => p.authorityKey === "100005709|52184");
     expect(vetPack?.gtin).toBe("5909991029876");
     expect(vetPack?.description).toBe("1× fiol. 10 ml");
+    expect(
+      vetPack?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type") && i.value === "weterynaryjny"),
+    ).toBe(true);
+    expect(pack?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type") && i.value === "ludzki")).toBe(
+      true,
+    );
 
     const sharedGtin = result.catalogue.packages.filter((p) => p.gtin === "05909990998203");
     expect(sharedGtin.map((p) => p.authorityKey).sort()).toEqual(["100282886|151745", "100282886|78318"]);
@@ -458,18 +464,29 @@ describe("pl-base fixture build", () => {
     expect(med).toContain("pl/rpl/package");
     expect(med).toContain("1× fiol. 5 ml");
     expect(med).toContain("05909991023652");
+    expect(med).toContain("weterynaryjny");
+    expect(med).not.toContain("pl-rpl-species");
     expect(medicationStatus(pack!)).toBe("active");
     expect(medicationStatus(noGtin!)).toBe("inactive");
     const r4 = med
       .trim()
       .split("\n")
       .map((line) => JSON.parse(line) as {
-        identifier?: { value: string }[];
+        identifier?: { system?: string; value: string }[];
         status?: string;
         amount?: unknown;
         ingredient?: { itemCodeableConcept?: { text?: string } }[];
       });
     const zolR4 = r4.find((m) => m.identifier?.some((i) => i.value === "100000014|2"));
+    expect(zolR4?.identifier?.some((i) => i.system?.includes("pl-rpl-preparation-type") && i.value === "ludzki")).toBe(
+      true,
+    );
+    const vetR4 = r4.find((m) => m.identifier?.some((i) => i.value === "100005709|52184"));
+    expect(vetR4?.identifier?.some((i) => i.system?.includes("pl-rpl-preparation-type") && i.value === "weterynaryjny")).toBe(
+      true,
+    );
+    expect(vetR4?.identifier?.some((i) => i.system?.includes("pl-rpl-species"))).toBe(false);
+    expect(vetR4?.identifier?.some((i) => i.system === "http://www.whocc.no/atc")).toBe(false);
     expect(zolR4?.status).toBe("active");
     expect(zolR4?.ingredient?.some((i) => i.itemCodeableConcept?.text === "Acidum zoledronicum")).toBe(true);
     expect(

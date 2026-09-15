@@ -284,7 +284,7 @@ export class RplAdapter implements Adapter {
           regulatoryStatus: packStatus(pack),
           gtin,
           names: description ? [{ text: description, language: "pl" }] : undefined,
-          identifiers: packIdentifiers(packKey, gtin, packId),
+          identifiers: [...packIdentifiers(packKey, gtin, packId), ...preparationTypeIdentifier(row)],
           fieldProvenance: {
             description: { sourceId: "rpl", snapshotId: snapshot.id, originalField: RplXml.packUnits },
           },
