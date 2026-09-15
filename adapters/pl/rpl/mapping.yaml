@@ -1,59 +1,82 @@
 # RPL overall.xml 6.0.0 field mapping. Unknown fields must not be silently ignored.
+# Reconciled against the live dump stanNaDzien=2026-09-15 (schema 6.0.0).
 sourceId: rpl
 files:
   overall.xml:
-    stanNaDzien: mapped
-    produktLeczniczy: mapped
-    xmlns: intentionally-ignored
-    id: mapped
-    nazwaProduktu: mapped
-    rodzajPreparatu: mapped
-    nazwaPowszechnieStosowana: mapped
-    nazwaPoprzedniaProduktu: retained-as-metadata
-    moc: mapped
-    nazwaPostaciFarmaceutycznej: mapped
-    podmiotOdpowiedzialny: mapped
-    typProcedury: retained-as-metadata
-    numerPozwolenia: mapped
-    waznoscPozwolenia: mapped
-    podstawaPrawna: retained-as-metadata
-    zakazStosowaniaUZwierzat: retained-as-metadata
-    ulotka: retained-as-metadata
-    charakterystyka: retained-as-metadata
-    kodyATC: mapped
-    kodATC: mapped
-    drogiPodania: mapped
     drogaPodania: mapped
     drogaPodaniaNazwa: mapped
-    substancjeCzynne: mapped
-    substancjaCzynna: mapped
-    nazwaSubstancji: mapped
-    iloscSubstancji: mapped
-    jednostkaMiaryIlosciSubstancji: mapped
+    drogiPodania: mapped
+    id: mapped
     iloscPreparatu: mapped
-    jednostkaMiaryIlosciPreparatu: mapped
+    iloscSubstancji: mapped
+    informacjeDodatkowe: mapped
     innyOpisIlosci: mapped
+    jednostkaMiaryIlosciPreparatu: mapped
+    jednostkaMiaryIlosciSubstancji: mapped
+    jednostkaOpakowania: mapped
+    jednostkaPojemnosci: mapped
+    jednostkiOpakowania: mapped
+    kodATC: mapped
+    kodGTIN: mapped
+    kodyATC: mapped
+    liczbaOpakowan: mapped
+    moc: mapped
+    nazwaPostaciFarmaceutycznej: mapped
+    nazwaPowszechnieStosowana: mapped
+    nazwaProduktu: mapped
+    nazwaSubstancji: mapped
+    numerPozwolenia: mapped
     opakowania: mapped
     opakowanie: mapped
-    kodGTIN: mapped
-    kategoriaDostepnosci: retained-as-metadata
-    skasowane: mapped
-    numerEu: retained-as-metadata
-    dystrybutorRownolegly: retained-as-metadata
-    jednostkiOpakowania: mapped
-    jednostkaOpakowania: mapped
-    liczbaOpakowan: mapped
-    rodzajOpakowania: mapped
+    podmiotOdpowiedzialny: mapped
     pojemnosc: mapped
-    jednostkaPojemnosci: mapped
-    informacjeDodatkowe: mapped
-    zgodyPrezesa: retained-as-metadata
+    produktLeczniczy: mapped
+    rodzajOpakowania: mapped
+    rodzajPreparatu: mapped
+    skasowane: mapped
+    stanNaDzien: mapped
+    substancjaCzynna: mapped
+    substancjeCzynne: mapped
+    waznoscPozwolenia: mapped
+    GTINZagraniczne: retained-as-metadata
+    GTINZagraniczny: retained-as-metadata
+    charakterystyka: retained-as-metadata
     daneOWytworcy: retained-as-metadata
-    wytworcy: retained-as-metadata
-    nazwaWytworcyImportera: retained-as-metadata
-    krajWytworcyImportera: retained-as-metadata
-    materialyEdukacyjne: retained-as-metadata
-    dlaPacjenta: retained-as-metadata
     dlaMedyka: retained-as-metadata
+    dlaPacjenta: retained-as-metadata
+    dystrybutorRownolegly: retained-as-metadata
+    etykietoUlotka: retained-as-metadata
+    etykietoUlotkaImportRownolegly: retained-as-metadata
+    kategoriaDostepnosci: retained-as-metadata
+    krajEksportu: retained-as-metadata
+    krajWytworcyImportera: retained-as-metadata
+    material: retained-as-metadata
+    materialEdukacyjny: retained-as-metadata
+    materialyEdukacyjne: retained-as-metadata
+    nazwaMaterialu: retained-as-metadata
+    nazwaPoprzedniaProduktu: retained-as-metadata
+    nazwaWytworcyImportera: retained-as-metadata
+    nrZgodyPrezesa: retained-as-metadata
+    numer: retained-as-metadata
+    numerEu: retained-as-metadata
+    oznaczenieOpakowanImportRownolegly: retained-as-metadata
+    podmiotOdpowiedzialnywKrajuEksportu: retained-as-metadata
+    podstawaPrawna: retained-as-metadata
+    typProcedury: retained-as-metadata
+    ulotka: retained-as-metadata
+    ulotkaImportRownolegly: retained-as-metadata
+    wytworcy: retained-as-metadata
+    zakazStosowaniaUZwierzat: retained-as-metadata
+    zgodaPrezesa: retained-as-metadata
+    zgodyPrezesa: retained-as-metadata
+    gatunek: intentionally-ignored
+    gatunki: intentionally-ignored
+    jednostkaMiary: intentionally-ignored
+    nazwaGatunku: intentionally-ignored
+    nazwaTkanki: intentionally-ignored
+    okresKarencji: intentionally-ignored
+    okresyKarencji: intentionally-ignored
     "produktLeczniczy.rodzajPreparatu[veterinary]": intentionally-ignored
     "produktLeczniczy[incomplete]": intentionally-ignored
+    wartoscMiary: intentionally-ignored
+    xmlns: intentionally-ignored

@@ -23,6 +23,11 @@ const XML_ARRAY_TAGS = new Set([
   "opakowanie",
   "jednostkaOpakowania",
   "wytworcy",
+  "zgodaPrezesa",
+  "GTINZagraniczny",
+  "materialEdukacyjny",
+  "gatunek",
+  "okresKarencji",
 ]);
 
 /** XML values stay strings. Never let the parser turn 001 into 1. */

@@ -220,6 +220,13 @@ export class RplAdapter implements Adapter {
           [RplXml.animalUseProhibition]: attr(row, RplXml.animalUseProhibition),
           [RplXml.patientLeafletUrl]: attr(row, RplXml.patientLeafletUrl),
           [RplXml.smpcUrl]: attr(row, RplXml.smpcUrl),
+          [RplXml.packageLeafletAndLabellingUrl]: attr(row, RplXml.packageLeafletAndLabellingUrl),
+          [RplXml.parallelImportPackageLeafletAndLabellingUrl]: attr(
+            row,
+            RplXml.parallelImportPackageLeafletAndLabellingUrl,
+          ),
+          [RplXml.parallelImportLeafletUrl]: attr(row, RplXml.parallelImportLeafletUrl),
+          [RplXml.parallelImportPackageMarkingUrl]: attr(row, RplXml.parallelImportPackageMarkingUrl),
         }),
       });
 
@@ -280,6 +287,7 @@ export class RplAdapter implements Adapter {
             [RplXml.cancelled]: attr(pack, RplXml.cancelled),
             [RplXml.euNumber]: attr(pack, RplXml.euNumber),
             [RplXml.parallelDistributor]: attr(pack, RplXml.parallelDistributor),
+            ...packConsentMeta(pack),
           }),
         });
       }
@@ -522,6 +530,29 @@ function buildComposition(
     });
   });
   return { declarationRows, ingredients, substances };
+}
+
+function packConsentMeta(pack: Record<string, unknown>): Record<string, string | undefined> {
+  const consents = asArray(nested(pack, RplXml.presidentConsents)?.[RplXml.presidentConsent]).filter(
+    (c): c is Record<string, unknown> => Boolean(c) && typeof c === "object" && !Array.isArray(c),
+  );
+  const numbers: string[] = [];
+  const foreign: string[] = [];
+  for (const consent of consents) {
+    const nr = attr(consent, RplXml.presidentConsentNumber) || text(consent[RplXml.presidentConsentNumber]).trim();
+    if (nr) numbers.push(nr);
+    const gtinRows = asArray(nested(consent, RplXml.foreignGtins)?.[RplXml.foreignGtin]).filter(
+      (g): g is Record<string, unknown> => Boolean(g) && typeof g === "object" && !Array.isArray(g),
+    );
+    for (const gtin of gtinRows) {
+      const n = attr(gtin, RplXml.number);
+      if (n) foreign.push(n);
+    }
+  }
+  return {
+    [RplXml.presidentConsentNumber]: numbers.join("; ") || undefined,
+    [RplXml.foreignGtin]: foreign.join(" ") || undefined,
+  };
 }
 
 function compactMeta(values: Record<string, string | undefined>): Record<string, string> | undefined {

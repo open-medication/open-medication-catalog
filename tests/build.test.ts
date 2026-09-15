@@ -375,6 +375,7 @@ describe("pl-base fixture build", () => {
     expect(pack?.metadata?.kategoriaDostepnosci).toBe("Rpz");
     expect(pack?.quantity?.unit?.system).toContain("pl-rpl-package-unit");
     expect(pack?.fieldProvenance?.description?.originalField).toBe("jednostkiOpakowania");
+    expect(result.catalogue.mappingCoverage[0]?.unknownFields).toEqual([]);
 
     const med = fs.readFileSync(path.join(out, "release", "fhir-r4", "Medication.ndjson"), "utf8");
     expect(med).toContain("https://www.gs1.org/gtin");
