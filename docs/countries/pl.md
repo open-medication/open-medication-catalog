@@ -26,6 +26,8 @@ Pack GTIN is emitted as `https://www.gs1.org/gtin`. ATC codes use `http://www.wh
 
 R4 `Medication.status` follows pack lifecycle (`aktywne` → `active`, `skasowane` → `inactive`). Active substances are `Medication.ingredient` (role `substancja czynna`). Strength stays text on the canonical row and on R5 `Ingredient.substance.strength.textPresentation`; R4 `ingredient.strength` is only emitted when a structured ratio exists.
 
+Package quantity is the pack, not a single container's fill. One `jednostkaOpakowania` with `liczbaOpakowan` other than 1 becomes that count of `rodzajOpakowania` (4× fiol. 5 ml → 4 fiol.). A single container, or a row that only has `pojemnosc` (100 tabl.), uses capacity. Multiple package-unit rows stay unstructured; the full list is on canonical `packUnits` and in `description`. That structured value is R4 `Medication.amount` and R5 `PackagedProductDefinition.containedItemQuantity`.
+
 ## Reimbursement
 
 None. RPL is not the NFZ list.

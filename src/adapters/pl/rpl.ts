@@ -15,6 +15,8 @@ import {
   type MedicinalProduct,
   type Organization,
   type Package,
+  type PackageQuantity,
+  type PackageUnit,
   type SourceSnapshot,
   type Substance,
 } from "../../canonical/types.js";
@@ -259,6 +261,7 @@ export class RplAdapter implements Adapter {
         const packKey = packId ? authorityKey([productId, packId]) : gtin || "";
         if (!packKey) continue;
         const description = packDescription(pack) || gtinRaw || packKey;
+        const units = mappedPackUnits(pack);
         packages.push({
           id: canonicalId({
             jurisdiction: JURISDICTION,
@@ -271,7 +274,9 @@ export class RplAdapter implements Adapter {
           authorityKey: packKey,
           medicinalProductId: mpId,
           description,
-          quantity: packQuantity(pack),
+          quantity: packQuantity(units),
+          packUnits: units.length ? units : undefined,
+          packageType: units.length === 1 ? units[0]?.kind : undefined,
           regulatoryStatus: packStatus(pack),
           gtin,
           names: description ? [{ text: description, language: "pl" }] : undefined,
@@ -417,15 +422,43 @@ function packDescription(pack: Record<string, unknown>): string | undefined {
   return parts.filter(Boolean).join("; ") || undefined;
 }
 
-function packQuantity(pack: Record<string, unknown>): Package["quantity"] {
-  const first = packUnits(pack)[0];
-  const size = first ? attr(first, RplXml.capacity) : undefined;
-  const unit = first ? attr(first, RplXml.capacityUnit) : undefined;
-  return {
-    value: size,
-    unit: unit ? coded(RPL_SYSTEMS.packageUnit, unit) : undefined,
-    structured: Boolean(size && unit && /^\d+([.,]\d+)?$/.test(size)),
-  };
+function mappedPackUnits(pack: Record<string, unknown>): PackageUnit[] {
+  return packUnits(pack).map((u) => {
+    const count = attr(u, RplXml.packCount);
+    const kind = attr(u, RplXml.packKind);
+    const capacityValue = attr(u, RplXml.capacity);
+    const capacityUnit = attr(u, RplXml.capacityUnit);
+    const additionalInfo = attr(u, RplXml.additionalInfo);
+    const unit: PackageUnit = {};
+    if (count) unit.count = count;
+    if (kind) unit.kind = coded(RPL_SYSTEMS.packageUnit, kind);
+    if (capacityValue) unit.capacityValue = capacityValue;
+    if (capacityUnit) unit.capacityUnit = coded(RPL_SYSTEMS.packageUnit, capacityUnit);
+    if (additionalInfo) unit.additionalInfo = additionalInfo;
+    return unit;
+  });
+}
+
+function numericQuantity(value?: string): number | undefined {
+  if (!value || !/^\d+([.,]\d+)?$/.test(value)) return undefined;
+  return Number(value.replace(",", "."));
+}
+
+function packQuantity(units: PackageUnit[]): PackageQuantity {
+  if (units.length !== 1) return { structured: false };
+  const [unit] = units;
+  const count = numericQuantity(unit?.count);
+  const capacity = numericQuantity(unit?.capacityValue);
+  if (count !== undefined && unit?.kind && count !== 1) {
+    return { value: unit.count, unit: unit.kind, structured: true };
+  }
+  if (capacity !== undefined && unit?.capacityUnit) {
+    return { value: unit.capacityValue, unit: unit.capacityUnit, structured: true };
+  }
+  if (count !== undefined && unit?.kind) {
+    return { value: unit.count, unit: unit.kind, structured: true };
+  }
+  return { structured: false };
 }
 
 function packWithdrawn(pack: Record<string, unknown>): boolean {

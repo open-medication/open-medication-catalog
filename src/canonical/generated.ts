@@ -181,6 +181,7 @@ export interface Package {
   productGroupId?: EntityId;
   description: string;
   quantity: PackageQuantity;
+  packUnits?: PackageUnit[];
   domain: CodedValue;
   packageType?: CodedValue;
   regulatoryStatus: CodedValue;
@@ -203,6 +204,17 @@ export interface PackageQuantity {
   value?: string;
   unit?: CodedValue;
   structured: boolean;
+}
+/**
+ * This interface was referenced by `Catalogue`'s JSON-Schema
+ * via the `definition` "PackageUnit".
+ */
+export interface PackageUnit {
+  count?: string;
+  kind?: CodedValue;
+  capacityValue?: string;
+  capacityUnit?: CodedValue;
+  additionalInfo?: string;
 }
 /**
  * This interface was referenced by `Catalogue`'s JSON-Schema

@@ -88,6 +88,13 @@
                 </jednostkiOpakowania>
                 <zgodyPrezesa/>
             </opakowanie>
+            <opakowanie kodGTIN="05909991023706" kategoriaDostepnosci="Rpz" skasowane="NIE" numerEu="EU/1/08/496/010" dystrybutorRownolegly="" id="122163">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="1" rodzajOpakowania="amp.-strzyk." pojemnosc="50" jednostkaPojemnosci="mg" informacjeDodatkowe=""/>
+                    <jednostkaOpakowania liczbaOpakowan="2" rodzajOpakowania="igły" pojemnosc="" jednostkaPojemnosci="" informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
         </opakowania>
         <daneOWytworcy>
             <wytworcy nazwaWytworcyImportera="Novartis Pharmaceutical Manufacturing GmbH" krajWytworcyImportera="Austria"/>

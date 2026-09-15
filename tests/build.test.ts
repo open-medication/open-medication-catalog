@@ -356,7 +356,7 @@ describe("pl-base fixture build", () => {
     expect(result.catalogue.jurisdiction).toBe("PL");
     expect(result.catalogue.productGroups).toHaveLength(0);
     expect(result.catalogue.medicinalProducts).toHaveLength(4);
-    expect(result.catalogue.packages).toHaveLength(8);
+    expect(result.catalogue.packages).toHaveLength(9);
     expect(result.catalogue.reimbursements).toHaveLength(0);
 
     const zol = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000014");
@@ -376,7 +376,44 @@ describe("pl-base fixture build", () => {
     expect(pack?.jurisdiction).toBe("PL");
     expect(pack?.regulatoryStatus.display).toBe("aktywne");
     expect(pack?.metadata?.kategoriaDostepnosci).toBe("Rpz");
-    expect(pack?.quantity?.unit?.system).toContain("pl-rpl-package-unit");
+    expect(pack?.description).toBe("1× fiol. 5 ml");
+    expect(pack?.quantity).toEqual({
+      value: "5",
+      unit: { system: expect.stringContaining("pl-rpl-package-unit"), code: "ml", display: "ml" },
+      structured: true,
+    });
+    expect(pack?.packageType?.display).toBe("fiol.");
+    expect(pack?.packUnits).toEqual([
+      {
+        count: "1",
+        kind: { system: expect.stringContaining("pl-rpl-package-unit"), code: "fiol.", display: "fiol." },
+        capacityValue: "5",
+        capacityUnit: { system: expect.stringContaining("pl-rpl-package-unit"), code: "ml", display: "ml" },
+      },
+    ]);
+    const fourVials = result.catalogue.packages.find((p) => p.authorityKey === "100000014|3");
+    expect(fourVials?.description).toBe("4× fiol. 5 ml");
+    expect(fourVials?.quantity).toEqual({
+      value: "4",
+      unit: { system: expect.stringContaining("pl-rpl-package-unit"), code: "fiol.", display: "fiol." },
+      structured: true,
+    });
+    expect(fourVials?.packUnits?.[0]?.capacityValue).toBe("5");
+    const tenVials = result.catalogue.packages.find((p) => p.authorityKey === "100000014|4");
+    expect(tenVials?.description).toBe("10× fiol. 5 ml");
+    expect(tenVials?.quantity.value).toBe("10");
+    expect(tenVials?.quantity.unit?.display).toBe("fiol.");
+    expect(tenVials?.quantity.structured).toBe(true);
+    const tablets = result.catalogue.packages.find((p) => p.authorityKey === "100282886|78318");
+    expect(tablets?.quantity).toEqual({
+      value: "100",
+      unit: { system: expect.stringContaining("pl-rpl-package-unit"), code: "tabl.", display: "tabl." },
+      structured: true,
+    });
+    const kit = result.catalogue.packages.find((p) => p.authorityKey === "100000505|122163");
+    expect(kit?.description).toBe("1× amp.-strzyk. 50 mg; 2× igły");
+    expect(kit?.quantity).toEqual({ structured: false });
+    expect(kit?.packUnits).toHaveLength(2);
     expect(pack?.fieldProvenance?.description?.originalField).toBe("jednostkiOpakowania");
     expect(result.catalogue.mappingCoverage[0]?.unknownFields).toEqual([]);
     expect(
@@ -417,11 +454,21 @@ describe("pl-base fixture build", () => {
       .map((line) => JSON.parse(line) as {
         identifier?: { value: string }[];
         status?: string;
+        amount?: unknown;
         ingredient?: { itemCodeableConcept?: { text?: string } }[];
       });
     const zolR4 = r4.find((m) => m.identifier?.some((i) => i.value === "100000014|2"));
     expect(zolR4?.status).toBe("active");
     expect(zolR4?.ingredient?.some((i) => i.itemCodeableConcept?.text === "Acidum zoledronicum")).toBe(true);
+    expect(
+      r4.find((m) => m.identifier?.some((i) => i.value === "100000014|3"))?.amount,
+    ).toEqual({
+      numerator: { value: 4, unit: "fiol." },
+      denominator: { value: 1 },
+    });
+    expect(
+      r4.find((m) => m.identifier?.some((i) => i.value === "100000505|122163"))?.amount,
+    ).toBeUndefined();
     const withdrawnR4 = r4.find((m) => m.identifier?.some((i) => i.value === "100000505|122162"));
     expect(withdrawnR4?.status).toBe("inactive");
     expect(withdrawnR4?.ingredient?.some((i) => i.itemCodeableConcept?.text === "Filgrastimum")).toBe(true);
@@ -443,6 +490,22 @@ describe("pl-base fixture build", () => {
     );
     expect(ppd).toContain("packageFor");
     expect(ppd).toContain("05909991023683");
+    const ppdRows = ppd
+      .trim()
+      .split("\n")
+      .map(
+        (line) =>
+          JSON.parse(line) as {
+            identifier?: { value: string }[];
+            containedItemQuantity?: { value: number; unit?: string }[];
+          },
+      );
+    expect(
+      ppdRows.find((p) => p.identifier?.some((i) => i.value === "100000014|3"))?.containedItemQuantity,
+    ).toEqual([{ value: 4, unit: "fiol." }]);
+    expect(
+      ppdRows.find((p) => p.identifier?.some((i) => i.value === "100000505|122163"))?.containedItemQuantity,
+    ).toBeUndefined();
 
     const r5Dir = path.join(out, "release", "fhir-r5");
     for (const name of [

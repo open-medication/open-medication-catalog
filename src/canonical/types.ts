@@ -15,6 +15,7 @@ export type {
   Organization,
   Package,
   PackageQuantity,
+  PackageUnit,
   ProductGroup,
   ProductPrice,
   Reimbursement,
