@@ -410,6 +410,22 @@ describe("pl-base fixture build", () => {
     expect(med).toContain("pl/rpl/package");
     expect(med).toContain("1× fiol. 5 ml");
     expect(med).toContain("05909991023652");
+    expect(medicationStatus(pack!)).toBe("active");
+    expect(medicationStatus(noGtin!)).toBe("inactive");
+    const r4 = med
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line) as {
+        identifier?: { value: string }[];
+        status?: string;
+        ingredient?: { itemCodeableConcept?: { text?: string } }[];
+      });
+    const zolR4 = r4.find((m) => m.identifier?.some((i) => i.value === "100000014|2"));
+    expect(zolR4?.status).toBe("active");
+    expect(zolR4?.ingredient?.some((i) => i.itemCodeableConcept?.text === "Acidum zoledronicum")).toBe(true);
+    const withdrawnR4 = r4.find((m) => m.identifier?.some((i) => i.value === "100000505|122162"));
+    expect(withdrawnR4?.status).toBe("inactive");
+    expect(withdrawnR4?.ingredient?.some((i) => i.itemCodeableConcept?.text === "Filgrastimum")).toBe(true);
 
     const mpd = fs.readFileSync(
       path.join(out, "release", "fhir-r5", "MedicinalProductDefinition.ndjson"),

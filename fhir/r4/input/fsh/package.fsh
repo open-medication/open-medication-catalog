@@ -13,8 +13,10 @@ Always keep the original identity-authority pack text in the package-description
 Medication.amount is populated only for a faithful structured ratio.
 
 Medication.status is catalogue-record usability only:
-* Z, B, S, N, A → active
-* D, BA, U → inactive
+* Z, B, S, N, A (Swissmedic) → active
+* D, BA, U (Swissmedic) → inactive
+* aktywne (RPL) → active
+* skasowane (RPL) → inactive
 * unknown / unmapped → omit status rather than invent it
 
 Do not set inactive merely because a pack is not marketed or not reimbursed."""

@@ -6,11 +6,22 @@ import { reimbursementDetailExtension } from "./reimbursement.js";
 
 export const R4_PROFILE = `${FHIR_CANONICAL_BASE}/StructureDefinition/OpenMedicationPackage`;
 
+const R4_ACTIVE_INGREDIENT_ROLES = new Set([
+  "WIRKS",
+  "WIIS",
+  "WIZUS",
+  "SA",
+  "FT",
+  "substancja czynna",
+]);
+
 /** Catalogue-record lifecycle only. Not marketing or reimbursement. */
 export function medicationStatus(pkg: Package): "active" | "inactive" | undefined {
   const code = pkg.regulatoryStatus.code;
-  if (code === "D" || code === "BA" || code === "U") return "inactive";
-  if (code === "Z" || code === "B" || code === "S" || code === "N" || code === "A") return "active";
+  if (code === "D" || code === "BA" || code === "U" || code === "skasowane") return "inactive";
+  if (code === "Z" || code === "B" || code === "S" || code === "N" || code === "A" || code === "aktywne") {
+    return "active";
+  }
   const lower = code.toLowerCase();
   if (/abrog|retir|suspend|inactiv/.test(lower)) return "inactive";
   if (/active/.test(lower)) return "active";
@@ -74,10 +85,7 @@ export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<str
         : undefined,
       amount: fhirRatio(pkg.quantity.structured ? pkg.quantity.value : undefined, pkg.quantity.unit?.display ?? pkg.quantity.unit?.code, "1"),
       ingredient: mp?.ingredients
-        .filter((i) => {
-          const code = i.role.code;
-          return code === "WIRKS" || code === "WIIS" || code === "WIZUS" || code === "SA" || code === "FT";
-        })
+        .filter((i) => R4_ACTIVE_INGREDIENT_ROLES.has(i.role.code))
         .map((i) => ({
           itemCodeableConcept: { text: i.name, coding: i.role ? [i.role] : undefined },
           strength: fhirRatio(
