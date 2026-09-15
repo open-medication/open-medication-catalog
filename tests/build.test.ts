@@ -444,6 +444,34 @@ describe("pl-base fixture build", () => {
     expect(ppd).toContain("packageFor");
     expect(ppd).toContain("05909991023683");
 
+    const r5Dir = path.join(out, "release", "fhir-r5");
+    for (const name of [
+      "MedicinalProductDefinition.ndjson",
+      "PackagedProductDefinition.ndjson",
+      "RegulatedAuthorization.ndjson",
+      "Ingredient.ndjson",
+      "Organization.ndjson",
+    ]) {
+      expect(fs.existsSync(path.join(r5Dir, name))).toBe(true);
+    }
+    const ingredients = fs
+      .readFileSync(path.join(r5Dir, "Ingredient.ndjson"), "utf8")
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line) as { resourceType: string; substance?: { strength?: Record<string, unknown>[] } });
+    expect(ingredients.length).toBeGreaterThan(0);
+    for (const ing of ingredients) {
+      expect(ing.resourceType).toBe("Ingredient");
+      for (const strength of ing.substance?.strength ?? []) {
+        expect(strength).not.toHaveProperty("text");
+      }
+    }
+    expect(
+      ingredients.some((ing) =>
+        ing.substance?.strength?.some((s) => s.textPresentation === "Acidum zoledronicum 4 mg / 5 ml"),
+      ),
+    ).toBe(true);
+
     const sqlite = path.join(out, "release", "database", "medication.sqlite");
     const hits = searchPackages(sqlite, "Edelan");
     expect(hits.length).toBeGreaterThan(0);

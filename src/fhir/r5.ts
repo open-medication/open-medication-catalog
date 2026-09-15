@@ -162,6 +162,7 @@ function ingredientStrength(strength: {
 }): unknown {
   const numerator = strength.structured ? parseFhirDecimal(strength.numeratorValue) : undefined;
   const denominator = strength.structured ? parseFhirDecimal(strength.denominatorValue) : undefined;
+  const textPresentation = strength.text;
   if (numerator !== undefined && denominator !== undefined) {
     return [
       {
@@ -169,11 +170,11 @@ function ingredientStrength(strength: {
           numerator: { value: numerator, unit: strength.numeratorUnit?.code },
           denominator: { value: denominator, unit: strength.denominatorUnit?.code },
         },
-        text: strength.text,
+        textPresentation,
       },
     ];
   }
-  return strength.text ? [{ text: strength.text }] : undefined;
+  return textPresentation ? [{ textPresentation }] : undefined;
 }
 
 /** Swissmedic ROUTE_ADMIN plus an EDQM coding when the English labels matched. */
