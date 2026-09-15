@@ -81,6 +81,28 @@ Description: "Human vs veterinary use. R4 backport of R5 MedicinalProductDefinit
 * ^context[=].expression = "Medication"
 * value[x] only Coding
 * valueCoding 1..1
+* valueCoding from MedicinalProductDomainVS (required)
+
+CodeSystem: MedicinalProductDomain
+Id: medicinal-product-domain
+Title: "Medicinal Product Domain"
+Description: """R4 copy of the R5 code system so the domain extension can be validated.
+Codes and URL match http://hl7.org/fhir/medicinal-product-domain."""
+* ^url = "http://hl7.org/fhir/medicinal-product-domain"
+* ^status = #active
+* ^experimental = false
+* ^caseSensitive = true
+* ^content = #complete
+* #Human "Human use" "Product intended for use with humans"
+* #Veterinary "Veterinary use" "Product intended for use with animals"
+* #HumanAndVeterinary "Human and Veterinary use" "Product intended for use with both humans and animals"
+
+ValueSet: MedicinalProductDomainVS
+Id: medicinal-product-domain
+Title: "Medicinal Product Domain"
+Description: "Human, veterinary, or both."
+* ^url = "http://hl7.org/fhir/ValueSet/medicinal-product-domain"
+* include codes from system MedicinalProductDomain
 
 Extension: OmcRegulatoryStatus
 Id: regulatory-status
