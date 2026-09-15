@@ -8,6 +8,15 @@ on:
   workflow_dispatch:
   workflow_call:
 
+# One writer at a time to gh-pages. Overlapping release dispatches each call
+# this workflow; without a mutex the later force-push can drop artifacts the
+# other run already published. Queue (don't cancel) so the last deploy rebuilds
+# catalog.json from every GitHub Release after the previous publish finishes.
+# Also serializes scheduled release.yml vs a concurrent workflow_dispatch.
+concurrency:
+  group: pages-publish
+  cancel-in-progress: false
+
 jobs:
   pages:
     runs-on: ubuntu-latest

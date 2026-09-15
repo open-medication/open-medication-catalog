@@ -92,6 +92,9 @@ jobs:
             --title "$TAG" \
             --notes "Open Medication Catalogue $TAG"
 
+  # After the whole matrix (schedule) or the single dispatched artifact — not
+  # per matrix cell. Pages publishes are serialized in pages.yml so a second
+  # overlapping release run cannot clobber catalog.json on gh-pages.
   catalog:
     needs: release
     if: always() && !cancelled()
