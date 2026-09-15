@@ -13,7 +13,7 @@ Veterinary rows (`rodzajPreparatu` other than `ludzki`) and products without an 
 | Canonical | RPL | R4 | R5 |
 | --- | --- | --- | --- |
 | MedicinalProduct | register product `id` | Medication extension `medicinal-product-id` | MedicinalProductDefinition |
-| Package | pack GTIN when 13/14 digits; else `productId\|packId` | Medication (one per package) | PackagedProductDefinition |
+| Package | `productId\|packId` (GTIN is an identifier; it is not unique in RPL) | Medication (one per package) | PackagedProductDefinition |
 | Authorization | `numerPozwolenia` (product `id` if the number is missing) | — | one RegulatedAuthorization per MA number |
 | Organization | `podmiotOdpowiedzialny` (trimmed name) | Organization | Organization |
 

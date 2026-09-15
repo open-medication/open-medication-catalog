@@ -131,5 +131,37 @@
             <dlaMedyka/>
         </materialyEdukacyjne>
     </produktLeczniczy>
+    <produktLeczniczy nazwaProduktu="Normeg" rodzajPreparatu="ludzki" nazwaPowszechnieStosowana="Levetiracetamum" nazwaPoprzedniaProduktu="brak" moc="500 mg" nazwaPostaciFarmaceutycznej="Tabletki powlekane" podmiotOdpowiedzialny="Zentiva, k.s." typProcedury="DCP" numerPozwolenia="20401" waznoscPozwolenia="Bezterminowe" podstawaPrawna="art. 15 ust. 1 pkt 2" zakazStosowaniaUZwierzat="" ulotka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/28288/leaflet" charakterystyka="https://rejestry.ezdrowie.gov.pl/api/rpl/medicinal-products/28288/characteristic" id="100282886">
+        <kodyATC>
+            <kodATC>N03AX14</kodATC>
+        </kodyATC>
+        <drogiPodania>
+            <drogaPodania drogaPodaniaNazwa="doustna"/>
+        </drogiPodania>
+        <substancjeCzynne>
+            <substancjaCzynna nazwaSubstancji="Levetiracetamum" iloscSubstancji="500" jednostkaMiaryIlosciSubstancji="mg" iloscPreparatu="" jednostkaMiaryIlosciPreparatu="" innyOpisIlosci=""/>
+        </substancjeCzynne>
+        <opakowania>
+            <opakowanie kodGTIN="05909990998203" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="78318">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="100" jednostkaPojemnosci="tabl." informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+            <opakowanie kodGTIN="05909990998203" kategoriaDostepnosci="Rp" skasowane="NIE" numerEu="" dystrybutorRownolegly="" id="151745">
+                <jednostkiOpakowania>
+                    <jednostkaOpakowania liczbaOpakowan="" rodzajOpakowania="" pojemnosc="100" jednostkaPojemnosci="tabl." informacjeDodatkowe=""/>
+                </jednostkiOpakowania>
+                <zgodyPrezesa/>
+            </opakowanie>
+        </opakowania>
+        <daneOWytworcy>
+            <wytworcy nazwaWytworcyImportera="Zentiva, k.s." krajWytworcyImportera="Czechy"/>
+        </daneOWytworcy>
+        <materialyEdukacyjne>
+            <dlaPacjenta/>
+            <dlaMedyka/>
+        </materialyEdukacyjne>
+    </produktLeczniczy>
     <produktLeczniczy nazwaProduktu="Wpis bez identyfikatora" rodzajPreparatu="ludzki"/>
 </produktyLecznicze>

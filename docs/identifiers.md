@@ -10,4 +10,4 @@ Example: `CH|swissmedic|MedicinalProduct|123456|01`
 
 France uses the same formula: `FR|bdpm|MedicinalProduct|{CIS}` / `FR|bdpm|Package|{CIP13}`.
 
-Poland uses the same formula: `PL|rpl|MedicinalProduct|{id}` / `PL|rpl|Package|{GTIN or productId|packId}`.
+Poland uses the same formula: `PL|rpl|MedicinalProduct|{id}` / `PL|rpl|Package|{productId}|{packId}`.

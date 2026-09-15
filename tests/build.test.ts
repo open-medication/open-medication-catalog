@@ -355,8 +355,8 @@ describe("pl-base fixture build", () => {
     expect(result.official).toBe(true);
     expect(result.catalogue.jurisdiction).toBe("PL");
     expect(result.catalogue.productGroups).toHaveLength(0);
-    expect(result.catalogue.medicinalProducts).toHaveLength(3);
-    expect(result.catalogue.packages).toHaveLength(6);
+    expect(result.catalogue.medicinalProducts).toHaveLength(4);
+    expect(result.catalogue.packages).toHaveLength(8);
     expect(result.catalogue.reimbursements).toHaveLength(0);
 
     const zol = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000014");
@@ -368,7 +368,7 @@ describe("pl-base fixture build", () => {
     expect(zol?.declarationRows[0]?.quantityUnit?.display).toBe("mg");
     expect(zol?.metadata?.moc).toBe("4 mg/5 ml");
 
-    const pack = result.catalogue.packages.find((p) => p.authorityKey === "05909991023652");
+    const pack = result.catalogue.packages.find((p) => p.authorityKey === "100000014|2");
     expect(pack?.gtin).toBe("05909991023652");
     expect(pack?.jurisdiction).toBe("PL");
     expect(pack?.regulatoryStatus.display).toBe("aktywne");
@@ -392,6 +392,9 @@ describe("pl-base fixture build", () => {
     );
     expect(noGtin?.regulatoryStatus.display).toBe("skasowane");
     expect(result.catalogue.medicinalProducts.some((p) => p.authorityKey === "100005709")).toBe(false);
+
+    const sharedGtin = result.catalogue.packages.filter((p) => p.gtin === "05909990998203");
+    expect(sharedGtin.map((p) => p.authorityKey).sort()).toEqual(["100282886|151745", "100282886|78318"]);
 
     const med = fs.readFileSync(path.join(out, "release", "fhir-r4", "Medication.ndjson"), "utf8");
     expect(med).toContain("https://www.gs1.org/gtin");

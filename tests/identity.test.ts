@@ -93,6 +93,14 @@ describe("string identity invariant", () => {
     });
     expect(pl).not.toBe(fr);
     expect(pl).toBe(uuidv5("PL|rpl|MedicinalProduct|100000014", PROJECT_NAMESPACE));
+    expect(
+      canonicalId({
+        jurisdiction: "PL",
+        identityAuthority: "rpl",
+        entityType: "Package",
+        authorityKey: "100000014|2",
+      }),
+    ).toBe(uuidv5("PL|rpl|Package|100000014|2", PROJECT_NAMESPACE));
   });
 
   it("project namespace is UUIDv5(DNS, openmedicationcatalog.org)", () => {

@@ -256,7 +256,7 @@ export class RplAdapter implements Adapter {
         const packId = attr(pack, RplXml.id) || "";
         const gtinRaw = attr(pack, RplXml.gtinCode);
         const gtin = gtinDigits(gtinRaw);
-        const packKey = gtin || (packId ? `${productId}|${packId}` : "");
+        const packKey = packId ? authorityKey([productId, packId]) : gtin || "";
         if (!packKey) continue;
         const description = packDescription(pack) || gtinRaw || packKey;
         packages.push({
