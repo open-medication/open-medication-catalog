@@ -67,6 +67,8 @@ export const RPL_SYSTEMS = {
   route: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-route",
   regulatoryStatus: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-regulatory-status",
   ingredientRole: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-ingredient-role",
+  preparationType: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-preparation-type",
+  species: "https://fhir.openmedicationcatalog.org/CodeSystem/pl-rpl-species",
 } as const;
 
 export const BDPM_SYSTEMS = {

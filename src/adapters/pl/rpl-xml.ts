@@ -77,13 +77,11 @@ export class RplXml {
   static readonly measureValue = "wartoscMiary";
   static readonly measureUnit = "jednostkaMiary";
 
-  static readonly veterinaryIgnored = `${RplXml.medicinalProduct}.${RplXml.preparationType}[veterinary]`;
   static readonly incompleteIgnored = `${RplXml.medicinalProduct}[incomplete]`;
 }
 
 /** Recurring coded values in the RPL dump (not element names). */
 export class RplValue {
-  static readonly human = "ludzki";
   static readonly none = "brak";
   static readonly yes = "TAK";
   static readonly cancelled = "skasowane";

@@ -51,7 +51,6 @@ interface RplParsed {
   products: Record<string, unknown>[];
   exportDate?: string;
   coverage: MappingCoverageReport;
-  ignoredVeterinary: number;
   ignoredIncomplete: number;
 }
 
@@ -115,13 +114,10 @@ export class RplAdapter implements Adapter {
       (p): p is Record<string, unknown> => Boolean(p) && typeof p === "object" && !Array.isArray(p),
     );
 
-    let ignoredVeterinary = 0;
     let ignoredIncomplete = 0;
     for (const product of products) {
       if (!attr(product, RplXml.id)) ignoredIncomplete += 1;
-      else if (!isHuman(product)) ignoredVeterinary += 1;
     }
-    seen.set(RplXml.veterinaryIgnored, ignoredVeterinary);
     seen.set(RplXml.incompleteIgnored, ignoredIncomplete);
 
     for (const key of seen.keys()) {
@@ -136,7 +132,7 @@ export class RplAdapter implements Adapter {
       console.warn(`RPL unknown fields: ${coverage.unknownFields.join(", ")}`);
     }
 
-    return { products, exportDate, coverage, ignoredVeterinary, ignoredIncomplete };
+    return { products, exportDate, coverage, ignoredIncomplete };
   }
 
   async normalize(_ctx: AdapterContext, parsed: unknown, snapshot: SourceSnapshot): Promise<PartialCatalogue> {
@@ -155,7 +151,6 @@ export class RplAdapter implements Adapter {
     for (const row of data.products) {
       const productId = attr(row, RplXml.id);
       if (!productId) continue;
-      if (!isHuman(row)) continue;
 
       const holderName = attr(row, RplXml.marketingAuthorisationHolder);
       const holder = holderName ? upsertOrg(orgByKey, organizations, holderName, snapshot) : undefined;
@@ -178,10 +173,14 @@ export class RplAdapter implements Adapter {
       const atcCodes = asArray(nested(row, RplXml.atcCodes)?.[RplXml.atcCode])
         .map((c) => text(c).trim())
         .filter(Boolean);
-      const routes = asArray(nested(row, RplXml.routesOfAdministration)?.[RplXml.routeOfAdministration])
-        .map((r) => (typeof r === "object" && r ? attr(r as Record<string, unknown>, RplXml.routeName) : text(r).trim()))
+      const routeNodes = asArray(nested(row, RplXml.routesOfAdministration)?.[RplXml.routeOfAdministration]).filter(
+        (r): r is Record<string, unknown> => Boolean(r) && typeof r === "object" && !Array.isArray(r),
+      );
+      const routes = routeNodes
+        .map((r) => attr(r, RplXml.routeName) || text(r).trim())
         .filter(Boolean)
         .map((r) => coded(RPL_SYSTEMS.route, r)!);
+      const speciesNames = speciesFromRoutes(routeNodes);
 
       const substanceRows = asArray(nested(row, RplXml.activeSubstances)?.[RplXml.activeSubstance]).filter(
         (s): s is Record<string, unknown> => Boolean(s) && typeof s === "object" && !Array.isArray(s),
@@ -211,6 +210,8 @@ export class RplAdapter implements Adapter {
         identifiers: [
           { system: RPL_SYSTEMS.product, value: productId, use: "official" },
           ...atcCodes.map((code) => ({ system: WHO_ATC_SYSTEM, value: code })),
+          ...preparationTypeIdentifier(row),
+          ...speciesNames.map((name) => ({ system: RPL_SYSTEMS.species, value: name })),
         ],
         declarationRows: composition.declarationRows,
         ingredients: composition.ingredients,
@@ -222,6 +223,9 @@ export class RplAdapter implements Adapter {
           [RplXml.authorisationValidity]: attr(row, RplXml.authorisationValidity),
           [RplXml.previousProductName]: blankish(attr(row, RplXml.previousProductName)),
           [RplXml.legalBasis]: attr(row, RplXml.legalBasis),
+          [RplXml.preparationType]: attr(row, RplXml.preparationType),
+          [RplXml.species]: speciesNames.join("; ") || undefined,
+          [RplXml.withdrawalPeriods]: withdrawalPeriods(routeNodes) || undefined,
           [RplXml.animalUseProhibition]: attr(row, RplXml.animalUseProhibition),
           [RplXml.patientLeafletUrl]: attr(row, RplXml.patientLeafletUrl),
           [RplXml.smpcUrl]: attr(row, RplXml.smpcUrl),
@@ -367,8 +371,46 @@ function nested(node: Record<string, unknown>, name: string): Record<string, unk
   return value as Record<string, unknown>;
 }
 
-function isHuman(row: Record<string, unknown>): boolean {
-  return (attr(row, RplXml.preparationType) ?? "").trim().toLowerCase() === RplValue.human;
+function preparationTypeIdentifier(row: Record<string, unknown>): { system: string; value: string }[] {
+  const value = attr(row, RplXml.preparationType)?.trim();
+  return value ? [{ system: RPL_SYSTEMS.preparationType, value }] : [];
+}
+
+function speciesFromRoutes(routes: Record<string, unknown>[]): string[] {
+  const names = new Set<string>();
+  for (const route of routes) {
+    for (const species of speciesNodes(route)) {
+      const name = attr(species, RplXml.speciesName);
+      if (name) names.add(name);
+    }
+  }
+  return [...names];
+}
+
+function withdrawalPeriods(routes: Record<string, unknown>[]): string | undefined {
+  const parts: string[] = [];
+  for (const route of routes) {
+    for (const species of speciesNodes(route)) {
+      const name = attr(species, RplXml.speciesName);
+      const periods = asArray(nested(species, RplXml.withdrawalPeriods)?.[RplXml.withdrawalPeriod]).filter(
+        (p): p is Record<string, unknown> => Boolean(p) && typeof p === "object" && !Array.isArray(p),
+      );
+      for (const period of periods) {
+        const tissue = attr(period, RplXml.tissueName);
+        const measure = [attr(period, RplXml.measureValue), attr(period, RplXml.measureUnit)].filter(Boolean).join(" ");
+        const detail = [tissue, measure].filter(Boolean).join(": ");
+        if (!detail) continue;
+        parts.push(name ? `${name} | ${detail}` : detail);
+      }
+    }
+  }
+  return parts.join("; ") || undefined;
+}
+
+function speciesNodes(route: Record<string, unknown>): Record<string, unknown>[] {
+  return asArray(nested(route, RplXml.species)?.[RplXml.speciesItem]).filter(
+    (s): s is Record<string, unknown> => Boolean(s) && typeof s === "object" && !Array.isArray(s),
+  );
 }
 
 function blankish(value?: string): string | undefined {

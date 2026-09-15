@@ -355,8 +355,8 @@ describe("pl-base fixture build", () => {
     expect(result.official).toBe(true);
     expect(result.catalogue.jurisdiction).toBe("PL");
     expect(result.catalogue.productGroups).toHaveLength(0);
-    expect(result.catalogue.medicinalProducts).toHaveLength(4);
-    expect(result.catalogue.packages).toHaveLength(9);
+    expect(result.catalogue.medicinalProducts).toHaveLength(5);
+    expect(result.catalogue.packages).toHaveLength(10);
     expect(result.catalogue.reimbursements).toHaveLength(0);
 
     const zol = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000014");
@@ -417,13 +417,13 @@ describe("pl-base fixture build", () => {
     expect(pack?.fieldProvenance?.description?.originalField).toBe("jednostkiOpakowania");
     expect(result.catalogue.mappingCoverage[0]?.unknownFields).toEqual([]);
     expect(
-      result.catalogue.mappingCoverage[0]?.fields.find((f) =>
-        f.name.endsWith("produktLeczniczy.rodzajPreparatu[veterinary]"),
-      )?.count,
-    ).toBe(1);
-    expect(
       result.catalogue.mappingCoverage[0]?.fields.find((f) => f.name.endsWith("produktLeczniczy[incomplete]"))?.count,
     ).toBe(1);
+    expect(
+      result.catalogue.mappingCoverage[0]?.fields.some((f) =>
+        f.name.endsWith("produktLeczniczy.rodzajPreparatu[veterinary]"),
+      ),
+    ).toBe(false);
 
     const noGtin = result.catalogue.packages.find((p) => p.authorityKey === "100000505|122162");
     expect(noGtin?.gtin).toBeUndefined();
@@ -436,7 +436,19 @@ describe("pl-base fixture build", () => {
     expect(listed?.metadata?.waznoscPozwolenia).toBeUndefined();
     expect(result.catalogue.authorizations.find((a) => a.authorityKey === "100000505")?.status.display).toBe("aktywne");
     expect(result.catalogue.medicinalProducts.every((p) => p.regulatoryStatus.display === "aktywne")).toBe(true);
-    expect(result.catalogue.medicinalProducts.some((p) => p.authorityKey === "100005709")).toBe(false);
+    const vet = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100005709");
+    expect(vet?.names[0]?.text).toBe("Parvoerysin");
+    expect(vet?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type") && i.value === "weterynaryjny")).toBe(
+      true,
+    );
+    expect(zol?.identifiers.some((i) => i.system.includes("pl-rpl-preparation-type") && i.value === "ludzki")).toBe(true);
+    expect(vet?.identifiers.some((i) => i.system === "http://www.whocc.no/atc" && i.value === "QI09AL01")).toBe(true);
+    expect(vet?.identifiers.some((i) => i.system.includes("pl-rpl-species") && i.value === "świnia")).toBe(true);
+    expect(vet?.routes[0]?.display).toBe("Podanie domięśniowe");
+    expect(vet?.metadata?.okresyKarencji).toBe("świnia | tkanki jadalne: 0.0 dni");
+    const vetPack = result.catalogue.packages.find((p) => p.authorityKey === "100005709|52184");
+    expect(vetPack?.gtin).toBe("5909991029876");
+    expect(vetPack?.description).toBe("1× fiol. 10 ml");
 
     const sharedGtin = result.catalogue.packages.filter((p) => p.gtin === "05909990998203");
     expect(sharedGtin.map((p) => p.authorityKey).sort()).toEqual(["100282886|151745", "100282886|78318"]);
@@ -480,6 +492,8 @@ describe("pl-base fixture build", () => {
     expect(mpd).toContain("MedicinalProductDefinition");
     expect(mpd).toContain("/sid/pl/rpl/product");
     expect(mpd).toContain("Edelan");
+    expect(mpd).toContain("Parvoerysin");
+    expect(mpd).toContain("weterynaryjny");
     expect(mpd).toContain('"code":"aktywne"');
     expect(mpd).not.toContain('"code":"skasowane"');
     expect(mpd).not.toContain("Bezterminowe");
