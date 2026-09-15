@@ -22,10 +22,10 @@ export type AuthorityKey = string;
 export type MappingClass = "mapped" | "intentionally-ignored" | "retained-as-metadata" | "unknown";
 
 /**
- * OMC canonical catalogue 0.1.1. JSON Schema is the source of truth; TypeScript types are generated from this file.
+ * OMC canonical catalogue 0.1.2. JSON Schema is the source of truth; TypeScript types are generated from this file.
  */
 export interface Catalogue {
-  schemaVersion: "0.1.1";
+  schemaVersion: "0.1.2";
   artifactId: string;
   release?: string;
   jurisdiction: string;
@@ -50,6 +50,7 @@ export interface ProductGroup {
   identityAuthority: string;
   authorityKey: AuthorityKey;
   names: LocalizedName[];
+  domain: CodedValue;
   atc?: CodedValue;
   regulatoryStatus: CodedValue;
   authorizationHolderId?: EntityId;
@@ -113,6 +114,7 @@ export interface MedicinalProduct {
   authorityKey: AuthorityKey;
   productGroupId?: EntityId;
   names: LocalizedName[];
+  domain: CodedValue;
   doseForm?: CodedValue;
   routes: CodedValue[];
   regulatoryStatus: CodedValue;
@@ -179,6 +181,7 @@ export interface Package {
   productGroupId?: EntityId;
   description: string;
   quantity: PackageQuantity;
+  domain: CodedValue;
   packageType?: CodedValue;
   regulatoryStatus: CodedValue;
   marketingStatus?: CodedValue;

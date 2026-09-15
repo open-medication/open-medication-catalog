@@ -4,7 +4,7 @@ import { parseXmlString } from "../src/xml.js";
 import { emptyCatalogue } from "../src/adapters/compose.js";
 import { canonicalId } from "../src/identity.js";
 import { authorityKey } from "../src/branded.js";
-import { SWISSMEDIC_SYSTEMS, type Package, type SourceSnapshot } from "../src/canonical/types.js";
+import { SWISSMEDIC_SYSTEMS, medicinalProductDomain, type Package, type SourceSnapshot } from "../src/canonical/types.js";
 import { applyBag, BagAdapter, loadFhirResources } from "../src/adapters/ch/bag.js";
 import fs from "node:fs";
 import os from "node:os";
@@ -51,6 +51,7 @@ describe("refdata join", () => {
       identityAuthority: "swissmedic",
       authorityKey: "001|01|001",
       medicinalProductId: mpId,
+      domain: medicinalProductDomain("Human"),
       description: "001 10 tablet(s)",
       quantity: { structured: false },
       regulatoryStatus: { system: SWISSMEDIC_SYSTEMS.regulatoryStatus, code: "Z" },
@@ -131,6 +132,7 @@ describe("BAG join", () => {
       identityAuthority: "swissmedic",
       authorityKey: "10029|2|2",
       medicinalProductId: mpId,
+      domain: medicinalProductDomain("Human"),
       description: "200 ML",
       quantity: { structured: false },
       gtin: "7680687930017",

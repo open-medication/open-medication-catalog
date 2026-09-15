@@ -42,6 +42,10 @@ export function exportR5(catalogue: Catalogue, releaseLabel: string): Record<str
           ...mp.identifiers,
         ],
         name: [{ productName: mp.names[0]?.text }],
+        domain: {
+          coding: [{ ...mp.domain, code: fhirCode(mp.domain.code) }],
+          text: mp.domain.display,
+        },
         combinedPharmaceuticalDoseForm: mp.doseForm
           ? {
               coding: [{ ...mp.doseForm, code: fhirCode(mp.doseForm.code) }],

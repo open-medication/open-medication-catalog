@@ -20,6 +20,7 @@ import {
   type Package,
   type ProductGroup,
   SWISSMEDIC_SYSTEMS,
+  medicinalProductDomain,
   type SourceSnapshot,
   type Substance,
 } from "../../canonical/types.js";
@@ -251,12 +252,14 @@ export class SwissmedicAdapter implements Adapter {
     }
     const orgByPartner = new Map(organizations.map((o) => [o.authorityKey, o]));
 
-    const humanAuth = new Set<string>();
+    const domain = medicinalProductDomain(ctx.domain === "Veterinary" ? "Veterinary" : "Human");
+    const wantedVerwendung = domain.code === "Veterinary" ? "TAM" : "HAM";
+    const domainAuth = new Set<string>();
     const productGroups: ProductGroup[] = [];
     for (const row of data.files.praeparate ?? []) {
-      if (text(row.VERWENDUNG) !== "HAM") continue;
+      if (text(row.VERWENDUNG) !== wantedVerwendung) continue;
       const authNo = asAuthorisationNumber(text(row.ZULASSUNGSNUMMER));
-      humanAuth.add(authNo);
+      domainAuth.add(authNo);
       const holder = optionalText(row.ZULASSUNGSINHABERIN);
       const atcCode = optionalText(row.ATC_CODE);
       productGroups.push({
@@ -270,6 +273,7 @@ export class SwissmedicAdapter implements Adapter {
         identityAuthority: AUTHORITY,
         authorityKey: authNo,
         names: [{ text: text(row.PRAEPARATENAME), language: "de" }],
+        domain,
         atc: atcCode
           ? { system: "http://www.whocc.no/atc", code: atcCode, display: atcDesc.get(atcCode) }
           : undefined,
@@ -292,7 +296,7 @@ export class SwissmedicAdapter implements Adapter {
     for (const row of data.files.routes ?? []) {
       const authNo = text(row.ZULASSUNGSNUMMER);
       const seq = text(row.SEQUENZNUMMER);
-      if (!humanAuth.has(authNo)) continue;
+      if (!domainAuth.has(authNo)) continue;
       const code = text(row.APPLIKATIONSART_CODE);
       const list = routesBySeq.get(`${authNo}|${seq}`) ?? [];
       list.push(coded(SWISSMEDIC_SYSTEMS.route, code, udc, "ROUTE_ADMIN"));
@@ -302,7 +306,7 @@ export class SwissmedicAdapter implements Adapter {
     const declBySeq = new Map<string, Record<string, unknown>[]>();
     for (const row of data.files.deklarationen ?? []) {
       const authNo = text(row.ZULASSUNGSNUMMER);
-      if (!humanAuth.has(authNo)) continue;
+      if (!domainAuth.has(authNo)) continue;
       const key = `${authNo}|${text(row.SEQUENZNUMMER)}`;
       const list = declBySeq.get(key) ?? [];
       list.push(row);
@@ -316,7 +320,7 @@ export class SwissmedicAdapter implements Adapter {
 
     for (const row of data.files.sequenzen ?? []) {
       const authNo = asAuthorisationNumber(text(row.ZULASSUNGSNUMMER));
-      if (!humanAuth.has(authNo)) continue;
+      if (!domainAuth.has(authNo)) continue;
       const seq = asSequenceNumber(text(row.SEQUENZNUMMER));
       const group = groupByAuth.get(authNo);
       const key = `${authNo}|${seq}`;
@@ -347,6 +351,7 @@ export class SwissmedicAdapter implements Adapter {
         authorityKey: `${authNo}|${seq}`,
         productGroupId: group?.id,
         names: [{ text: text(row.SEQUENZNAME) || group?.names[0]?.text || "", language: "de" }],
+        domain,
         doseForm: undefined,
         routes: routesBySeq.get(key) ?? [],
         regulatoryStatus: coded(SWISSMEDIC_SYSTEMS.regulatoryStatus, text(row.ZULASSUNGSSTATUS), udc, "MA_STATUS"),
@@ -370,7 +375,7 @@ export class SwissmedicAdapter implements Adapter {
     // Fix dose form properly (avoid the messy ternary above) — recompute from praeparate.
     const formByAuth = new Map<string, string>();
     for (const row of data.files.praeparate ?? []) {
-      if (text(row.VERWENDUNG) === "HAM") {
+      if (text(row.VERWENDUNG) === wantedVerwendung) {
         formByAuth.set(text(row.ZULASSUNGSNUMMER), text(row.ARZNEIFORM));
       }
     }
@@ -383,7 +388,7 @@ export class SwissmedicAdapter implements Adapter {
     const packages: Package[] = [];
     for (const row of data.files.packungen ?? []) {
       const authNo = asAuthorisationNumber(text(row.ZULASSUNGSNUMMER));
-      if (!humanAuth.has(authNo)) continue;
+      if (!domainAuth.has(authNo)) continue;
       const seq = asSequenceNumber(text(row.SEQUENZNUMMER));
       const pack = asPackageCode(text(row.PACKUNGSCODE));
       const mp = medicinalProducts.find((p) => p.authorityKey === `${authNo}|${seq}`);
@@ -412,6 +417,7 @@ export class SwissmedicAdapter implements Adapter {
           unit: !weird ? unit : undefined,
           structured: Boolean(!weird && size && unitCode && /^\d+([.,]\d+)?$/.test(size)),
         },
+        domain,
         packageType: optionalText(row.PACKUNGSTYP)
           ? coded(SWISSMEDIC_SYSTEMS.packageUnit, text(row.PACKUNGSTYP), udc, "PAC_TYPE")
           : undefined,

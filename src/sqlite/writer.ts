@@ -15,6 +15,7 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
       identity_authority TEXT NOT NULL,
       authority_key TEXT NOT NULL,
       name TEXT NOT NULL,
+      domain TEXT NOT NULL,
       atc_code TEXT,
       regulatory_status TEXT NOT NULL,
       authorization_holder_id TEXT
@@ -26,6 +27,7 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
       identity_authority TEXT NOT NULL,
       authority_key TEXT NOT NULL,
       name TEXT NOT NULL,
+      domain TEXT NOT NULL,
       dose_form TEXT,
       regulatory_status TEXT NOT NULL
     );
@@ -37,6 +39,7 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
       identity_authority TEXT NOT NULL,
       authority_key TEXT NOT NULL,
       description TEXT NOT NULL,
+      domain TEXT NOT NULL,
       quantity_value TEXT,
       quantity_unit TEXT,
       quantity_structured INTEGER NOT NULL,
@@ -124,6 +127,7 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
         mp.authority_key AS source_product_id,
         pg.id AS product_group_id,
         pg.name AS group_name,
+        p.domain,
         p.regulatory_status,
         p.marketing_status,
         p.reimbursement_status,
@@ -136,13 +140,13 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
   `);
 
   const insG = db.prepare(
-    `INSERT INTO product_group VALUES (@id,@jurisdiction,@identity_authority,@authority_key,@name,@atc_code,@regulatory_status,@authorization_holder_id)`,
+    `INSERT INTO product_group VALUES (@id,@jurisdiction,@identity_authority,@authority_key,@name,@domain,@atc_code,@regulatory_status,@authorization_holder_id)`,
   );
   const insMp = db.prepare(
-    `INSERT INTO medicinal_product VALUES (@id,@product_group_id,@jurisdiction,@identity_authority,@authority_key,@name,@dose_form,@regulatory_status)`,
+    `INSERT INTO medicinal_product VALUES (@id,@product_group_id,@jurisdiction,@identity_authority,@authority_key,@name,@domain,@dose_form,@regulatory_status)`,
   );
   const insP = db.prepare(
-    `INSERT INTO package VALUES (@id,@medicinal_product_id,@product_group_id,@jurisdiction,@identity_authority,@authority_key,@description,@quantity_value,@quantity_unit,@quantity_structured,@gtin,@regulatory_status,@marketing_status,@reimbursement_status,@marketing_valid_from,@marketing_valid_to)`,
+    `INSERT INTO package VALUES (@id,@medicinal_product_id,@product_group_id,@jurisdiction,@identity_authority,@authority_key,@description,@domain,@quantity_value,@quantity_unit,@quantity_structured,@gtin,@regulatory_status,@marketing_status,@reimbursement_status,@marketing_valid_from,@marketing_valid_to)`,
   );
   const insO = db.prepare(`INSERT INTO organization VALUES (@id,@name,@role,@authority_key)`);
   const insA = db.prepare(`INSERT INTO authorization VALUES (@id,@authority_key,@status,@holder_id)`);
@@ -169,6 +173,7 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
         identity_authority: g.identityAuthority,
         authority_key: g.authorityKey,
         name: g.names[0]?.text ?? "",
+        domain: g.domain.code,
         atc_code: g.atc?.code ?? null,
         regulatory_status: g.regulatoryStatus.code,
         authorization_holder_id: g.authorizationHolderId ?? null,
@@ -183,6 +188,7 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
         identity_authority: mp.identityAuthority,
         authority_key: mp.authorityKey,
         name: mp.names[0]?.text ?? "",
+        domain: mp.domain.code,
         dose_form: mp.doseForm?.display ?? mp.doseForm?.code ?? null,
         regulatory_status: mp.regulatoryStatus.code,
       });
@@ -207,6 +213,7 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
         identity_authority: pkg.identityAuthority,
         authority_key: pkg.authorityKey,
         description: pkg.description,
+        domain: pkg.domain.code,
         quantity_value: pkg.quantity.value ?? null,
         quantity_unit: pkg.quantity.unit?.display ?? pkg.quantity.unit?.code ?? null,
         quantity_structured: pkg.quantity.structured ? 1 : 0,

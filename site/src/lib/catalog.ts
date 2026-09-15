@@ -28,10 +28,22 @@ export const ARTIFACT_META: ArtifactMeta[] = [
     blurb: "Swissmedic medicinal-product export.",
   },
   {
+    id: "ch-vet-base",
+    title: "Switzerland: veterinary base",
+    jurisdiction: "CH",
+    blurb: "Swissmedic veterinary (TAM) medicinal-product export.",
+  },
+  {
     id: "ch-enriched",
     title: "Switzerland: enriched",
     jurisdiction: "CH",
     blurb: "Swissmedic export plus GTIN, trade status, and pack names from Refdata.",
+  },
+  {
+    id: "ch-vet-enriched",
+    title: "Switzerland: veterinary enriched",
+    jurisdiction: "CH",
+    blurb: "Swissmedic veterinary export plus GTIN, trade status, and pack names from Refdata.",
   },
   {
     id: "fr-base",

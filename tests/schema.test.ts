@@ -21,7 +21,7 @@ describe("canonical JSON Schema", () => {
 
   it("schema file is the committed source of truth", () => {
     const schema = JSON.parse(fs.readFileSync(repoPath("canonical/schema/catalogue.schema.json"), "utf8"));
-    expect(schema.$id).toContain("canonical/0.1.1/catalogue.schema.json");
-    expect(schema.properties.schemaVersion.const).toBe("0.1.1");
+    expect(schema.$id).toContain("canonical/0.1.2/catalogue.schema.json");
+    expect(schema.properties.schemaVersion.const).toBe("0.1.2");
   });
 });

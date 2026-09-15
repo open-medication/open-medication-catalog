@@ -17,6 +17,7 @@ import {
   type Reimbursement,
   type SourceSnapshot,
   type Substance,
+  medicinalProductDomain,
 } from "../../canonical/types.js";
 import { fhirCode } from "../../fhir/serialize.js";
 import { canonicalId } from "../../identity.js";
@@ -245,6 +246,7 @@ export class BdpmAdapter implements Adapter {
         identityAuthority: AUTHORITY,
         authorityKey: cis,
         names: [{ text: row.denomination?.trim() || cis, language: "fr" }],
+        domain: medicinalProductDomain("Human"),
         doseForm: coded(BDPM_SYSTEMS.doseForm, row.formePharmaceutique),
         routes: splitList(row.voiesAdministration)
           .map((r) => coded(BDPM_SYSTEMS.route, r))
@@ -339,6 +341,7 @@ export class BdpmAdapter implements Adapter {
         medicinalProductId: mp.id,
         description: row.libellePresentation?.trim() || packKey,
         quantity: { structured: false },
+        domain: medicinalProductDomain("Human"),
         regulatoryStatus: coded(BDPM_SYSTEMS.regulatoryStatus, row.statutAdministratif) ?? {
           system: BDPM_SYSTEMS.regulatoryStatus,
           code: "unknown",

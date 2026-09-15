@@ -2,9 +2,12 @@ import fs from "node:fs";
 import YAML from "yaml";
 import { repoPath } from "./paths.js";
 
+export type MedicinalProductDomainCode = "Human" | "Veterinary";
+
 export interface ArtifactRecipe {
   id: string;
   jurisdiction: string;
+  domain?: MedicinalProductDomainCode;
   requiredSources: string[];
   requiredArtifacts?: string[];
   attachRawSources: string[];
@@ -22,6 +25,7 @@ export function loadRecipes(file = repoPath("artifacts.yaml")): Map<string, Arti
     out.set(id, {
       id,
       jurisdiction: spec.jurisdiction,
+      domain: spec.domain,
       requiredSources: spec.requiredSources ?? [],
       requiredArtifacts: spec.requiredArtifacts,
       attachRawSources: spec.attachRawSources ?? [],
@@ -34,13 +38,13 @@ export function getRecipe(id: string): ArtifactRecipe {
   const recipe = loadRecipes().get(id);
   if (!recipe) {
     throw new Error(
-      `Unknown artifact '${id}'. Official builds use recipe ids from artifacts.yaml (e.g. ch-base, ch-enriched, fr-base).`,
+      `Unknown artifact '${id}'. Official builds use recipe ids from artifacts.yaml (e.g. ch-base, ch-vet-base, ch-enriched, fr-base).`,
     );
   }
   return recipe;
 }
 
-export const OFFICIAL_ARTIFACT_IDS = ["ch-base", "ch-enriched", "fr-base"] as const;
+export const OFFICIAL_ARTIFACT_IDS = [...loadRecipes().keys()].sort();
 
 export function isOfficialArtifactId(id: string): boolean {
   return loadRecipes().has(id);

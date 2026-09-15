@@ -5,6 +5,7 @@ Title: "Open Medicinal Product Definition (R5)"
 Description: "Canonical MedicinalProduct (Swissmedic Sequenz) → MedicinalProductDefinition. ProductGroup/Präparat is not projected as a resource."
 * identifier 1..*
 * name 1..*
+* domain 1..1
 * extension contains
     OmcJurisdictionR5 named jurisdiction 1..1 and
     OmcIdentityAuthorityR5 named identityAuthority 1..1 and

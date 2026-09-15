@@ -92,6 +92,7 @@ export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<str
         ext("identity-authority", pkg.identityAuthority),
         ext("omc-release", releaseLabel),
         ext("regulatory-status", pkg.regulatoryStatus.code, pkg.regulatoryStatus.system),
+        ext("domain", pkg.domain.code, pkg.domain.system),
         pkg.marketingStatus
           ? ext("marketing-status", pkg.marketingStatus.code, pkg.marketingStatus.system)
           : undefined,

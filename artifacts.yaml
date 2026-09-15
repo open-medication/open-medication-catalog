@@ -6,20 +6,38 @@ schemaVersion: "1"
 artifacts:
   ch-base:
     jurisdiction: CH
+    domain: Human
     requiredSources:
       - swissmedic
     attachRawSources:
       - swissmedic
   ch-enriched:
     jurisdiction: CH
+    domain: Human
     requiredSources:
       - swissmedic
       - refdata
       # bag is added only after redistribution terms are recorded.
     attachRawSources:
       - swissmedic
+  ch-vet-base:
+    jurisdiction: CH
+    domain: Veterinary
+    requiredSources:
+      - swissmedic
+    attachRawSources:
+      - swissmedic
+  ch-vet-enriched:
+    jurisdiction: CH
+    domain: Veterinary
+    requiredSources:
+      - swissmedic
+      - refdata
+    attachRawSources:
+      - swissmedic
   fr-base:
     jurisdiction: FR
+    domain: Human
     requiredSources:
       - bdpm
     attachRawSources:

@@ -4,9 +4,9 @@
 
 | Source | Role | Artifact |
 | --- | --- | --- |
-| Swissmedic OGD | Regulatory ground truth | `ch-base`, `ch-enriched` |
-| Refdata Article Refdatabase | GTIN, trade status, pack trade names (DE/FR/IT/EN), trade dates if present | `ch-enriched` only |
-| BAG Spezialitätenliste | Reimbursement (status, prices, limitations, cost share, gamme, dates, dossier) | adapter present; **not** in the public recipe until terms are cleared. Local: `omc build ch-enriched --enable-bag` |
+| Swissmedic OGD | Regulatory ground truth | `ch-base`, `ch-enriched` (HAM); `ch-vet-base`, `ch-vet-enriched` (TAM) |
+| Refdata Article Refdatabase | GTIN, trade status, pack trade names (DE/FR/IT/EN), trade dates if present | `ch-enriched` and `ch-vet-enriched` |
+| BAG Spezialitätenliste | Reimbursement (status, prices, limitations, cost share, gamme, dates, dossier) | adapter present; **not** in the public recipe until terms are cleared. Local: `omc build ch-enriched --enable-bag`. Not used for veterinary artifacts. |
 
 Enrichment maps fields Swissmedic OGD does **not** already carry. Join keys, ATC, Abgabekategorie, and sequence number are not copied from Refdata. BAG IDMP product fields that duplicate Swissmedic (dose form, ingredients, ATC, German regulatory name) are skipped.
 
@@ -18,7 +18,10 @@ Enrichment maps fields Swissmedic OGD does **not** already carry. Join keys, ATC
 | MedicinalProduct | Sequenz auth+sequence | Medication extension `medicinal-product-id` | MedicinalProductDefinition |
 | Package | Packung auth+sequence+pack code | Medication (one per package) | PackagedProductDefinition `packageFor` 1..1 |
 | Authorization | authorisation number | — | one RegulatedAuthorization, `subject` = all sequence MPDs |
+| Domain | Präparat `VERWENDUNG` (`HAM` / `TAM`) | Medication extension `domain` | `MedicinalProductDefinition.domain` |
 | Declaration row | auth+seq+component+ZEILENNUMMER+substance GUID | ingredient text | Ingredient |
+
+`HAM` maps to FHIR `Human`, `TAM` to `Veterinary` (`http://hl7.org/fhir/medicinal-product-domain`). Official recipes split by `VERWENDUNG`: `ch-base` / `ch-enriched` keep HAM only; `ch-vet-base` / `ch-vet-enriched` keep TAM. Domain is still set on every product so a merged store can tell them apart. R4 has no native slot, so the same Coding is an OMC extension on `Medication`.
 
 ## Declarations
 
@@ -30,7 +33,7 @@ Regulatory, marketing, reimbursement, and catalogue lifecycle are separate. R4 `
 
 ## Refdata join
 
-Join is authorisation number + pack code (strings). Invariant: within Swissmedic OGD, `(authorisationNumber, packageCode)` must not map to more than one sequence. Proven on the 2026-08 snapshot (0 collisions). Re-checked every `ch-base` build.
+Join is authorisation number + pack code (strings). Invariant: within Swissmedic OGD, `(authorisationNumber, packageCode)` must not map to more than one sequence. Proven on the 2026-08 snapshot (0 collisions). Re-checked every `ch-base` and `ch-vet-base` build.
 
 Refdata names are pack-level trade names (`NAME / Stärke / Menge / Form`), not sequence names. They go on `Package.names` (`de`/`fr`/`it`/`en`). Swissmedic `description` stays the original pack text. FHIR R5 puts the default-language name on `PackagedProductDefinition.name` and other languages on the [translation](http://hl7.org/fhir/StructureDefinition/translation) extension; R4 does the same on `Medication.code.text`. They are not copied onto `MedicinalProductDefinition.name`.
 
