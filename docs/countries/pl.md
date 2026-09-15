@@ -4,9 +4,9 @@
 
 | Source | Role | Artifact |
 | --- | --- | --- |
-| RPL overall.xml 6.0.0 | Regulatory ground truth: products, packs, composition, MA holder | `pl-base` |
+| RPL overall.xml 6.0.0 | Regulatory ground truth: products, packs, composition, MA holder | `pl-base` (human), `pl-vet-base` (veterinary) |
 
-Human and veterinary rows are both mapped. `rodzajPreparatu` (`ludzki` / `weterynaryjny`) becomes canonical `domain` (`http://hl7.org/fhir/medicinal-product-domain`, `Human` / `Veterinary`) on the MedicinalProduct and every Package. Products without an `id`, or with a missing/unknown `rodzajPreparatu`, are dropped. Target species (`gatunki`) are identifiers; withdrawal periods (`okresyKarencji`) stay in metadata. NFZ reimbursement is not in RPL and is not mapped. SmPC/PIL URLs and parallel-import extras stay in metadata. Manufacturer and educational-material XML is not mapped.
+`rodzajPreparatu` (`ludzki` / `weterynaryjny`) becomes canonical `domain` (`http://hl7.org/fhir/medicinal-product-domain`, `Human` / `Veterinary`) on the MedicinalProduct and every Package. Official recipes split by that field the same way Switzerland splits HAM/TAM: `pl-base` keeps `ludzki` only; `pl-vet-base` keeps `weterynaryjny`. Domain is still set on every product so a merged store can tell them apart. Products without an `id`, or with a missing/unknown `rodzajPreparatu`, are dropped. Target species (`gatunki`) are identifiers; withdrawal periods (`okresyKarencji`) stay in metadata. NFZ reimbursement is not in RPL and is not mapped. SmPC/PIL URLs and parallel-import extras stay in metadata. Manufacturer and educational-material XML is not mapped.
 
 ## Identity
 
@@ -35,4 +35,4 @@ None. RPL is not the NFZ list.
 
 ## Reproducibility
 
-`pl-base` attaches a zip of the downloaded `overall.xml`. RPL overwrites the 6.0.0 dump in place (incremental XML was withdrawn). Releases are still tagged `pl-base-YYYY.MM`; `omc next-month pl-base` ships the current month if that tag does not already exist. Cite Centrum e-Zdrowia / URPL, CC BY 4.0, and the dump date (`stanNaDzien`).
+`pl-base` and `pl-vet-base` each attach a zip of the downloaded `overall.xml`. RPL overwrites the 6.0.0 dump in place (incremental XML was withdrawn). Releases are still tagged `pl-base-YYYY.MM` / `pl-vet-base-YYYY.MM`; `omc next-month pl-base` ships the current month if that tag does not already exist. Cite Centrum e-Zdrowia / URPL, CC BY 4.0, and the dump date (`stanNaDzien`).

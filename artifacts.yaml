@@ -44,6 +44,14 @@ artifacts:
       - bdpm
   pl-base:
     jurisdiction: PL
+    domain: Human
+    requiredSources:
+      - rpl
+    attachRawSources:
+      - rpl
+  pl-vet-base:
+    jurisdiction: PL
+    domain: Veterinary
     requiredSources:
       - rpl
     attachRawSources:

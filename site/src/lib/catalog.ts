@@ -55,7 +55,13 @@ export const ARTIFACT_META: ArtifactMeta[] = [
     id: "pl-base",
     title: "Poland: base",
     jurisdiction: "PL",
-    blurb: "RPL medicinal products, packs, composition, and marketing-authorisation holders.",
+    blurb: "RPL human medicinal products, packs, composition, and marketing-authorisation holders.",
+  },
+  {
+    id: "pl-vet-base",
+    title: "Poland: veterinary base",
+    jurisdiction: "PL",
+    blurb: "RPL veterinary medicinal products, packs, composition, and marketing-authorisation holders.",
   },
 ];
 

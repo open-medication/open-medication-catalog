@@ -139,9 +139,10 @@ export class RplAdapter implements Adapter {
     return { products, exportDate, coverage, ignoredIncomplete };
   }
 
-  async normalize(_ctx: AdapterContext, parsed: unknown, snapshot: SourceSnapshot): Promise<PartialCatalogue> {
+  async normalize(ctx: AdapterContext, parsed: unknown, snapshot: SourceSnapshot): Promise<PartialCatalogue> {
     const data = parsed as RplParsed;
     if (data.exportDate) snapshot.sourceEffectiveDate = data.exportDate;
+    const wanted = ctx.domain === "Veterinary" ? "Veterinary" : "Human";
 
     const organizations: Organization[] = [];
     const orgByKey = new Map<string, Organization>();
@@ -156,7 +157,7 @@ export class RplAdapter implements Adapter {
       const productId = attr(row, RplXml.id);
       if (!productId) continue;
       const domain = rplDomain(row);
-      if (!domain) continue;
+      if (!domain || domain.code !== wanted) continue;
 
       const holderName = attr(row, RplXml.marketingAuthorisationHolder);
       const holder = holderName ? upsertOrg(orgByKey, organizations, holderName, snapshot) : undefined;

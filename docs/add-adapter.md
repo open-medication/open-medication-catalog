@@ -4,7 +4,7 @@
 2. Implement `Adapter` in `src/adapters/<jurisdiction>/` (`metadata`, `fetch`, `validateSource`, `parse`, `normalize`, `qualityReport`). `metadata()` must read licence fields from `source.yaml` via `loadSourceDescriptor` / `metadataFromDescriptor` — do not hardcode tags.
 3. Map into canonical `MedicinalProduct` (formulation/strength) and `Package`. Use optional `ProductGroup` only if the source has a real grouping (Swissmedic Präparat). Do not invent a group.
 4. IDs: `canonicalId({ jurisdiction, identityAuthority, entityType, authorityKey })`. Authority keys are strings.
-5. Add a recipe in `artifacts.yaml` (`fr-base`, `pl-base`, `ch-vet-base`, etc.). Official CLI is `omc build <recipe-id>`. Set `domain: Human` or `Veterinary` when the source splits that way; omit it for a combined catalog.
+5. Add a recipe in `artifacts.yaml` (`fr-base`, `pl-base`, `pl-vet-base`, `ch-vet-base`, etc.). Official CLI is `omc build <recipe-id>`. Set `domain: Human` or `Veterinary` so official `*-base` is human-only and veterinary rows get a `*-vet-base`.
 6. Add fixtures, mapping coverage, and a country doc under `docs/countries/`.
 7. FHIR exporters are country-neutral; do not special-case parsing in `src/pipeline`.
 

@@ -7,7 +7,7 @@ export interface AdapterContext {
   releaseMonth: string; // YYYY.MM data month
   cutoffDate: string; // expected sourceEffectiveDate YYYY-MM-DD
   archiveMonth: string; // YYYYMM for Swissmedic archive filename
-  /** HAM vs TAM filter for Swissmedic. Defaults to Human. */
+  /** HAM vs TAM / ludzki vs weterynaryjny filter. Defaults to Human. */
   domain?: "Human" | "Veterinary";
 }
 
