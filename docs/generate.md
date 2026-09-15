@@ -6,6 +6,7 @@ pnpm omc build ch-base --input ./OGD_202608.ZIP --month 2026.08
 pnpm omc build ch-vet-base --input ./OGD_202608.ZIP --month 2026.08
 pnpm omc build fr-base --input fixtures/fr/bdpm/BDPM_FIXTURE.zip --month 2026.09
 pnpm omc build pl-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09
+pnpm omc build pl-vet-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09
 ```
 
 Outputs under `output/ch-base/`:
@@ -17,7 +18,7 @@ Outputs under `output/ch-base/`:
 - `release/licensing/` — upstream terms URLs, flags, checksums, and disclaimer
 - `ch-base-2026.08.zip`
 
-Live Swissmedic fetch uses the immutable archive `OGD_YYYYMM.zip` (the server uses lowercase; `.ZIP` is tried as a fallback), not the overwritten `OGD.zip`. France uses the live BDPM txt files (overwritten in place) and still tags releases `fr-base-YYYY.MM`. Poland uses the live RPL `overall.xml` 6.0.0 dump (overwritten in place) and still tags releases `pl-base-YYYY.MM`. `pnpm omc next-month ch-base` / `ch-vet-base` / `fr-base` / `pl-base` reports the newest unpublished month relative to GitHub Releases.
+Live Swissmedic fetch uses the immutable archive `OGD_YYYYMM.zip` (the server uses lowercase; `.ZIP` is tried as a fallback), not the overwritten `OGD.zip`. France uses the live BDPM txt files (overwritten in place) and still tags releases `fr-base-YYYY.MM`. Poland uses the live RPL `overall.xml` 6.0.0 dump (overwritten in place) and still tags releases `pl-base-YYYY.MM` / `pl-vet-base-YYYY.MM`. `pnpm omc next-month ch-base` / `ch-vet-base` / `fr-base` / `pl-base` / `pl-vet-base` reports the newest unpublished month relative to GitHub Releases.
 
 Regenerate canonical TypeScript types after editing `canonical/schema/catalogue.schema.json`:
 
