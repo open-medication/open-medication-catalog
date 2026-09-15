@@ -14,6 +14,13 @@
       "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-enriched-2026.08/ch-enriched-2026.08.zip",
       "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-enriched-2026.08/manifest.json"
     },
+    "ch-vet-base": {
+      "latest": "2026.08",
+      "tag": "ch-vet-base-2026.08",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-vet-base-2026.08",
+      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-vet-base-2026.08/ch-vet-base-2026.08.zip",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-vet-base-2026.08/manifest.json"
+    },
     "fr-base": {
       "latest": "2026.09",
       "tag": "fr-base-2026.09",
