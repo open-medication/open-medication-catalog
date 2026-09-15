@@ -394,12 +394,11 @@ describe("pl-base fixture build", () => {
       result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000505")?.id,
     );
     expect(noGtin?.regulatoryStatus.display).toBe("skasowane");
-    const withdrawn = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000505");
-    expect(withdrawn?.regulatoryStatus.display).toBe("skasowane");
-    expect(withdrawn?.metadata?.waznoscPozwolenia).toBeUndefined();
-    expect(result.catalogue.authorizations.find((a) => a.authorityKey === "100000505")?.status.display).toBe(
-      "skasowane",
-    );
+    const listed = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000505");
+    expect(listed?.regulatoryStatus.display).toBe("aktywne");
+    expect(listed?.metadata?.waznoscPozwolenia).toBeUndefined();
+    expect(result.catalogue.authorizations.find((a) => a.authorityKey === "100000505")?.status.display).toBe("aktywne");
+    expect(result.catalogue.medicinalProducts.every((p) => p.regulatoryStatus.display === "aktywne")).toBe(true);
     expect(result.catalogue.medicinalProducts.some((p) => p.authorityKey === "100005709")).toBe(false);
 
     const sharedGtin = result.catalogue.packages.filter((p) => p.gtin === "05909990998203");
@@ -435,7 +434,7 @@ describe("pl-base fixture build", () => {
     expect(mpd).toContain("/sid/pl/rpl/product");
     expect(mpd).toContain("Edelan");
     expect(mpd).toContain('"code":"aktywne"');
-    expect(mpd).toContain('"code":"skasowane"');
+    expect(mpd).not.toContain('"code":"skasowane"');
     expect(mpd).not.toContain("Bezterminowe");
 
     const ppd = fs.readFileSync(

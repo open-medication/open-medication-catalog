@@ -195,7 +195,7 @@ export class RplAdapter implements Adapter {
       const packRows = asArray(nested(row, RplXml.packages)?.[RplXml.pack]).filter(
         (p): p is Record<string, unknown> => Boolean(p) && typeof p === "object" && !Array.isArray(p),
       );
-      const status = productStatus(packRows);
+      const listed = listedStatus();
       medicinalProducts.push({
         id: mpId,
         jurisdiction: JURISDICTION,
@@ -204,7 +204,7 @@ export class RplAdapter implements Adapter {
         names,
         doseForm: coded(RPL_SYSTEMS.doseForm, attr(row, RplXml.doseFormName)),
         routes,
-        regulatoryStatus: status,
+        regulatoryStatus: listed,
         authorizationId: authId,
         identifiers: [
           { system: RPL_SYSTEMS.product, value: productId, use: "official" },
@@ -241,7 +241,7 @@ export class RplAdapter implements Adapter {
           identityAuthority: AUTHORITY,
           authorityKey: authKey,
           holderId: holder?.id,
-          status,
+          status: listed,
           medicinalProductIds: [mpId],
           identifiers: [{ system: RPL_SYSTEMS.authorisation, value: authKey }],
           sourceRecords: [ref(snapshot, authKey)],
@@ -250,7 +250,6 @@ export class RplAdapter implements Adapter {
         authorizations.push(auth);
       } else {
         auth.medicinalProductIds.push(mpId);
-        if (status.code === RplValue.active) auth.status = status;
       }
 
       for (const pack of packRows) {
@@ -437,9 +436,8 @@ function packStatus(pack: Record<string, unknown>): CodedValue {
   return coded(RPL_SYSTEMS.regulatoryStatus, packWithdrawn(pack) ? RplValue.cancelled : RplValue.active)!;
 }
 
-function productStatus(packRows: Record<string, unknown>[]): CodedValue {
-  const withdrawn = packRows.length > 0 && packRows.every(packWithdrawn);
-  return coded(RPL_SYSTEMS.regulatoryStatus, withdrawn ? RplValue.cancelled : RplValue.active)!;
+function listedStatus(): CodedValue {
+  return coded(RPL_SYSTEMS.regulatoryStatus, RplValue.active)!;
 }
 
 function upsertOrg(

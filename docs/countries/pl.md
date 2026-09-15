@@ -22,7 +22,7 @@ IDs use the same formula as Switzerland: `UUIDv5(projectNamespace, PL|rpl|{entit
 
 There is no `ProductGroup`. RPL is product + packages, not a Präparat/Sequenz tree.
 
-Pack GTIN is emitted as `https://www.gs1.org/gtin`. ATC codes use `http://www.whocc.no/atc`. Dose form, route, and regulatory status stay RPL source text (no invented EDQM). Pack `regulatoryStatus` is withdrawn (`skasowane`) vs active (`aktywne`). Product and authorization status use the same pair: `skasowane` only when every pack is cancelled; otherwise `aktywne` (including products with no packs). MA validity (`waznoscPozwolenia`) stays in metadata — it is a date or `Bezterminowe`, not a status code. Rx/OTC (`kategoriaDostepnosci`) stays in metadata.
+Pack GTIN is emitted as `https://www.gs1.org/gtin`. ATC codes use `http://www.whocc.no/atc`. Dose form, route, and regulatory status stay RPL source text (no invented EDQM). Pack `regulatoryStatus` is withdrawn (`skasowane`) vs active (`aktywne`) — that is the only RPL cancelled flag. Product and authorization status are `aktywne` while the row is in this dump (RPL has no product/MA `skasowane`). A product that disappears in a later month shows up in `changes.json`. MA validity (`waznoscPozwolenia`) stays in metadata — it is a date or `Bezterminowe`, not a status code. Rx/OTC (`kategoriaDostepnosci`) stays in metadata.
 
 R4 `Medication.status` follows pack lifecycle (`aktywne` → `active`, `skasowane` → `inactive`). Active substances are `Medication.ingredient` (role `substancja czynna`). Strength stays text on the canonical row and on R5 `Ingredient`; R4 `ingredient.strength` is only emitted when a structured ratio exists.
 
