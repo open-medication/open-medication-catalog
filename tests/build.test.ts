@@ -355,8 +355,8 @@ describe("pl-base fixture build", () => {
     expect(result.official).toBe(true);
     expect(result.catalogue.jurisdiction).toBe("PL");
     expect(result.catalogue.productGroups).toHaveLength(0);
-    expect(result.catalogue.medicinalProducts).toHaveLength(2);
-    expect(result.catalogue.packages).toHaveLength(5);
+    expect(result.catalogue.medicinalProducts).toHaveLength(3);
+    expect(result.catalogue.packages).toHaveLength(6);
     expect(result.catalogue.reimbursements).toHaveLength(0);
 
     const zol = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000014");
@@ -376,6 +376,22 @@ describe("pl-base fixture build", () => {
     expect(pack?.quantity?.unit?.system).toContain("pl-rpl-package-unit");
     expect(pack?.fieldProvenance?.description?.originalField).toBe("jednostkiOpakowania");
     expect(result.catalogue.mappingCoverage[0]?.unknownFields).toEqual([]);
+    expect(
+      result.catalogue.mappingCoverage[0]?.fields.find((f) =>
+        f.name.endsWith("produktLeczniczy.rodzajPreparatu[veterinary]"),
+      )?.count,
+    ).toBe(1);
+    expect(
+      result.catalogue.mappingCoverage[0]?.fields.find((f) => f.name.endsWith("produktLeczniczy[incomplete]"))?.count,
+    ).toBe(1);
+
+    const noGtin = result.catalogue.packages.find((p) => p.authorityKey === "100000505|122162");
+    expect(noGtin?.gtin).toBeUndefined();
+    expect(noGtin?.medicinalProductId).toBe(
+      result.catalogue.medicinalProducts.find((p) => p.authorityKey === "100000505")?.id,
+    );
+    expect(noGtin?.regulatoryStatus.display).toBe("skasowane");
+    expect(result.catalogue.medicinalProducts.some((p) => p.authorityKey === "100005709")).toBe(false);
 
     const med = fs.readFileSync(path.join(out, "release", "fhir-r4", "Medication.ndjson"), "utf8");
     expect(med).toContain("https://www.gs1.org/gtin");
