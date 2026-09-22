@@ -32,18 +32,36 @@ function normalizeHtml(html: string): string {
     .toLowerCase();
 }
 
-/** Slice one opendata.swiss terms_* definition so site chrome does not bust the checksum. */
+/**
+ * Slice one licence block so site chrome does not bust the checksum.
+ * `terms_*` ids (opendata.swiss) run until the next `terms_*` id.
+ * Any other id runs until the next `<h2>`.
+ */
 export function extractTermsFragment(html: string, fragmentId: string): string {
   const matches = [...html.matchAll(/id=["'](terms_[a-z0-9_]+)["']/gi)];
   const idx = matches.findIndex((m) => m[1]!.toLowerCase() === fragmentId.toLowerCase());
-  if (idx < 0) {
+  if (idx >= 0) {
+    const start = matches[idx]!.index!;
+    const tagStart = html.lastIndexOf("<", start);
+    const from = tagStart >= 0 ? tagStart : start;
+    const next = matches[idx + 1];
+    const to = next ? html.lastIndexOf("<", next.index!) : html.length;
+    if (to <= from) {
+      throw new Error(`Terms fragment #${fragmentId} has empty bounds`);
+    }
+    return html.slice(from, to);
+  }
+
+  const escaped = fragmentId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const generic = new RegExp(`id=["']${escaped}["']`, "i").exec(html);
+  if (!generic || generic.index === undefined) {
     throw new Error(`Terms fragment #${fragmentId} not found`);
   }
-  const start = matches[idx]!.index!;
-  const tagStart = html.lastIndexOf("<", start);
-  const from = tagStart >= 0 ? tagStart : start;
-  const next = matches[idx + 1];
-  const to = next ? html.lastIndexOf("<", next.index!) : html.length;
+  const tagStart = html.lastIndexOf("<", generic.index);
+  const from = tagStart >= 0 ? tagStart : generic.index;
+  const rest = html.slice(from + 1);
+  const nextHeading = rest.search(/<h2\b/i);
+  const to = nextHeading < 0 ? html.length : from + 1 + nextHeading;
   if (to <= from) {
     throw new Error(`Terms fragment #${fragmentId} has empty bounds`);
   }

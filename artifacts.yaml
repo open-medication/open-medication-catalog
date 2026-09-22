@@ -56,6 +56,13 @@ artifacts:
       - rpl
     attachRawSources:
       - rpl
+  us-base:
+    jurisdiction: US
+    domain: Human
+    requiredSources:
+      - ndc
+    attachRawSources:
+      - ndc
   # Future (not this delivery):
   # global-base:
   #   requiredArtifacts: [ch-base, fr-base, pl-base, no-base, ca-base, us-base]

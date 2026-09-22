@@ -2,6 +2,7 @@ import { isOfficialArtifactId, getRecipe } from "../artifacts.js";
 import { swissmedicArchiveCandidates } from "../adapters/ch/swissmedic.js";
 import { bdpmDumpAvailable } from "../adapters/fr/bdpm.js";
 import { rplDumpAvailable } from "../adapters/pl/rpl.js";
+import { ndcDumpAvailable } from "../adapters/us/ndc.js";
 import { httpExists } from "../security.js";
 import { calendarForDate, monthsToProbe, parseDataMonth } from "./dates.js";
 import { catalogFromReleaseTags, fetchGithubReleaseTags } from "./packager.js";
@@ -32,6 +33,7 @@ export async function dataMonthAvailable(artifactId: string, dataMonth: string):
   const recipe = getRecipe(artifactId);
   if (recipe.jurisdiction === "FR") return bdpmDumpAvailable();
   if (recipe.jurisdiction === "PL") return rplDumpAvailable();
+  if (recipe.jurisdiction === "US") return ndcDumpAvailable();
   return swissmedicDataMonthAvailable(dataMonth);
 }
 

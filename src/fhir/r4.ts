@@ -13,6 +13,7 @@ const R4_ACTIVE_INGREDIENT_ROLES = new Set([
   "SA",
   "FT",
   "substancja czynna",
+  "active",
 ]);
 
 /** Catalogue-record lifecycle only. Not marketing or reimbursement. */
@@ -28,7 +29,7 @@ export function medicationStatus(pkg: Package): "active" | "inactive" | undefine
   return undefined;
 }
 
-export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<string, string> {
+export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<string, string[]> {
   const medications: string[] = [];
   const orgs: string[] = [];
   for (const org of catalogue.organizations) {
@@ -49,8 +50,9 @@ export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<str
       }),
     );
   }
+  const products = new Map(catalogue.medicinalProducts.map((mp) => [mp.id, mp]));
   for (const pkg of catalogue.packages) {
-    const mp = catalogue.medicinalProducts.find((m) => m.id === pkg.medicinalProductId);
+    const mp = products.get(pkg.medicinalProductId);
     const status = medicationStatus(pkg);
     const fallback =
       mp?.names[0]?.text && !pkg.description.includes(mp.names[0].text)
@@ -117,8 +119,8 @@ export function exportR4(catalogue: Catalogue, releaseLabel: string): Record<str
     medications.push(jsonLine(resource));
   }
   return {
-    "Medication.ndjson": medications.join(""),
-    "Organization.ndjson": orgs.join(""),
+    "Medication.ndjson": medications,
+    "Organization.ndjson": orgs,
   };
 }
 

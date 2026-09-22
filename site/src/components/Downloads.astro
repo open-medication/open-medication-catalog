@@ -14,10 +14,12 @@ import LicenceFlags from "./LicenceFlags.astro";
 
 const catalog = parseCatalogDoc(bakedCatalog);
 
-const cards = ARTIFACT_META.map((meta) => {
-  const entry: CatalogArtifact | undefined = catalog.artifacts[meta.id];
-  return { meta, entry, sources: sourcesForArtifact(meta.id) };
-});
+const cards = [...ARTIFACT_META]
+  .sort((a, b) => a.id.localeCompare(b.id, "en"))
+  .map((meta) => {
+    const entry: CatalogArtifact | undefined = catalog.artifacts[meta.id];
+    return { meta, entry, sources: sourcesForArtifact(meta.id) };
+  });
 ---
 
 <section class="section" id="download">

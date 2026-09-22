@@ -173,6 +173,33 @@ describe("resolveNextDataMonth", () => {
     });
   });
 
+  it("forced month works for us-base without probing Swissmedic", async () => {
+    const result = await resolveNextDataMonth({
+      artifactId: "us-base",
+      tags: ["us-base-2026.08"],
+      forcedMonth: "2026.09",
+      archiveAvailable: async () => {
+        throw new Error("must not probe when month is forced");
+      },
+    });
+    expect(result).toMatchObject({ skip: false, reason: "forced", month: "2026.09", tag: "us-base-2026.09" });
+  });
+
+  it("treats a live NDC dump as available for the current unpublished month", async () => {
+    const result = await resolveNextDataMonth({
+      artifactId: "us-base",
+      tags: ["us-base-2026.07"],
+      now: new Date("2026-09-09T07:00:00Z"),
+      archiveAvailable: async () => true,
+    });
+    expect(result).toMatchObject({
+      skip: false,
+      reason: "newer",
+      month: "2026.09",
+      tag: "us-base-2026.09",
+    });
+  });
+
   it("treats a live BDPM dump as available for the current unpublished month", async () => {
     const result = await resolveNextDataMonth({
       artifactId: "fr-base",

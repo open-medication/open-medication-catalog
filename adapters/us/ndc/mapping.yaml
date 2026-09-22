@@ -1,0 +1,36 @@
+# FDA NDC Directory field mapping. Files have a header row.
+# Live ndctext.zip uses ACTIVE_NUMERATOR_STRENGTH / ACTIVE_INGRED_UNIT.
+# StrengthNumber / StrengthUnit from the definitions page alias onto those names.
+# Unknown extra columns must not be silently ignored.
+sourceId: ndc
+files:
+  product.txt:
+    PRODUCTID: mapped
+    PRODUCTNDC: mapped
+    PRODUCTTYPENAME: retained-as-metadata
+    PROPRIETARYNAME: mapped
+    PROPRIETARYNAMESUFFIX: mapped
+    NONPROPRIETARYNAME: mapped
+    DOSAGEFORMNAME: mapped
+    ROUTENAME: mapped
+    STARTMARKETINGDATE: mapped
+    ENDMARKETINGDATE: mapped
+    MARKETINGCATEGORYNAME: mapped
+    APPLICATIONNUMBER: mapped
+    LABELERNAME: mapped
+    SUBSTANCENAME: mapped
+    ACTIVE_NUMERATOR_STRENGTH: mapped
+    ACTIVE_INGRED_UNIT: mapped
+    PHARM_CLASSES: retained-as-metadata
+    DEASCHEDULE: retained-as-metadata
+    NDC_EXCLUDE_FLAG: retained-as-metadata
+    LISTING_RECORD_CERTIFIED_THROUGH: retained-as-metadata
+  package.txt:
+    PRODUCTID: mapped
+    PRODUCTNDC: intentionally-ignored
+    NDCPACKAGECODE: mapped
+    PACKAGEDESCRIPTION: mapped
+    STARTMARKETINGDATE: mapped
+    ENDMARKETINGDATE: mapped
+    NDC_EXCLUDE_FLAG: intentionally-ignored
+    SAMPLE_PACKAGE: retained-as-metadata

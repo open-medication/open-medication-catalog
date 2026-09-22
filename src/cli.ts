@@ -39,7 +39,7 @@ function defaultInputSource(artifactId?: string): string {
 
 program
   .command("build")
-  .argument("<target>", "artifact id (ch-base, ch-vet-base, ch-enriched, ch-vet-enriched, fr-base, pl-base, pl-vet-base) or jurisdiction for custom builds")
+  .argument("<target>", "artifact id (ch-base, ch-vet-base, ch-enriched, ch-vet-enriched, fr-base, pl-base, pl-vet-base, us-base) or jurisdiction for custom builds")
   .option("--source <id>", "custom local source (repeatable); cannot publish as official", collect, [] as string[])
   .option("--input <spec>", "source=path or a zip/dir for the recipe's primary source", collect, [] as string[])
   .option("--out <dir>", "output directory")
@@ -180,7 +180,7 @@ program
   .command("fhir-validate")
   .description("Run the pinned HL7 Java validator over a release directory")
   .requiredOption("--dir <path>", "release directory containing fhir-r4/ and fhir-r5/")
-  .option("--max <n>", "max resources per NDJSON file", "20")
+  .option("--max <n>", "spread sample size per NDJSON file; smaller files are validated in full", "200")
   .action(async (opts: { dir: string; max: string }) => {
     const jar = await ensureValidatorJar();
     validateReleaseFhir({

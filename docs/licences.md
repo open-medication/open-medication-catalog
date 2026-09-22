@@ -39,6 +39,7 @@ A source may have `redistribution: allowed` for **derived fields only** while `r
 | BAG SL | review-required | review-required | TBD | [BAG SL data](https://sl.bag.admin.ch/resources/current-and-archived-data) |
 | BDPM | allowed (Licence Ouverte) | allowed | required | [BDPM Licence Ouverte PDF](https://base-donnees-publique.medicaments.gouv.fr/docs/telechargement/licence_bdpm.pdf) |
 | RPL | allowed (CC BY 4.0) | allowed | required | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/legalcode.txt); dataset [dane.gov.pl 397](https://dane.gov.pl/pl/dataset/397,rejestr-produktow-leczniczych) |
+| FDA NDC | allowed (public domain) | allowed | not required | [FDA website policies, linking](https://www.fda.gov/about-fda/about-website/website-policies#linking) |
 
 BAG flags stay `review-required` until a written reuse grant. Outreach to `epl@bag.admin.ch` (Cc `Arzneimittel-Krankenversicherung@bag.admin.ch`) is in progress. Fetch still requires `--input`. Do not treat the download SPA or CH EPL IG CC0 as a data licence.
 
@@ -47,7 +48,7 @@ Flags live in `adapters/<jurisdiction>/<source>/source.yaml`. Adapter `metadata(
 ## How to verify
 
 1. Open `terms.url` (on the [licence page](https://openmedicationcatalog.org/licence), on each download card, and in every release `licensing/SOURCES.md` / `manifest.json`).
-2. Compare the live page to `terms.checksum`. HTML pages are SHA-256 of normalized text (or of the `#fragment` slice when set). PDFs are SHA-256 of the file bytes. Swissmedic hashes the `#terms_open` definition only, so CMS chrome on opendata.swiss does not block releases. BDPM hashes the Licence Ouverte PDF. RPL hashes the CC BY 4.0 `legalcode.txt` (not the dane.gov.pl CMS chrome). The portal timestamp condition still requires citing the dump date.
+2. Compare the live page to `terms.checksum`. HTML pages are SHA-256 of normalized text (or of the `#fragment` slice when set). PDFs are SHA-256 of the file bytes. Swissmedic hashes the `#terms_open` definition only, so CMS chrome on opendata.swiss does not block releases. BDPM hashes the Licence Ouverte PDF. RPL hashes the CC BY 4.0 `legalcode.txt` (not the dane.gov.pl CMS chrome). The portal timestamp condition still requires citing the dump date. FDA NDC hashes the `#linking` section of the FDA website policies page (public domain; credit is appreciated but not required).
 3. A material change still blocks official redistribution until `terms.reviewedAt` and the snapshot are updated (`pnpm omc terms`).
 
 To challenge a flag, open an issue with the `terms.url` and the passage you think we misread. Fixing it is an update to `source.yaml` plus a checksum refresh.

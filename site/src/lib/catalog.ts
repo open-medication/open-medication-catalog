@@ -63,6 +63,12 @@ export const ARTIFACT_META: ArtifactMeta[] = [
     jurisdiction: "PL",
     blurb: "RPL veterinary medicinal products, packs, composition, and marketing-authorisation holders.",
   },
+  {
+    id: "us-base",
+    title: "United States: base",
+    jurisdiction: "US",
+    blurb: "FDA NDC Directory finished drugs: products, packages, labelers, and active ingredients.",
+  },
 ];
 
 export function parseCatalogDoc(data: unknown): CatalogDoc {

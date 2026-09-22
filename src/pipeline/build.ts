@@ -7,6 +7,7 @@ import { RefdataAdapter } from "../adapters/ch/refdata.js";
 import { BagAdapter, loadFhirResources } from "../adapters/ch/bag.js";
 import { BdpmAdapter } from "../adapters/fr/bdpm.js";
 import { RplAdapter } from "../adapters/pl/rpl.js";
+import { NdcAdapter } from "../adapters/us/ndc.js";
 import type { Adapter, AdapterContext, FetchResult } from "../adapters/types.js";
 import { assertValidCatalogue } from "../canonical/validate.js";
 import { repoPath } from "../paths.js";
@@ -45,6 +46,7 @@ const adapters: Record<string, Adapter> = {
   bag: new BagAdapter(),
   bdpm: new BdpmAdapter(),
   rpl: new RplAdapter(),
+  ndc: new NdcAdapter(),
 };
 
 export async function build(opts: BuildOptions): Promise<BuildResult> {
@@ -172,7 +174,7 @@ export async function build(opts: BuildOptions): Promise<BuildResult> {
   }
 
   fs.mkdirSync(outDir, { recursive: true });
-  fs.writeFileSync(path.join(outDir, "canonical.json"), `${JSON.stringify(catalogue)}\n`);
+  writeCatalogueJson(path.join(outDir, "canonical.json"), catalogue);
 
   const packed = await writeRelease({
     catalogue,
@@ -186,4 +188,41 @@ export async function build(opts: BuildOptions): Promise<BuildResult> {
   });
 
   return { catalogue, zipPath: packed.zipPath, sha256: packed.sha256, official };
+}
+
+/** Stream the catalogue so a national dump is not one string past Node's limit. */
+function writeCatalogueJson(file: string, catalogue: Catalogue): void {
+  const fd = fs.openSync(file, "w");
+  let buf = "";
+  const push = (chunk: string) => {
+    buf += chunk;
+    if (buf.length > 8_000_000) {
+      fs.writeSync(fd, buf);
+      buf = "";
+    }
+  };
+  try {
+    push("{");
+    const keys = Object.keys(catalogue);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]!;
+      if (i > 0) push(",");
+      push(`${JSON.stringify(key)}:`);
+      const value = (catalogue as unknown as Record<string, unknown>)[key];
+      if (Array.isArray(value)) {
+        push("[");
+        for (let j = 0; j < value.length; j++) {
+          if (j > 0) push(",");
+          push(JSON.stringify(value[j]));
+        }
+        push("]");
+      } else {
+        push(JSON.stringify(value));
+      }
+    }
+    push("}\n");
+    if (buf) fs.writeSync(fd, buf);
+  } finally {
+    fs.closeSync(fd);
+  }
 }

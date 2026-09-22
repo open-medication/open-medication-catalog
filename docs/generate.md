@@ -7,6 +7,7 @@ pnpm omc build ch-vet-base --input ./OGD_202608.ZIP --month 2026.08
 pnpm omc build fr-base --input fixtures/fr/bdpm/BDPM_FIXTURE.zip --month 2026.09
 pnpm omc build pl-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09
 pnpm omc build pl-vet-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09
+pnpm omc build us-base --input fixtures/us/ndc/NDC_FIXTURE.zip --month 2026.09
 ```
 
 Outputs under `output/ch-base/`:
@@ -18,7 +19,7 @@ Outputs under `output/ch-base/`:
 - `release/licensing/` — upstream terms URLs, flags, checksums, and disclaimer
 - `ch-base-2026.08.zip`
 
-Live Swissmedic fetch uses the immutable archive `OGD_YYYYMM.zip` (the server uses lowercase; `.ZIP` is tried as a fallback), not the overwritten `OGD.zip`. France uses the live BDPM txt files (overwritten in place) and still tags releases `fr-base-YYYY.MM`. Poland uses the live RPL `overall.xml` 6.0.0 dump (overwritten in place) and still tags releases `pl-base-YYYY.MM` / `pl-vet-base-YYYY.MM`. `pnpm omc next-month ch-base` / `ch-vet-base` / `fr-base` / `pl-base` / `pl-vet-base` reports the newest unpublished month relative to GitHub Releases.
+Live Swissmedic fetch uses the immutable archive `OGD_YYYYMM.zip` (the server uses lowercase; `.ZIP` is tried as a fallback), not the overwritten `OGD.zip`. France uses the live BDPM txt files (overwritten in place) and still tags releases `fr-base-YYYY.MM`. Poland uses the live RPL `overall.xml` 6.0.0 dump (overwritten in place) and still tags releases `pl-base-YYYY.MM` / `pl-vet-base-YYYY.MM`. The United States uses the live FDA `ndctext.zip` (overwritten daily) and still tags releases `us-base-YYYY.MM`. `pnpm omc next-month ch-base` / `ch-vet-base` / `fr-base` / `pl-base` / `pl-vet-base` / `us-base` reports the newest unpublished month relative to GitHub Releases.
 
 Regenerate canonical TypeScript types after editing `canonical/schema/catalogue.schema.json`:
 
@@ -26,7 +27,7 @@ Regenerate canonical TypeScript types after editing `canonical/schema/catalogue.
 pnpm gen:types
 ```
 
-Official builds fetch live licence pages and refuse to redistribute if a committed `terms.snapshot.txt` no longer matches. Swissmedic compares the `#terms_open` definition only. Fixture/CI builds set `OMC_SKIP_TERMS=1`. Check snapshots with `pnpm omc terms`.
+Official builds fetch live licence pages and refuse to redistribute if a committed `terms.snapshot.txt` no longer matches. Swissmedic compares the `#terms_open` definition only. FDA NDC compares the website-policies `#linking` section only. Fixture/CI builds set `OMC_SKIP_TERMS=1`. Check snapshots with `pnpm omc terms`.
 
 The HL7 Java validator (`validator_cli` 6.9.12, SHA-256 in `tooling/pins.json`) is normative:
 
@@ -34,6 +35,7 @@ The HL7 Java validator (`validator_cli` 6.9.12, SHA-256 in `tooling/pins.json`) 
 pnpm omc fhir-validate --dir output/ch-base/release
 ```
 
+Each NDJSON file contributes a spread of 200 resources, including the first and last. A smaller file is validated in full. The file is streamed, so a national dump is not loaded as one string.
 
 Custom experimental build (not publishable as official):
 

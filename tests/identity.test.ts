@@ -103,6 +103,24 @@ describe("string identity invariant", () => {
     ).toBe(uuidv5("PL|rpl|Package|100000014|2", PROJECT_NAMESPACE));
   });
 
+  it("United States uses the same formula with US|fda names", () => {
+    const us = canonicalId({
+      jurisdiction: "US",
+      identityAuthority: "fda",
+      entityType: "Package",
+      authorityKey: "0002-1433-01",
+    });
+    expect(us).toBe(uuidv5("US|fda|Package|0002-1433-01", PROJECT_NAMESPACE));
+    expect(us).not.toBe(
+      canonicalId({
+        jurisdiction: "US",
+        identityAuthority: "fda",
+        entityType: "Package",
+        authorityKey: "00002143301",
+      }),
+    );
+  });
+
   it("project namespace is UUIDv5(DNS, openmedicationcatalog.org)", () => {
     const DNS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
     expect(PROJECT_NAMESPACE).toBe(uuidv5("openmedicationcatalog.org", DNS));

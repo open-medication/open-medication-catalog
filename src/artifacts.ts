@@ -38,7 +38,7 @@ export function getRecipe(id: string): ArtifactRecipe {
   const recipe = loadRecipes().get(id);
   if (!recipe) {
     throw new Error(
-      `Unknown artifact '${id}'. Official builds use recipe ids from artifacts.yaml (e.g. ch-base, ch-vet-base, ch-enriched, fr-base, pl-base, pl-vet-base).`,
+      `Unknown artifact '${id}'. Official builds use recipe ids from artifacts.yaml (e.g. ch-base, ch-vet-base, ch-enriched, fr-base, pl-base, pl-vet-base, us-base).`,
     );
   }
   return recipe;

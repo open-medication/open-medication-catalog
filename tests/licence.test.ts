@@ -4,6 +4,7 @@ import { RefdataAdapter } from "../src/adapters/ch/refdata.js";
 import { SwissmedicAdapter } from "../src/adapters/ch/swissmedic.js";
 import { BdpmAdapter } from "../src/adapters/fr/bdpm.js";
 import { RplAdapter } from "../src/adapters/pl/rpl.js";
+import { NdcAdapter } from "../src/adapters/us/ndc.js";
 import { listSourceDirs, loadSourceDescriptorById } from "../src/adapters/descriptor.js";
 import { getRecipe } from "../src/artifacts.js";
 import { licensingTexts, sourceLicensing } from "../src/pipeline/licensing.js";
@@ -14,6 +15,7 @@ const adapters = [
   new BagAdapter(),
   new BdpmAdapter(),
   new RplAdapter(),
+  new NdcAdapter(),
 ];
 
 describe("licence flags from source.yaml", () => {
@@ -32,7 +34,7 @@ describe("licence flags from source.yaml", () => {
   });
 
   it("discovers every committed source.yaml", () => {
-    expect(listSourceDirs().map((s) => s.sourceId).sort()).toEqual(["bag", "bdpm", "refdata", "rpl", "swissmedic"]);
+    expect(listSourceDirs().map((s) => s.sourceId).sort()).toEqual(["bag", "bdpm", "ndc", "refdata", "rpl", "swissmedic"]);
   });
 
   it("artifact recipes list sources that have licence descriptors", () => {
@@ -52,6 +54,12 @@ describe("licence flags from source.yaml", () => {
     expect(getRecipe("pl-base").domain).toBe("Human");
     expect(getRecipe("pl-vet-base").requiredSources).toEqual(["rpl"]);
     expect(getRecipe("pl-vet-base").domain).toBe("Veterinary");
+    expect(getRecipe("us-base").requiredSources).toEqual(["ndc"]);
+    expect(getRecipe("us-base").domain).toBe("Human");
+    expect(loadSourceDescriptorById("ndc").commercialUse).toBe("allowed");
+    expect(loadSourceDescriptorById("ndc").redistribution).toBe("allowed");
+    expect(loadSourceDescriptorById("ndc").attributionRequired).toBe(false);
+    expect(loadSourceDescriptorById("ndc").terms.fragment).toBe("linking");
     expect(loadSourceDescriptorById("bdpm").commercialUse).toBe("allowed");
     expect(loadSourceDescriptorById("bdpm").redistribution).toBe("allowed");
     expect(loadSourceDescriptorById("bdpm").attributionRequired).toBe(true);

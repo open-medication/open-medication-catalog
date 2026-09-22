@@ -8,7 +8,7 @@ import { reimbursementDetailExtension } from "./reimbursement.js";
 export const R5_MPD_PROFILE = `${FHIR_CANONICAL_BASE}/StructureDefinition/OpenMedicinalProductDefinition`;
 export const R5_PPD_PROFILE = `${FHIR_CANONICAL_BASE}/StructureDefinition/OpenPackagedProductDefinition`;
 
-export function exportR5(catalogue: Catalogue, releaseLabel: string): Record<string, string> {
+export function exportR5(catalogue: Catalogue, releaseLabel: string): Record<string, string[]> {
   const mpd: string[] = [];
   const ppd: string[] = [];
   const authz: string[] = [];
@@ -138,11 +138,11 @@ export function exportR5(catalogue: Catalogue, releaseLabel: string): Record<str
   }
 
   return {
-    "MedicinalProductDefinition.ndjson": mpd.join(""),
-    "PackagedProductDefinition.ndjson": ppd.join(""),
-    "RegulatedAuthorization.ndjson": authz.join(""),
-    "Ingredient.ndjson": ing.join(""),
-    "Organization.ndjson": orgs.join(""),
+    "MedicinalProductDefinition.ndjson": mpd,
+    "PackagedProductDefinition.ndjson": ppd,
+    "RegulatedAuthorization.ndjson": authz,
+    "Ingredient.ndjson": ing,
+    "Organization.ndjson": orgs,
   };
 }
 

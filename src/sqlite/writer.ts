@@ -204,6 +204,7 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
         });
       }
     }
+    const productsById = new Map(catalogue.medicinalProducts.map((mp) => [mp.id, mp]));
     for (const pkg of catalogue.packages) {
       insP.run({
         id: pkg.id,
@@ -228,7 +229,7 @@ export function writeSqlite(catalogue: Catalogue, destFile: string): void {
       for (const n of pkg.names ?? []) {
         insName.run({ package_id: pkg.id, language: n.language, text: n.text });
       }
-      const mp = catalogue.medicinalProducts.find((m) => m.id === pkg.medicinalProductId);
+      const mp = productsById.get(pkg.medicinalProductId);
       const nameBlob = [mp?.names[0]?.text ?? "", ...(pkg.names ?? []).map((n) => n.text)]
         .filter(Boolean)
         .join(" ");
