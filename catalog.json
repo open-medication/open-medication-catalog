@@ -48,6 +48,13 @@
       "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/pl-vet-base-2026.09",
       "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/pl-vet-base-2026.09/pl-vet-base-2026.09.zip",
       "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/pl-vet-base-2026.09/manifest.json"
+    },
+    "us-base": {
+      "latest": "2026.09",
+      "tag": "us-base-2026.09",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/us-base-2026.09",
+      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/us-base-2026.09/us-base-2026.09.zip",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/us-base-2026.09/manifest.json"
     }
   }
 }
