@@ -180,7 +180,7 @@ program
   .command("fhir-validate")
   .description("Run the pinned HL7 Java validator over a release directory")
   .requiredOption("--dir <path>", "release directory containing fhir-r4/ and fhir-r5/")
-  .option("--max <n>", "max resources per NDJSON file", "20")
+  .option("--max <n>", "spread sample size per NDJSON file; smaller files are validated in full", "200")
   .action(async (opts: { dir: string; max: string }) => {
     const jar = await ensureValidatorJar();
     validateReleaseFhir({

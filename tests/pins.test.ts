@@ -3,7 +3,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { repoPath } from "../src/paths.js";
-import { listReleaseFhirNdjson, validateReleaseFhir } from "../src/pipeline/validator.js";
+import {
+  FHIR_VALIDATION_SAMPLE,
+  listReleaseFhirNdjson,
+  materialiseNdjson,
+  spreadIndices,
+  validateReleaseFhir,
+} from "../src/pipeline/validator.js";
 
 describe("pins and terms snapshots", () => {
   it("pins a real validator SHA-256", () => {
@@ -59,6 +65,25 @@ describe("fhir-validate preflight", () => {
       "Organization.ndjson",
       "PackagedProductDefinition.ndjson",
       "RegulatedAuthorization.ndjson",
+    ]);
+  });
+
+  it("spreads the sample across the file and skips lines in between", () => {
+    expect(FHIR_VALIDATION_SAMPLE).toBe(200);
+    expect(spreadIndices(5, 3)).toEqual([0, 2, 4]);
+    expect(spreadIndices(3, 200)).toEqual([0, 1, 2]);
+
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "omc-ndjson-spread-"));
+    const ndjson = path.join(dir, "Medication.ndjson");
+    const lines = ["one", "skip-a", "two", "skip-b", "three"].map((id, i) =>
+      i % 2 === 1 ? "this is not json and must not be parsed" : JSON.stringify({ resourceType: "Medication", id }),
+    );
+    fs.writeFileSync(ndjson, `${lines.join("\n")}\n`);
+    const files = materialiseNdjson(ndjson, path.join(dir, "out"), 3);
+    expect(files.map((f) => path.basename(f))).toEqual([
+      "Medication-one.json",
+      "Medication-two.json",
+      "Medication-three.json",
     ]);
   });
 });

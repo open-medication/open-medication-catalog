@@ -76,7 +76,7 @@ jobs:
           pnpm exec sushi fhir/r5
       - name: Java FHIR validate
         if: steps.next.outputs.skip != 'true' && steps.build.outputs.not_yet != 'true'
-        run: pnpm omc fhir-validate --dir "output/${{ matrix.artifact }}/release" --max 25
+        run: pnpm omc fhir-validate --dir "output/${{ matrix.artifact }}/release"
       - name: Publish GitHub Release
         if: steps.next.outputs.skip != 'true' && steps.build.outputs.not_yet != 'true'
         env:

@@ -60,12 +60,12 @@ jobs:
           key: validator-cli-${{ hashFiles('tooling/pins.json') }}
       - name: Java FHIR validate fixture
         run: |
-          pnpm omc fhir-validate --dir /tmp/omc-ci/release --max 10
-          pnpm omc fhir-validate --dir /tmp/omc-ci-vet/release --max 10
-          pnpm omc fhir-validate --dir /tmp/omc-ci-fr/release --max 10
-          pnpm omc fhir-validate --dir /tmp/omc-ci-pl/release --max 10
-          pnpm omc fhir-validate --dir /tmp/omc-ci-pl-vet/release --max 10
-          pnpm omc fhir-validate --dir /tmp/omc-ci-us/release --max 10
+          pnpm omc fhir-validate --dir /tmp/omc-ci/release
+          pnpm omc fhir-validate --dir /tmp/omc-ci-vet/release
+          pnpm omc fhir-validate --dir /tmp/omc-ci-fr/release
+          pnpm omc fhir-validate --dir /tmp/omc-ci-pl/release
+          pnpm omc fhir-validate --dir /tmp/omc-ci-pl-vet/release
+          pnpm omc fhir-validate --dir /tmp/omc-ci-us/release
       - name: Terms snapshots still match live pages
         run: pnpm omc terms
 

@@ -35,6 +35,7 @@ The HL7 Java validator (`validator_cli` 6.9.12, SHA-256 in `tooling/pins.json`) 
 pnpm omc fhir-validate --dir output/ch-base/release
 ```
 
+Each NDJSON file contributes a spread of 200 resources, including the first and last. A smaller file is validated in full. The file is streamed, so a national dump is not loaded as one string.
 
 Custom experimental build (not publishable as official):
 
