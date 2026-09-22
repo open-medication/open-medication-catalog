@@ -1,0 +1,25 @@
+country: US
+sourceId: ndc
+identityAuthority: fda
+authority: FDA
+dataset: National Drug Code Directory
+sourceType: regulatory
+jurisdiction: US
+updateFrequency: daily
+commercialUse: allowed
+redistribution: allowed
+attributionRequired: false
+credentialsRequired: false
+required: true
+parserSchemaVersion: "0.1.0"
+downloadUrl: "https://www.accessdata.fda.gov/cder/ndctext.zip"
+terms:
+  url: "https://www.fda.gov/about-fda/about-website/website-policies#linking"
+  datasetUrl: "https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory"
+  fragment: linking
+  reviewedAt: "2026-09-22"
+  checksum: "7cdee70d39de5120fbd6ecc1a7777b33843bc589719f6cf1aa7ad3801a035905"
+  notes: "FDA website policies, section Linking to or Copying Information: FDA.gov text and graphics are not copyrighted. They are in the public domain and may be republished, reprinted, and otherwise used freely without permission. Credit to the U.S. Food and Drug Administration is appreciated but not required. Checksum is SHA-256 of the normalized #linking section, not the rest of the policies page. The NDC Directory is a US government work (17 U.S.C. § 105). An NDC listing is not an FDA approval and is not a reimbursement decision."
+releasePolicy:
+  public: true
+  required: true

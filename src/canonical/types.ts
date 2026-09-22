@@ -85,6 +85,23 @@ export const BDPM_SYSTEMS = {
   collectivites: "https://fhir.openmedicationcatalog.org/CodeSystem/fr-bdpm-agrement-collectivites",
 } as const;
 
+export const FDA_SYSTEMS = {
+  productNdc: "https://fhir.openmedicationcatalog.org/sid/us/fda/product-ndc",
+  productId: "https://fhir.openmedicationcatalog.org/sid/us/fda/product-id",
+  packageNdc: "https://fhir.openmedicationcatalog.org/sid/us/fda/package-ndc",
+  ndc11: "https://fhir.openmedicationcatalog.org/sid/us/fda/ndc-11",
+  application: "https://fhir.openmedicationcatalog.org/sid/us/fda/application",
+  labeler: "https://fhir.openmedicationcatalog.org/sid/us/fda/labeler",
+  substance: "https://fhir.openmedicationcatalog.org/sid/us/fda/substance",
+  doseForm: "https://fhir.openmedicationcatalog.org/CodeSystem/us-fda-dose-form",
+  route: "https://fhir.openmedicationcatalog.org/CodeSystem/us-fda-route",
+  regulatoryStatus: "https://fhir.openmedicationcatalog.org/CodeSystem/us-fda-marketing-category",
+  marketingStatus: "https://fhir.openmedicationcatalog.org/CodeSystem/us-fda-marketing-status",
+  ingredientRole: "https://fhir.openmedicationcatalog.org/CodeSystem/us-fda-ingredient-role",
+  packageUnit: "https://fhir.openmedicationcatalog.org/CodeSystem/us-fda-package-unit",
+  strengthUnit: "https://fhir.openmedicationcatalog.org/CodeSystem/us-fda-strength-unit",
+} as const;
+
 export const OMC_SYSTEMS = {
   resourceId: "https://fhir.openmedicationcatalog.org/sid/resource-id",
   gtin: "https://www.gs1.org/gtin",

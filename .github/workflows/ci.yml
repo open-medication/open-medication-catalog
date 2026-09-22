@@ -49,6 +49,10 @@ jobs:
         env:
           OMC_SKIP_TERMS: "1"
         run: pnpm omc build pl-vet-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09 --out /tmp/omc-ci-pl-vet
+      - name: Fixture official build (United States)
+        env:
+          OMC_SKIP_TERMS: "1"
+        run: pnpm omc build us-base --input fixtures/us/ndc/NDC_FIXTURE.zip --month 2026.09 --out /tmp/omc-ci-us
       - name: Cache HL7 validator
         uses: actions/cache@v4
         with:
@@ -61,6 +65,7 @@ jobs:
           pnpm omc fhir-validate --dir /tmp/omc-ci-fr/release --max 10
           pnpm omc fhir-validate --dir /tmp/omc-ci-pl/release --max 10
           pnpm omc fhir-validate --dir /tmp/omc-ci-pl-vet/release --max 10
+          pnpm omc fhir-validate --dir /tmp/omc-ci-us/release --max 10
       - name: Terms snapshots still match live pages
         run: pnpm omc terms
 

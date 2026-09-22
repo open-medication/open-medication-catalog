@@ -27,11 +27,11 @@ Landing page: [`https://openmedicationcatalog.org`](https://openmedicationcatalo
 | GB | dm+d | planned | review-required (TRUD) | yes |
 | NO | FEST | planned | NLOD | no |
 | CA | DPD | planned | OGL-Canada | no |
-| US | FDA NDC | planned | CC0 / public domain | no |
+| US | FDA NDC | production (`us-base`) | public domain (US government work) | no |
 | SA | SFDA | planned | review-required | TBD |
 | ID | BPOM | planned | review-required (reach out to BPOM) | TBD |
 
-Country notes: [Switzerland](docs/countries/ch.md), [France](docs/countries/fr.md), [Poland](docs/countries/pl.md).
+Country notes: [Switzerland](docs/countries/ch.md), [France](docs/countries/fr.md), [Poland](docs/countries/pl.md), [United States](docs/countries/us.md).
 
 A **global** database will be the union of national catalogues (`requiredArtifacts` on a future recipe), not a cross-country ontology.
 
@@ -47,9 +47,10 @@ omc build ch-vet-enriched  # Swissmedic TAM + Refdata
 omc build fr-base          # BDPM only
 omc build pl-base          # RPL human (ludzki) only
 omc build pl-vet-base      # RPL veterinary (weterynaryjny) only
+omc build us-base          # FDA NDC Directory (finished human drugs)
 ```
 
-`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched` / `ch-vet-base` / `ch-vet-enriched` / `pl-base` / `pl-vet-base`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata. BAG is not used on veterinary recipes.
+`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched` / `ch-vet-base` / `ch-vet-enriched` / `pl-base` / `pl-vet-base` / `us-base`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata. BAG is not used on veterinary recipes.
 
 ```text
 pnpm install
@@ -58,6 +59,7 @@ pnpm omc build ch-vet-base --input fixtures/ch/swissmedic/OGD_FIXTURE.zip --mont
 pnpm omc build fr-base --input fixtures/fr/bdpm/BDPM_FIXTURE.zip --month 2026.09
 pnpm omc build pl-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09
 pnpm omc build pl-vet-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09
+pnpm omc build us-base --input fixtures/us/ndc/NDC_FIXTURE.zip --month 2026.09
 pnpm omc search output/ch-base/release/database/medication.sqlite Metformin
 ```
 
@@ -68,7 +70,7 @@ pnpm omc next-month ch-base
 pnpm omc build ch-base --month 2026.08
 ```
 
-`next-month` compares GitHub Releases to the upstream dump and prints the newest unpublished `YYYY.MM`. For Switzerland it probes the Swissmedic `OGD_YYYYMM.zip` archive. For France and Poland it treats the live BDPM / RPL dumps as available for the current month. If nothing newer exists it prints `up-to-date`. If a given Swissmedic archive is not published yet, `omc build` exits successfully as **not yet available**.
+`next-month` compares GitHub Releases to the upstream dump and prints the newest unpublished `YYYY.MM`. For Switzerland it probes the Swissmedic `OGD_YYYYMM.zip` archive. For France, Poland, and the United States it treats the live BDPM / RPL / NDC dumps as available for the current month. If nothing newer exists it prints `up-to-date`. If a given Swissmedic archive is not published yet, `omc build` exits successfully as **not yet available**.
 
 The release workflow runs on the 1st and 15th UTC. It ships that newest unpublished month, or skips when already current. Manual dispatch can still force a month.
 

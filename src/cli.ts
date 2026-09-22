@@ -39,7 +39,7 @@ function defaultInputSource(artifactId?: string): string {
 
 program
   .command("build")
-  .argument("<target>", "artifact id (ch-base, ch-vet-base, ch-enriched, ch-vet-enriched, fr-base, pl-base, pl-vet-base) or jurisdiction for custom builds")
+  .argument("<target>", "artifact id (ch-base, ch-vet-base, ch-enriched, ch-vet-enriched, fr-base, pl-base, pl-vet-base, us-base) or jurisdiction for custom builds")
   .option("--source <id>", "custom local source (repeatable); cannot publish as official", collect, [] as string[])
   .option("--input <spec>", "source=path or a zip/dir for the recipe's primary source", collect, [] as string[])
   .option("--out <dir>", "output directory")

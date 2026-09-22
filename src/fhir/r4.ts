@@ -13,6 +13,7 @@ const R4_ACTIVE_INGREDIENT_ROLES = new Set([
   "SA",
   "FT",
   "substancja czynna",
+  "active",
 ]);
 
 /** Catalogue-record lifecycle only. Not marketing or reimbursement. */

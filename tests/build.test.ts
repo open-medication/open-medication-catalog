@@ -653,3 +653,87 @@ describe("pl-vet-base fixture build", () => {
     expect(domains).toEqual([{ domain: "Veterinary" }]);
   });
 });
+
+describe("us-base fixture build", () => {
+  it("builds SQLite and FHIR from the NDC fixture", async () => {
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-us-"));
+    const result = await build({
+      artifactId: "us-base",
+      inputBySource: { ndc: repoPath("fixtures/us/ndc/NDC_FIXTURE.zip") },
+      outDir: out,
+      dataMonth: "2026.09",
+    });
+    expect(result.official).toBe(true);
+    expect(result.catalogue.jurisdiction).toBe("US");
+    expect(result.catalogue.productGroups).toHaveLength(0);
+    expect(result.catalogue.reimbursements).toHaveLength(0);
+    expect(result.catalogue.medicinalProducts).toHaveLength(4);
+    expect(result.catalogue.packages).toHaveLength(5);
+    expect(result.catalogue.medicinalProducts.every((p) => p.domain.code === "Human")).toBe(true);
+    expect(result.catalogue.mappingCoverage[0]?.unknownFields).toEqual([]);
+    expect(result.catalogue.mappingCoverage[0]?.fields.find((f) => f.name === "product.txt.nonHuman")?.count).toBe(1);
+    expect(result.catalogue.mappingCoverage[0]?.fields.find((f) => f.name === "package.txt.unmatched")?.count).toBe(1);
+
+    const metformin = result.catalogue.medicinalProducts.find((p) => p.authorityKey.startsWith("0002-1433_"));
+    expect(metformin?.names.map((n) => n.text)).toEqual(["Metformin XR", "metformin hydrochloride"]);
+    expect(metformin?.identifiers.some((i) => i.value === "0002-1433" && i.use === "official")).toBe(true);
+    expect(metformin?.routes.map((r) => r.code)).toEqual(["ORAL"]);
+    expect(metformin?.ingredients[0]?.strength).toMatchObject({
+      numeratorValue: "500",
+      numeratorUnit: { code: "mg" },
+      denominatorValue: "1",
+      denominatorUnit: { code: "1" },
+      text: "500 mg/1",
+      structured: true,
+    });
+    expect(result.catalogue.authorizations.find((a) => a.authorityKey === metformin?.authorityKey)?.identifiers).toEqual(
+      expect.arrayContaining([expect.objectContaining({ value: "NDA021123" })]),
+    );
+    expect(result.catalogue.organizations.find((o) => o.authorityKey === "0002")?.name).toBe("Eli Lilly and Company");
+
+    const bottle = result.catalogue.packages.find((p) => p.authorityKey === "0002-1433-01");
+    expect(bottle?.marketingValidFrom).toBe("2020-01-15");
+    expect(bottle?.quantity).toMatchObject({ value: "100", unit: { code: "TABLET" }, structured: true });
+    expect(bottle?.identifiers.some((i) => i.system.endsWith("/ndc-11") && i.value === "00002143301")).toBe(true);
+    expect(bottle?.gtin).toBeUndefined();
+    expect(medicationStatus(bottle!)).toBeUndefined();
+
+    const sample = result.catalogue.packages.find((p) => p.authorityKey === "0002-1433-02");
+    expect(sample?.metadata?.samplePackage).toBe("Y");
+    expect(sample?.identifiers.some((i) => i.value === "00002143302")).toBe(true);
+
+    const otc = result.catalogue.packages.find((p) => p.authorityKey === "12345-678-90");
+    expect(otc?.identifiers.some((i) => i.value === "12345067890")).toBe(true);
+    expect(otc?.regulatoryStatus.code).toBe("OTC MONOGRAPH FINAL");
+
+    const combo = result.catalogue.medicinalProducts.find((p) => p.names[0]?.text === "Cobenfy");
+    expect(combo?.routes.map((r) => r.code)).toEqual(["ORAL", "TOPICAL"]);
+    expect(combo?.ingredients).toHaveLength(2);
+    expect(combo?.ingredients.every((i) => i.strength.structured)).toBe(true);
+    expect(combo?.metadata?.deaSchedule).toBe("CII");
+    const kit = result.catalogue.packages.find((p) => p.authorityKey === "67890-1234-1");
+    expect(kit?.quantity).toEqual({ structured: false });
+    expect(kit?.identifiers.some((i) => i.value === "67890123401")).toBe(true);
+    expect(kit?.marketingStatus?.code).toBe("active");
+    expect(kit?.marketingValidTo).toBe("2027-12-31");
+
+    const ended = result.catalogue.packages.find((p) => p.authorityKey === "0002-9999-01");
+    expect(ended?.marketingStatus?.code).toBe("inactive");
+    const old = result.catalogue.medicinalProducts.find((p) => p.authorityKey.startsWith("0002-9999_"));
+    expect(old?.ingredients.every((i) => i.strength.structured === false)).toBe(true);
+
+    expect(result.catalogue.medicinalProducts.some((p) => p.names[0]?.text === "Vetmed")).toBe(false);
+
+    const med = fs.readFileSync(path.join(out, "release", "fhir-r4", "Medication.ndjson"), "utf8");
+    expect(med).toContain("00002143301");
+    expect(med).toContain("METFORMIN HYDROCHLORIDE");
+    expect(med).toContain('"value":500');
+
+    const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
+    expect(sourcesMd).toContain("website-policies#linking");
+    expect(sourcesMd).toContain("attributionRequired: false");
+
+    const sqlite = path.join(out, "release", "database", "medication.sqlite");
+    expect(searchPackages(sqlite, "Metformin").length).toBeGreaterThan(0);
+  });
+});

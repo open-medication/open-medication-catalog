@@ -31,6 +31,17 @@ describe("extractTermsFragment", () => {
   it("fails when the fragment id is missing", () => {
     expect(() => extractTermsFragment("<p>no ids</p>", "terms_open")).toThrow(/not found/);
   });
+
+  it("hashes an h2 section so the rest of the page is ignored", () => {
+    const html = `<nav>chrome 1</nav><h2 id="linking">Linking</h2><p>public domain</p><h2 id="other">Other</h2><p>cookie</p>`;
+    const fragment = extractTermsFragment(html, "linking");
+    expect(fragment).toContain("public domain");
+    expect(fragment).not.toContain("chrome");
+    expect(fragment).not.toContain("cookie");
+    const a = termsChecksum(html, "linking");
+    const b = termsChecksum(html.replace("chrome 1", "chrome 2"), "linking");
+    expect(a).toBe(b);
+  });
 });
 
 describe("termsChecksumBytes", () => {
