@@ -59,7 +59,7 @@ describe("R5 Ingredient strength", () => {
       ]),
     );
 
-    const rows = parseNdjson(exportR5(catalogue, "2026.09")["Ingredient.ndjson"] ?? "");
+    const rows = parseNdjson((exportR5(catalogue, "2026.09")["Ingredient.ndjson"] ?? []).join(""));
     expect(rows).toHaveLength(2);
 
     for (const row of rows) {

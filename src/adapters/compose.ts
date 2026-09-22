@@ -22,16 +22,21 @@ export function emptyCatalogue(artifactId: string, jurisdiction: string, generat
   };
 }
 
+/** Append without `push(...)`, which overflows the stack past ~100k arguments. */
+function appendAll<T>(target: T[], items: readonly T[]): void {
+  for (const item of items) target.push(item);
+}
+
 export function mergePartials(base: Catalogue, part: PartialCatalogue): void {
-  base.productGroups.push(...part.productGroups);
-  base.medicinalProducts.push(...part.medicinalProducts);
-  base.packages.push(...part.packages);
-  base.organizations.push(...part.organizations);
-  base.authorizations.push(...part.authorizations);
-  base.substances.push(...part.substances);
-  base.reimbursements.push(...part.reimbursements);
-  base.sourceSnapshots.push(...part.sourceSnapshots);
-  base.mappingCoverage.push(...part.mappingCoverage);
+  appendAll(base.productGroups, part.productGroups);
+  appendAll(base.medicinalProducts, part.medicinalProducts);
+  appendAll(base.packages, part.packages);
+  appendAll(base.organizations, part.organizations);
+  appendAll(base.authorizations, part.authorizations);
+  appendAll(base.substances, part.substances);
+  appendAll(base.reimbursements, part.reimbursements);
+  appendAll(base.sourceSnapshots, part.sourceSnapshots);
+  appendAll(base.mappingCoverage, part.mappingCoverage);
 }
 
 export function finalizeSwissmedic(catalogue: Catalogue): void {

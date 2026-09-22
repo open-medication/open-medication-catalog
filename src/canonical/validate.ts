@@ -23,8 +23,19 @@ const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
 const validateSchema = ajv.compile(schema);
 
-function plain(catalogue: Catalogue): unknown {
-  return JSON.parse(JSON.stringify(catalogue));
+/** Drop `undefined` values so Ajv sees the same shape as JSON, without one giant string. */
+function stripUndefined(value: unknown): void {
+  if (Array.isArray(value)) {
+    for (const item of value) stripUndefined(item);
+    return;
+  }
+  if (!value || typeof value !== "object") return;
+  const record = value as Record<string, unknown>;
+  for (const key of Object.keys(record)) {
+    const child = record[key];
+    if (child === undefined) delete record[key];
+    else stripUndefined(child);
+  }
 }
 
 export function validateCatalogue(catalogue: Catalogue): ValidationIssue[] {
@@ -36,7 +47,8 @@ export function validateCatalogue(catalogue: Catalogue): ValidationIssue[] {
     });
   }
 
-  if (!validateSchema(plain(catalogue))) {
+  stripUndefined(catalogue);
+  if (!validateSchema(catalogue)) {
     for (const err of validateSchema.errors ?? []) {
       issues.push({
         path: err.instancePath || "/",

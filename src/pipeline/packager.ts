@@ -12,6 +12,23 @@ import { sha256, writeDeterministicZip } from "../security.js";
 import { writeJson, type QualityReport, type ChangeReport } from "./quality.js";
 import { sourceLicensing } from "./licensing.js";
 
+function writeLines(file: string, lines: readonly string[]): void {
+  const fd = fs.openSync(file, "w");
+  let buf = "";
+  try {
+    for (const line of lines) {
+      buf += line;
+      if (buf.length > 8_000_000) {
+        fs.writeSync(fd, buf);
+        buf = "";
+      }
+    }
+    if (buf) fs.writeSync(fd, buf);
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
 function loadPins(): unknown {
   return JSON.parse(fs.readFileSync(repoPath("tooling/pins.json"), "utf8"));
 }
@@ -38,11 +55,11 @@ export async function writeRelease(input: PackagerInput): Promise<{ zipPath: str
   writeSqlite(input.catalogue, path.join(root, "database", "medication.sqlite"));
   const r4 = exportR4(input.catalogue, `${input.artifactId}-${input.releaseLabel}`);
   const r5 = exportR5(input.catalogue, `${input.artifactId}-${input.releaseLabel}`);
-  for (const [name, body] of Object.entries(r4)) {
-    fs.writeFileSync(path.join(root, "fhir-r4", name), body);
+  for (const [name, lines] of Object.entries(r4)) {
+    writeLines(path.join(root, "fhir-r4", name), lines);
   }
-  for (const [name, body] of Object.entries(r5)) {
-    fs.writeFileSync(path.join(root, "fhir-r5", name), body);
+  for (const [name, lines] of Object.entries(r5)) {
+    writeLines(path.join(root, "fhir-r5", name), lines);
   }
 
   const manifest = {
