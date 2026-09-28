@@ -102,7 +102,7 @@ describe("ch-enriched fixture build", () => {
   const refdata = repoPath("fixtures/ch/refdata/articles.xml");
   const bag = repoPath("fixtures/ch/bag/epl-paxlovid.json");
 
-  it("maps Refdata names and dates and stays official without BAG", async () => {
+  it("maps Refdata GTINs and names and stays official without BAG", async () => {
     const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-enr-"));
     const result = await build({
       artifactId: "ch-enriched",
@@ -114,9 +114,10 @@ describe("ch-enriched fixture build", () => {
     expect(result.catalogue.sourceSnapshots.map((s) => s.sourceId)).toEqual(["swissmedic", "refdata"]);
     const pkg = result.catalogue.packages.find((p) => p.authorityKey === "10029|2|2");
     expect(pkg?.gtin).toBe("7680687930017");
-    expect(pkg?.names?.map((n) => n.language)).toEqual(["de", "fr", "it", "en"]);
-    expect(pkg?.marketingValidFrom).toBe("2020-01-01");
-    expect(pkg?.marketingStatus?.code).toBe("inCommerce");
+    expect(pkg?.names?.map((n) => n.language)).toEqual(["de", "fr", "it"]);
+    // Every fixture package has a Refdata article; the quality floor would
+    // fail the build otherwise.
+    expect(result.catalogue.packages.every((p) => p.gtin)).toBe(true);
 
     const manifest = JSON.parse(fs.readFileSync(path.join(out, "release", "manifest.json"), "utf8")) as {
       experimentalBag?: boolean;
@@ -250,7 +251,7 @@ describe("ch-vet-base fixture build", () => {
     expect(result.official).toBe(true);
     const pkg = result.catalogue.packages.find((p) => p.authorityKey === "90001|1|1");
     expect(pkg?.gtin).toBe("7680900010018");
-    expect(pkg?.names?.map((n) => n.language)).toEqual(["de", "fr", "it", "en"]);
+    expect(pkg?.names?.map((n) => n.language)).toEqual(["de", "fr"]);
     expect(pkg?.domain.code).toBe("Veterinary");
 
     await expect(

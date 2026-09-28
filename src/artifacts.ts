@@ -4,6 +4,12 @@ import { repoPath } from "./paths.js";
 
 export type MedicinalProductDomainCode = "Human" | "Veterinary";
 
+/** Release-blocking quality floors, declared per recipe in artifacts.yaml. */
+export interface QualityGates {
+  /** Minimum share of packages carrying a GTIN. Omit for recipes whose sources carry none. */
+  minPercentPackagesWithGtin?: number;
+}
+
 export interface ArtifactRecipe {
   id: string;
   jurisdiction: string;
@@ -11,6 +17,7 @@ export interface ArtifactRecipe {
   requiredSources: string[];
   requiredArtifacts?: string[];
   attachRawSources: string[];
+  qualityGates?: QualityGates;
 }
 
 export interface ArtifactFile {
@@ -29,6 +36,7 @@ export function loadRecipes(file = repoPath("artifacts.yaml")): Map<string, Arti
       requiredSources: spec.requiredSources ?? [],
       requiredArtifacts: spec.requiredArtifacts,
       attachRawSources: spec.attachRawSources ?? [],
+      qualityGates: spec.qualityGates,
     });
   }
   return out;

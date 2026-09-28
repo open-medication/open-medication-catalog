@@ -20,6 +20,12 @@ artifacts:
       # bag is added only after redistribution terms are recorded.
     attachRawSources:
       - swissmedic
+    # 2026-08 regression: every release shipped 18,309 packages with 0 GTINs
+    # because the Refdata join silently matched nothing. Floors leave room for
+    # real source coverage (Refdata misses only GTIN-less packs, e.g. blood
+    # products) while making a zero-match join fail the official build.
+    qualityGates:
+      minPercentPackagesWithGtin: 70
   ch-vet-base:
     jurisdiction: CH
     domain: Veterinary
@@ -35,6 +41,8 @@ artifacts:
       - refdata
     attachRawSources:
       - swissmedic
+    qualityGates:
+      minPercentPackagesWithGtin: 70
   fr-base:
     jurisdiction: FR
     domain: Human
@@ -42,6 +50,9 @@ artifacts:
       - bdpm
     attachRawSources:
       - bdpm
+    # CIP13 is a GTIN; observed coverage is 100%.
+    qualityGates:
+      minPercentPackagesWithGtin: 90
   pl-base:
     jurisdiction: PL
     domain: Human
@@ -49,6 +60,10 @@ artifacts:
       - rpl
     attachRawSources:
       - rpl
+    # RPL carries no GTIN for ~10% of packs (verified against the live
+    # register); the floor leaves drift room below the observed ~90%.
+    qualityGates:
+      minPercentPackagesWithGtin: 80
   pl-vet-base:
     jurisdiction: PL
     domain: Veterinary
@@ -56,6 +71,8 @@ artifacts:
       - rpl
     attachRawSources:
       - rpl
+    qualityGates:
+      minPercentPackagesWithGtin: 80
   us-base:
     jurisdiction: US
     domain: Human

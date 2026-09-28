@@ -5,7 +5,7 @@
 | Source | Role | Artifact |
 | --- | --- | --- |
 | Swissmedic OGD | Regulatory ground truth | `ch-base`, `ch-enriched` (HAM); `ch-vet-base`, `ch-vet-enriched` (TAM) |
-| Refdata Article Refdatabase | GTIN, trade status, pack trade names (DE/FR/IT/EN), trade dates if present | `ch-enriched` and `ch-vet-enriched` |
+| Refdata Article Refdatabase | GTIN, pack trade names (DE/FR), Human/Veterinary domain | `ch-enriched` and `ch-vet-enriched` |
 | BAG Spezialitätenliste | Reimbursement (status, prices, limitations, cost share, gamme, dates, dossier) | adapter present; **not** in the public recipe until terms are cleared. Local: `omc build ch-enriched --enable-bag`. Not used for veterinary artifacts. |
 
 Enrichment maps fields Swissmedic OGD does **not** already carry. Join keys, ATC, Abgabekategorie, and sequence number are not copied from Refdata. BAG IDMP product fields that duplicate Swissmedic (dose form, ingredients, ATC, German regulatory name) are skipped.
@@ -33,11 +33,13 @@ Regulatory, marketing, reimbursement, and catalogue lifecycle are separate. R4 `
 
 ## Refdata join
 
-Join is authorisation number + pack code (strings). Invariant: within Swissmedic OGD, `(authorisationNumber, packageCode)` must not map to more than one sequence. Proven on the 2026-08 snapshot (0 collisions). Re-checked every `ch-base` and `ch-vet-base` build.
+Join is authorisation number + pack code. Refdata zero-pads Swissmedic numbers inside `RegulatedAuthorisationIdentifier` (authorisation to 5 digits, pack code to 3) while Swissmedic OGD does not pad, so join keys are compared unpadded. Invariant: within Swissmedic OGD, `(authorisationNumber, packageCode)` must not map to more than one sequence. Proven on the 2026-08 snapshot (0 collisions). Re-checked every `ch-base` and `ch-vet-base` build.
 
-Refdata names are pack-level trade names (`NAME / Stärke / Menge / Form`), not sequence names. They go on `Package.names` (`de`/`fr`/`it`/`en`). Swissmedic `description` stays the original pack text. FHIR R5 puts the default-language name on `PackagedProductDefinition.name` and other languages on the [translation](http://hl7.org/fhir/StructureDefinition/translation) extension; R4 does the same on `Medication.code.text`. They are not copied onto `MedicinalProductDefinition.name`.
+Refdata names are pack-level trade names, not sequence names. They go on `Package.names` in the languages the source carries (typically `de`/`fr`). Swissmedic `description` stays the original pack text. FHIR R5 puts the default-language name on `PackagedProductDefinition.name` and other languages on the [translation](http://hl7.org/fhir/StructureDefinition/translation) extension; R4 does the same on `Medication.code.text`. They are not copied onto `MedicinalProductDefinition.name`.
 
-`TYPE=NONPHARMA` articles are not applied. ATC and Abgabekategorie mismatches against Swissmedic are recorded as intentionally ignored.
+`ProductClass=NONPHARMA` articles and articles without a `DataCarrierIdentifier` (e.g. blood products under the collective registration 99999) are not applied. Articles whose `Domain` differs from the package's domain (Human vs Veterinary) are skipped. ATC and `LegalStatusOfSupply` (Abgabekategorie) mismatches against Swissmedic are recorded as intentionally ignored. Official `ch-enriched` / `ch-vet-enriched` builds fail if GTIN coverage drops below the recipe floor in `artifacts.yaml`.
+
+The Refdata download is nested SIMIS XML (`Article/MedicinalProduct`, `Article/PackagedProduct`); `PackagedProduct/DataCarrierIdentifier` is the GTIN. Unknown elements are surfaced as unknown fields instead of being guessed at — the 2026.08 releases shipped 18,309 packages with zero GTINs because the parser had been written against an invented flat format that Refdata never produced.
 
 ## BAG join
 

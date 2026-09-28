@@ -52,6 +52,8 @@ omc build us-base          # FDA NDC Directory (finished human drugs)
 
 `--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched` / `ch-vet-base` / `ch-vet-enriched` / `pl-base` / `pl-vet-base` / `us-base`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata. BAG is not used on veterinary recipes.
 
+GTIN provenance: `ch-enriched` / `ch-vet-enriched` carry GTINs from the Refdata join (Swissmedic OGD has no GTIN field — `ch-base` / `ch-vet-base` never carry GTINs). `fr-base` uses CIP13, `pl-base` / `pl-vet-base` use the RPL `kodGTIN` (RPL has none for ~10% of packs), and `us-base` carries no GTINs (FDA NDC is not a GTIN). Official builds fail if GTIN coverage drops below the per-recipe floor declared in `artifacts.yaml`.
+
 ```text
 pnpm install
 pnpm omc build ch-base --input fixtures/ch/swissmedic/OGD_FIXTURE.zip --month 2026.08

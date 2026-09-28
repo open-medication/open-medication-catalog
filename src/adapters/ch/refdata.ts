@@ -1,13 +1,59 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Catalogue, MappingCoverageReport, SourceSnapshot } from "../../canonical/types.js";
+import { OMC_SYSTEMS } from "../../canonical/types.js";
 import { repoPath } from "../../paths.js";
 import { extractZip, fetchBinary, fileSignatureOk, sha256 } from "../../security.js";
-import { asArray, optionalText, parseXmlFile, parseXmlString } from "../../xml.js";
+import { asArray, optionalText, parseXmlFile } from "../../xml.js";
 import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
 
 const ADAPTER_DIR = repoPath("adapters/ch/refdata");
+
+/**
+ * Refdata publishes the Artikel-refdatabase as nested SIMIS/GS1 XML
+ * (`https://simisinfo.refdata.ch/Articles/N`):
+ *
+ *   <Articles generatedOn="…">
+ *     <Article>
+ *       <MedicinalProduct>
+ *         <Domain>Human|Veterinary</Domain>
+ *         <LegalStatusOfSupply>B</LegalStatusOfSupply>
+ *         <RegulatedAuthorisationIdentifier>0058501</RegulatedAuthorisationIdentifier>  <!-- auth(5)+seq(2) -->
+ *         <ProductClassification><ProductClass>PHARMA|NONPHARMA</ProductClass><Atc>…</Atc></ProductClassification>
+ *       </MedicinalProduct>
+ *       <PackagedProduct>
+ *         <RegulatedAuthorisationIdentifier>00585001</RegulatedAuthorisationIdentifier>   <!-- auth(5)+pack(3) -->
+ *         <DataCarrierIdentifier>7680005850010</DataCarrierIdentifier>                     <!-- GTIN -->
+ *         <Name><Language>DE</Language><FullName>…</FullName></Name>…
+ *       </PackagedProduct>
+ *     </Article>
+ *
+ * Swissmedic pads its numbers inside Refdata (auth 5, seq 2, pack 3 digits) but
+ * does not pad them in its own OGD files, so join keys are compared unpadded.
+ */
+export interface RefdataArticle {
+  gtin?: string;
+  /** Swissmedic authorisation number, unpadded ("585" for Refdata "00585"). */
+  authNr?: string;
+  /** Swissmedic pack code, unpadded ("1" for Refdata "001"). */
+  packCode?: string;
+  /** Swissmedic sequence number, unpadded ("01" for Refdata "0001"/"01"). */
+  sequence?: string;
+  productClass?: string;
+  domain?: string;
+  atc?: string;
+  legalStatusOfSupply?: string;
+  names: { language: string; text: string }[];
+  /** Element names we do not map; surfaced as unknown fields so format drift is visible. */
+  extraKeys: string[];
+}
+
+export interface RefdataParsed {
+  articles: RefdataArticle[];
+  /** Root `generatedOn` attribute (ISO timestamp) — the source's effective date. */
+  generatedOn?: string;
+}
 
 export class RefdataAdapter implements Adapter {
   metadata(): AdapterMetadata {
@@ -59,11 +105,11 @@ export class RefdataAdapter implements Adapter {
     if (fetched.files.length === 0) throw new Error("Refdata fetch produced no files");
   }
 
-  async parse(_ctx: AdapterContext, fetched: FetchResult): Promise<RefdataArticle[]> {
+  async parse(_ctx: AdapterContext, fetched: FetchResult): Promise<RefdataParsed> {
     const xmlFile = fetched.files.find((f) => f.toLowerCase().endsWith(".xml"));
     if (!xmlFile) throw new Error("No Refdata XML file");
     const doc = parseXmlFile(xmlFile);
-    return collectArticles(doc);
+    return { articles: collectArticles(doc), generatedOn: collectGeneratedOn(doc) };
   }
 
   async normalize(
@@ -71,9 +117,11 @@ export class RefdataAdapter implements Adapter {
     parsed: unknown,
     snapshot: SourceSnapshot,
   ): Promise<PartialCatalogue> {
-    const articles = parsed as RefdataArticle[];
+    const data = parsed as RefdataParsed;
+    const articles = data.articles;
+    // Real files carry a generatedOn timestamp; prefer it over a placeholder date.
+    if (data.generatedOn) snapshot.sourceEffectiveDate = data.generatedOn.slice(0, 10);
     // Refdata does not create products. Enrichment is applied in compose().
-    snapshot.sourceEffectiveDate = snapshot.sourceEffectiveDate ?? snapshot.retrievedAt.slice(0, 10);
     return {
       productGroups: [],
       medicinalProducts: [],
@@ -90,19 +138,15 @@ export class RefdataAdapter implements Adapter {
             { name: "gtin", classification: "mapped", count: articles.filter((a) => a.gtin).length },
             { name: "authNr", classification: "mapped", count: articles.filter((a) => a.authNr).length },
             { name: "packCode", classification: "mapped", count: articles.filter((a) => a.packCode).length },
-            { name: "tradeStatus", classification: "mapped", count: articles.filter((a) => a.tradeStatus).length },
+            { name: "domain", classification: "mapped", count: articles.filter((a) => a.domain).length },
+            { name: "productClass", classification: "mapped", count: articles.filter((a) => a.productClass).length },
             { name: "names", classification: "mapped", count: articles.filter((a) => a.names.length).length },
             {
-              name: "marketingValidFrom",
-              classification: "mapped",
-              count: articles.filter((a) => a.marketingValidFrom).length,
+              name: "legalStatusOfSupply",
+              classification: "intentionally-ignored",
+              count: articles.filter((a) => a.legalStatusOfSupply).length,
             },
             { name: "atc", classification: "intentionally-ignored", count: articles.filter((a) => a.atc).length },
-            {
-              name: "abgabekategorie",
-              classification: "intentionally-ignored",
-              count: articles.filter((a) => a.abgabekategorie).length,
-            },
           ],
           unknownFields: [],
         },
@@ -119,82 +163,87 @@ export class RefdataAdapter implements Adapter {
   }
 }
 
-export interface RefdataArticle {
-  gtin?: string;
-  authNr?: string;
-  packCode?: string;
-  sequence?: string;
-  tradeStatus?: string;
-  type?: string;
-  atc?: string;
-  abgabekategorie?: string;
-  names: { language: string; text: string }[];
-  marketingValidFrom?: string;
-  marketingValidTo?: string;
-  extraKeys: string[];
-}
-
-const KNOWN_ARTICLE_KEYS = new Set(
+const KNOWN_ELEMENTS = new Set(
   [
-    "GTIN",
-    "GTIN13",
-    "EAN",
-    "BC",
-    "AUTHNR",
-    "AUTH_NR",
-    "SWISSMEDICNO",
-    "ZULASSUNGSNUMMER",
-    "IKSNR",
-    "IKS_NR",
-    "PACKCODE",
-    "PACK_CODE",
-    "PACKUNGSCODE",
-    "PKG",
-    "PACK",
-    "STATUS",
-    "TRADESTATUS",
-    "HANDELSSTATUS",
-    "INCOMMERCE",
-    "TYPE",
-    "ATC",
-    "ATCCODE",
-    "ATC_CODE",
-    "ABGABEKATEGORIE",
-    "ABGABE_KATEGORIE",
-    "SMCAT",
-    "DOSISSTAERKE",
-    "SEQUENZNUMMER",
-    "SEQ",
-    "NAME",
-    "NAME_DE",
-    "NAME_FR",
-    "NAME_IT",
-    "NAME_EN",
-    "NOM_DE",
-    "NOM_FR",
-    "NOM_IT",
-    "NOM_EN",
-    "DSCR",
-    "DSCRD",
-    "DSCRF",
-    "DSCRI",
-    "DSCRE",
-    "DESCRIPTION",
-    "BEZEICHNUNG",
-    "VALIDFROM",
-    "VALID_FROM",
-    "VALIDTO",
-    "VALID_TO",
-    "INCOMMERCEFROM",
-    "INCOMMERCETO",
-    "DATEFROM",
-    "DATETO",
-    "HANDELSSTATUSVON",
-    "HANDELSSTATUSBIS",
-    "FROM",
-    "TO",
+    "medicinalproduct",
+    "packagedproduct",
+    "identifier",
+    "domain",
+    "legalstatusofsupply",
+    "regulatedauthorisationidentifier",
+    "productclassification",
+    "productclass",
+    "atc",
+    "datacarrieridentifier",
+    "holder",
+    "name",
+    "language",
+    "fullname",
   ].map((k) => k.toLowerCase()),
 );
+
+/** Find a child key case-insensitively, ignoring namespace prefixes (`ns0:Article`). */
+function findKey(node: Record<string, unknown>, name: string): string | undefined {
+  const target = name.toLowerCase();
+  for (const key of Object.keys(node)) {
+    const bare = key.includes(":") ? (key.split(":").pop() ?? key) : key;
+    if (bare.toLowerCase() === target) return key;
+  }
+  return undefined;
+}
+
+function child(node: Record<string, unknown> | undefined, name: string): Record<string, unknown> | undefined {
+  if (!node) return undefined;
+  const key = findKey(node, name);
+  if (key === undefined) return undefined;
+  const value = node[key];
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  return value as Record<string, unknown>;
+}
+
+function text(node: Record<string, unknown> | undefined, name: string): string | undefined {
+  if (!node) return undefined;
+  const key = findKey(node, name);
+  if (key === undefined) return undefined;
+  const value = node[key];
+  const first = Array.isArray(value) ? value[0] : value;
+  return typeof first === "string" ? optionalText(first) : undefined;
+}
+
+/** Refdata zero-pads Swissmedic numbers (auth to 5, pack to 3, seq to 2); compare unpadded. */
+export function unpad(value: string): string {
+  const stripped = value.replace(/^0+/, "");
+  return stripped.length > 0 ? stripped : "0";
+}
+
+/**
+ * Split a RegulatedAuthorisationIdentifier into its unpadded parts:
+ * 8 digits = authorisation(5) + pack(3), 7 digits = authorisation(5) + sequence(2).
+ */
+function splitRegulatedAuthorisationId(
+  value: string | undefined,
+  length: 7 | 8,
+): [string, string] | undefined {
+  if (!value || value.length !== length || !/^\d+$/.test(value)) return undefined;
+  return [unpad(value.slice(0, 5)), unpad(value.slice(5))];
+}
+
+function gtinOf(value: string | undefined): string | undefined {
+  return value && /^\d{13,14}$/.test(value) ? value : undefined;
+}
+
+export function collectGeneratedOn(doc: unknown): string | undefined {
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) return undefined;
+  const rec = doc as Record<string, unknown>;
+  const key = findKey(rec, "Articles");
+  if (key === undefined) return undefined;
+  const value = rec[key];
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const attrs = value as Record<string, unknown>;
+  const generated = Object.keys(attrs).find((k) => k.toLowerCase() === "@_generatedon");
+  const raw = generated === undefined ? undefined : attrs[generated];
+  return typeof raw === "string" ? optionalText(raw) : undefined;
+}
 
 export function collectArticles(doc: unknown): RefdataArticle[] {
   const rows: Record<string, unknown>[] = [];
@@ -205,144 +254,146 @@ export function collectArticles(doc: unknown): RefdataArticle[] {
       return;
     }
     const rec = node as Record<string, unknown>;
-    const looksLikeArticle =
-      first(rec, ["GTIN", "Gtin", "EAN", "BC"]) &&
-      first(rec, ["AUTHNR", "AuthNr", "SwissmedicNo", "ZULASSUNGSNUMMER", "IkSnr", "IKSNR"]);
-    if (looksLikeArticle) rows.push(rec);
-    if ("ARTICLE" in rec) asArray(rec.ARTICLE).forEach((a) => walk(a));
-    else Object.values(rec).forEach(walk);
+    const key = findKey(rec, "Article");
+    if (key !== undefined) {
+      for (const article of asArray(rec[key])) {
+        if (article && typeof article === "object" && !Array.isArray(article)) {
+          rows.push(article as Record<string, unknown>);
+        }
+      }
+    }
+    for (const value of Object.values(rec)) walk(value);
   };
   walk(doc);
   return rows.map(rowToArticle);
 }
 
 function rowToArticle(row: Record<string, unknown>): RefdataArticle {
+  const medicinal = child(row, "MedicinalProduct");
+  const packaged = child(row, "PackagedProduct");
+  const classification = child(medicinal, "ProductClassification");
+
   const names: { language: string; text: string }[] = [];
-  const pushName = (language: string, text: string | undefined) => {
-    if (text) names.push({ language, text });
-  };
-  pushName("de", first(row, ["NAME_DE", "NOM_DE", "DSCRD"]));
-  pushName("fr", first(row, ["NAME_FR", "NOM_FR", "DSCRF"]));
-  pushName("it", first(row, ["NAME_IT", "NOM_IT", "DSCRI"]));
-  pushName("en", first(row, ["NAME_EN", "NOM_EN", "DSCRE"]));
-  if (names.length === 0) {
-    const generic = first(row, ["NAME", "DSCR", "DESCRIPTION", "Bezeichnung"]);
-    if (generic) names.push({ language: "de", text: generic });
+  if (packaged) {
+    const nameKey = findKey(packaged, "Name");
+    if (nameKey !== undefined) {
+      for (const entry of asArray(packaged[nameKey])) {
+        if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+        const name = entry as Record<string, unknown>;
+        const language = text(name, "Language")?.toLowerCase();
+        const fullName = text(name, "FullName");
+        if (language && fullName) names.push({ language, text: fullName });
+      }
+    }
   }
-  const extraKeys = Object.keys(row).filter((k) => {
-    if (k.startsWith(":") || k === "?xml") return false;
-    return !KNOWN_ARTICLE_KEYS.has(k.toLowerCase());
-  });
+
+  const packagedId = splitRegulatedAuthorisationId(
+    text(packaged, "RegulatedAuthorisationIdentifier"),
+    8,
+  );
+  const medicinalId = splitRegulatedAuthorisationId(
+    text(medicinal, "RegulatedAuthorisationIdentifier"),
+    7,
+  );
+
   return {
-    gtin: first(row, ["GTIN", "Gtin", "EAN", "BC"]),
-    authNr: first(row, ["AUTHNR", "AuthNr", "SwissmedicNo", "ZULASSUNGSNUMMER", "IkSnr", "IKSNR"]),
-    packCode: first(row, ["PACKCODE", "PackCode", "PACKUNGSCODE", "Pkg", "PACK"]),
-    sequence: first(row, ["DOSISSTAERKE", "SEQUENZNUMMER", "Seq"]),
-    tradeStatus: first(row, ["STATUS", "TradeStatus", "Handelsstatus", "INCOMMERCE"]),
-    type: first(row, ["TYPE"]),
-    atc: first(row, ["ATC", "ATC_CODE", "ATCCODE"]),
-    abgabekategorie: first(row, ["ABGABEKATEGORIE", "ABGABE_KATEGORIE", "SMCAT"]),
+    gtin: gtinOf(text(packaged, "DataCarrierIdentifier")),
+    authNr: packagedId?.[0],
+    packCode: packagedId?.[1],
+    sequence: medicinalId?.[1],
+    productClass: text(classification, "ProductClass"),
+    domain: text(medicinal, "Domain"),
+    atc: text(classification, "Atc"),
+    legalStatusOfSupply: text(medicinal, "LegalStatusOfSupply"),
     names,
-    marketingValidFrom: first(row, [
-      "VALIDFROM",
-      "VALID_FROM",
-      "INCOMMERCEFROM",
-      "DATEFROM",
-      "HANDELSSTATUSVON",
-    ]),
-    marketingValidTo: first(row, ["VALIDTO", "VALID_TO", "INCOMMERCETO", "DATETO", "HANDELSSTATUSBIS"]),
-    extraKeys,
+    extraKeys: extraElementKeys(row, medicinal, packaged, classification),
   };
+}
+
+function extraElementKeys(
+  row: Record<string, unknown>,
+  medicinal: Record<string, unknown> | undefined,
+  packaged: Record<string, unknown> | undefined,
+  classification: Record<string, unknown> | undefined,
+): string[] {
+  const out: string[] = [];
+  const visit = (node: Record<string, unknown> | undefined): void => {
+    if (!node) return;
+    for (const key of Object.keys(node)) {
+      if (key.startsWith("@_") || key === "#text") continue;
+      const bare = (key.includes(":") ? (key.split(":").pop() ?? key) : key).toLowerCase();
+      if (!KNOWN_ELEMENTS.has(bare) && !out.includes(bare)) out.push(bare);
+    }
+  };
+  visit(row);
+  visit(medicinal);
+  visit(packaged);
+  visit(classification);
+  return out;
 }
 
 export function applyRefdata(catalogue: Catalogue, articles: RefdataArticle[], snapshot: SourceSnapshot): void {
   const byAuthPack = new Map<string, RefdataArticle>();
   for (const a of articles) {
     if (!a.authNr || !a.packCode) continue;
-    if (a.type && a.type.toUpperCase() === "NONPHARMA") continue;
+    if (a.productClass && a.productClass.toUpperCase() === "NONPHARMA") continue;
     byAuthPack.set(`${a.authNr}|${a.packCode}`, a);
   }
   let atcMismatch = 0;
-  let abgabeMismatch = 0;
+  let legalStatusMismatch = 0;
+  let domainSkipped = 0;
   for (const pkg of catalogue.packages) {
     const [auth, , pack] = pkg.authorityKey.split("|");
     if (!auth || !pack) continue;
-    const hit = byAuthPack.get(`${auth}|${pack}`);
+    const hit = byAuthPack.get(`${unpad(auth)}|${unpad(pack)}`);
     if (!hit) continue;
+    // Refdata carries HAM and TAM in one file; do not cross-pollute domains.
+    if (hit.domain && pkg.domain.code && hit.domain !== pkg.domain.code) {
+      domainSkipped += 1;
+      continue;
+    }
     if (hit.gtin) {
       pkg.gtin = hit.gtin;
       pkg.identifiers = [
-        ...pkg.identifiers.filter((i) => i.system !== "https://www.gs1.org/gtin"),
-        { system: "https://www.gs1.org/gtin", value: hit.gtin },
+        ...pkg.identifiers.filter((i) => i.system !== OMC_SYSTEMS.gtin),
+        { system: OMC_SYSTEMS.gtin, value: hit.gtin },
       ];
-      pkg.fieldProvenance.gtin = { sourceId: "refdata", snapshotId: snapshot.id, originalField: "GTIN" };
-    }
-    if (hit.tradeStatus) {
-      pkg.marketingStatus = {
-        system: "https://fhir.openmedicationcatalog.org/CodeSystem/ch-refdata-trade-status",
-        code: hit.tradeStatus,
-      };
-      pkg.fieldProvenance.marketingStatus = {
+      pkg.fieldProvenance.gtin = {
         sourceId: "refdata",
         snapshotId: snapshot.id,
-        originalField: "STATUS",
+        originalField: "PackagedProduct/DataCarrierIdentifier",
       };
     }
     if (hit.names.length) {
-      pkg.names = hit.names.map((n) => ({ text: n.text, language: n.language }));
-      pkg.fieldProvenance.names = { sourceId: "refdata", snapshotId: snapshot.id, originalField: "NAME_DE" };
-    }
-    if (hit.marketingValidFrom) {
-      pkg.marketingValidFrom = hit.marketingValidFrom;
-      pkg.fieldProvenance.marketingValidFrom = {
-        sourceId: "refdata",
-        snapshotId: snapshot.id,
-        originalField: "VALIDFROM",
-      };
-    }
-    if (hit.marketingValidTo) {
-      pkg.marketingValidTo = hit.marketingValidTo;
-      pkg.fieldProvenance.marketingValidTo = {
-        sourceId: "refdata",
-        snapshotId: snapshot.id,
-        originalField: "VALIDTO",
-      };
+      pkg.names = hit.names;
+      pkg.fieldProvenance.names = { sourceId: "refdata", snapshotId: snapshot.id, originalField: "PackagedProduct/Name" };
     }
     const group = catalogue.productGroups.find((g) => g.id === pkg.productGroupId);
     if (hit.atc && group?.atc?.code && hit.atc !== group.atc.code) atcMismatch += 1;
     const swissAbgabe = pkg.metadata?.abgabekategorie;
-    if (hit.abgabekategorie && swissAbgabe && hit.abgabekategorie !== swissAbgabe) abgabeMismatch += 1;
+    if (hit.legalStatusOfSupply && swissAbgabe && hit.legalStatusOfSupply !== swissAbgabe) {
+      legalStatusMismatch += 1;
+    }
   }
   const coverage = catalogue.mappingCoverage.find((m) => m.sourceId === "refdata");
   if (coverage) {
     if (atcMismatch) {
       coverage.fields.push({ name: "atc-mismatch", classification: "intentionally-ignored", count: atcMismatch });
     }
-    if (abgabeMismatch) {
+    if (legalStatusMismatch) {
       coverage.fields.push({
-        name: "abgabekategorie-mismatch",
+        name: "legal-status-mismatch",
         classification: "intentionally-ignored",
-        count: abgabeMismatch,
+        count: legalStatusMismatch,
       });
     }
-    const extras = [...new Set(articles.flatMap((a) => a.extraKeys))].sort();
-    coverage.unknownFields = extras;
+    if (domainSkipped) {
+      coverage.fields.push({
+        name: "domain-skipped",
+        classification: "intentionally-ignored",
+        count: domainSkipped,
+      });
+    }
+    coverage.unknownFields = [...new Set(articles.flatMap((a) => a.extraKeys))].sort();
   }
 }
-
-function first(row: Record<string, unknown>, names: string[]): string | undefined {
-  for (const n of names) {
-    if (n in row) {
-      const v = optionalText(row[n]);
-      if (v) return v;
-    }
-    const found = Object.keys(row).find((k) => k.toLowerCase() === n.toLowerCase());
-    if (found) {
-      const v = optionalText(row[found]);
-      if (v) return v;
-    }
-  }
-  return undefined;
-}
-
-void parseXmlString;
