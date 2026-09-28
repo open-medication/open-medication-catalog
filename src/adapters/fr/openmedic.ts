@@ -288,7 +288,7 @@ function snapshotFrom(
     id: sha256(buf).slice(0, 16),
     sourceId: SOURCE_ID,
     identityAuthority: "openmedic",
-    retrievedAt: new Date(0).toISOString(),
+    retrievedAt: new Date().toISOString(),
     sourceEffectiveDate: sourceEffectiveDate ?? ctx.cutoffDate,
     sha256: sha256(buf),
     uri,

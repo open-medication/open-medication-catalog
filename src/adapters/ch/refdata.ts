@@ -93,7 +93,7 @@ export class RefdataAdapter implements Adapter {
         id: sha256(buf).slice(0, 16),
         sourceId: "refdata",
         identityAuthority: "swissmedic",
-        retrievedAt: new Date(0).toISOString(),
+        retrievedAt: new Date().toISOString(),
         sha256: sha256(buf),
         uri,
         ...snapshotTerms(loadSourceDescriptor(ADAPTER_DIR)),

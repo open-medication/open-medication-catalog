@@ -16,7 +16,7 @@ function snap(): SourceSnapshot {
     id: "snap1",
     sourceId: "refdata",
     identityAuthority: "swissmedic",
-    retrievedAt: "1970-01-01T00:00:00.000Z",
+    retrievedAt: "2026-08-31T06:00:00.000Z",
     sha256: "abc",
     uri: "file:fixture",
   };
@@ -224,7 +224,7 @@ describe("BAG CH EPL pin", () => {
             id: "x",
             sourceId: "bag",
             identityAuthority: "bag",
-            retrievedAt: "1970-01-01T00:00:00.000Z",
+            retrievedAt: "2026-08-31T06:00:00.000Z",
             sha256: "x",
             uri: "file:x",
           },
@@ -269,7 +269,7 @@ describe("BAG join", () => {
       id: "bagsnap",
       sourceId: "bag",
       identityAuthority: "bag",
-      retrievedAt: "1970-01-01T00:00:00.000Z",
+      retrievedAt: "2026-08-31T06:00:00.000Z",
       sha256: "bag",
       uri: "file:fixture",
     };

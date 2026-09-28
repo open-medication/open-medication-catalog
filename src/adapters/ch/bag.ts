@@ -36,7 +36,7 @@ export class BagAdapter implements Adapter {
         id: sha256(buf).slice(0, 16),
         sourceId: "bag",
         identityAuthority: "bag",
-        retrievedAt: new Date(0).toISOString(),
+        retrievedAt: new Date().toISOString(),
         sha256: sha256(buf),
         uri: `file:${ctx.inputPath}`,
         ...snapshotTerms(loadSourceDescriptor(ADAPTER_DIR)),

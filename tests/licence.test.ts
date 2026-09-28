@@ -100,7 +100,7 @@ describe("release licensing texts", () => {
           id: "x",
           sourceId: "swissmedic",
           identityAuthority: "swissmedic",
-          retrievedAt: "1970-01-01T00:00:00.000Z",
+          retrievedAt: "2026-08-31T06:00:00.000Z",
           sha256: "abc",
           uri: "file:test",
         },
