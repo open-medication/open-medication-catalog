@@ -3,7 +3,7 @@ import path from "node:path";
 import { getRecipe, isOfficialArtifactId, type ArtifactRecipe } from "../artifacts.js";
 import { emptyCatalogue, enrichWithBag, enrichWithRefdata, finalizeSwissmedic, mergePartials, sortCatalogue } from "../adapters/compose.js";
 import { SwissmedicAdapter, SourceNotYetAvailableError } from "../adapters/ch/swissmedic.js";
-import { RefdataAdapter } from "../adapters/ch/refdata.js";
+import { RefdataAdapter, type RefdataParsed } from "../adapters/ch/refdata.js";
 import { BagAdapter, loadFhirResources } from "../adapters/ch/bag.js";
 import { BdpmAdapter } from "../adapters/fr/bdpm.js";
 import { RplAdapter } from "../adapters/pl/rpl.js";
@@ -12,7 +12,14 @@ import type { Adapter, AdapterContext, FetchResult } from "../adapters/types.js"
 import { assertValidCatalogue } from "../canonical/validate.js";
 import { repoPath } from "../paths.js";
 import { calendarForDate, parseDataMonth, type ReleaseCalendar } from "./dates.js";
-import { detectAnomalies, diffCatalogues, qualityReport, type ChangeReport } from "./quality.js";
+import {
+  detectAnomalies,
+  diffCatalogues,
+  qualityGateViolations,
+  qualityReport,
+  readPreviousQualityReport,
+  type ChangeReport,
+} from "./quality.js";
 import { writeRelease } from "./packager.js";
 import { assertTermsAllowRedistribution } from "./terms.js";
 import { licensingTexts } from "./licensing.js";
@@ -140,7 +147,8 @@ export async function build(opts: BuildOptions): Promise<BuildResult> {
   else sortCatalogue(catalogue);
   if (sourceIds.includes("refdata")) {
     const snap = fetched.get("refdata")!.snapshot;
-    enrichWithRefdata(catalogue, parsed.get("refdata") as never, snap.id);
+    const parsedRefdata = parsed.get("refdata") as RefdataParsed;
+    enrichWithRefdata(catalogue, parsedRefdata.articles, snap.id);
   }
   if (sourceIds.includes("bag")) {
     const snap = fetched.get("bag")!.snapshot;
@@ -149,9 +157,12 @@ export async function build(opts: BuildOptions): Promise<BuildResult> {
 
   assertValidCatalogue(catalogue);
   const quality = qualityReport(catalogue);
-  const anomalies = detectAnomalies(quality);
-  if (anomalies.length && official && quality.unknownFields.length > 0 && quality.packageCount === 0) {
-    throw new Error(`Anomaly gate: ${anomalies.join("; ")}`);
+  // Official builds fail on regressions vs the previous release (when a
+  // previous build dir is given) and on absolute per-recipe quality floors.
+  const previous = readPreviousQualityReport(opts.previousDir);
+  const failures = [...detectAnomalies(quality, previous), ...qualityGateViolations(quality, recipe?.qualityGates)];
+  if (failures.length > 0 && official) {
+    throw new Error(`Quality gate: ${failures.join("; ")}`);
   }
 
   let changes: ChangeReport | undefined;

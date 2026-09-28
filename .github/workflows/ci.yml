@@ -37,6 +37,14 @@ jobs:
         env:
           OMC_SKIP_TERMS: "1"
         run: pnpm omc build ch-vet-base --input fixtures/ch/swissmedic/OGD_FIXTURE.zip --month 2026.08 --out /tmp/omc-ci-vet
+      - name: Fixture official build (CH enriched)
+        env:
+          OMC_SKIP_TERMS: "1"
+        run: pnpm omc build ch-enriched --input swissmedic=fixtures/ch/swissmedic/OGD_FIXTURE.zip --input refdata=fixtures/ch/refdata/articles.xml --month 2026.08 --out /tmp/omc-ci-ch-enriched
+      - name: Fixture official build (CH veterinary enriched)
+        env:
+          OMC_SKIP_TERMS: "1"
+        run: pnpm omc build ch-vet-enriched --input swissmedic=fixtures/ch/swissmedic/OGD_FIXTURE.zip --input refdata=fixtures/ch/refdata/articles.xml --month 2026.08 --out /tmp/omc-ci-ch-vet-enriched
       - name: Fixture official build (France)
         env:
           OMC_SKIP_TERMS: "1"
@@ -62,6 +70,8 @@ jobs:
         run: |
           pnpm omc fhir-validate --dir /tmp/omc-ci/release
           pnpm omc fhir-validate --dir /tmp/omc-ci-vet/release
+          pnpm omc fhir-validate --dir /tmp/omc-ci-ch-enriched/release
+          pnpm omc fhir-validate --dir /tmp/omc-ci-ch-vet-enriched/release
           pnpm omc fhir-validate --dir /tmp/omc-ci-fr/release
           pnpm omc fhir-validate --dir /tmp/omc-ci-pl/release
           pnpm omc fhir-validate --dir /tmp/omc-ci-pl-vet/release

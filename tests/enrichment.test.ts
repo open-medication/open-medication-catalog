@@ -23,53 +23,176 @@ function snap(): SourceSnapshot {
 }
 
 describe("refdata join", () => {
-  it("joins on authorisation + pack code as strings", () => {
-    const xml = `<?xml version="1.0"?><ARTICLES>
-      <ARTICLE><GTIN>7680123450017</GTIN><AUTHNR>001</AUTHNR><PACKCODE>001</PACKCODE><STATUS>inCommerce</STATUS><NAME_DE>Prednison DE</NAME_DE><NAME_FR>Prednisone FR</NAME_FR><VALIDFROM>2020-01-01</VALIDFROM><VALIDTO>2099-12-31</VALIDTO></ARTICLE>
-    </ARTICLES>`;
+  it("parses the real SIMIS Articles format and unpads swissmedic keys", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+      <Articles xmlns="https://simisinfo.refdata.ch/Articles/1.0/" totalArticles="2" generatedOn="2026-08-31T01:00:07Z">
+        <Article>
+          <MedicinalProduct>
+            <Identifier>CH-7601001000674-00585</Identifier>
+            <Domain>Human</Domain>
+            <LegalStatusOfSupply>B</LegalStatusOfSupply>
+            <RegulatedAuthorisationIdentifier>0058501</RegulatedAuthorisationIdentifier>
+            <ProductClassification><ProductClass>PHARMA</ProductClass><Atc>J07BK01</Atc></ProductClassification>
+          </MedicinalProduct>
+          <PackagedProduct>
+            <Identifier>CH-7601001000674-00585-001</Identifier>
+            <RegulatedAuthorisationIdentifier>00585001</RegulatedAuthorisationIdentifier>
+            <DataCarrierIdentifier>7680005850010</DataCarrierIdentifier>
+            <Name><Language>DE</Language><FullName>VARILRIX DE</FullName></Name>
+            <Name><Language>FR</Language><FullName>VARILRIX FR</FullName></Name>
+          </PackagedProduct>
+        </Article>
+        <Article>
+          <MedicinalProduct>
+            <Domain>Human</Domain>
+            <ProductClassification><ProductClass>NONPHARMA</ProductClass></ProductClassification>
+          </MedicinalProduct>
+          <PackagedProduct>
+            <RegulatedAuthorisationIdentifier>76100001</RegulatedAuthorisationIdentifier>
+            <DataCarrierIdentifier>7611600441020</DataCarrierIdentifier>
+          </PackagedProduct>
+        </Article>
+      </Articles>`;
     const articles = collectArticles(parseXmlString(xml));
-    expect(articles[0]?.authNr).toBe("001");
-    expect(articles[0]?.packCode).toBe("001");
-    expect(articles[0]?.gtin).toBe("7680123450017");
+    expect(articles).toHaveLength(2);
+    expect(articles[0]?.gtin).toBe("7680005850010");
+    expect(articles[0]?.authNr).toBe("585");
+    expect(articles[0]?.packCode).toBe("1");
+    expect(articles[0]?.sequence).toBe("1");
+    expect(articles[0]?.productClass).toBe("PHARMA");
+    expect(articles[0]?.domain).toBe("Human");
+    expect(articles[0]?.atc).toBe("J07BK01");
+    expect(articles[0]?.legalStatusOfSupply).toBe("B");
+    expect(articles[0]?.names).toEqual([
+      { language: "de", text: "VARILRIX DE" },
+      { language: "fr", text: "VARILRIX FR" },
+    ]);
+    // NONPHARMA articles are parsed but never join medicinal-product packages.
+    expect(articles[1]?.productClass).toBe("NONPHARMA");
+  });
+
+  it("joins on authorisation + pack code with padding normalization", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+      <Articles xmlns="https://simisinfo.refdata.ch/Articles/1.0/">
+        <Article>
+          <MedicinalProduct>
+            <Domain>Human</Domain>
+            <RegulatedAuthorisationIdentifier>0058501</RegulatedAuthorisationIdentifier>
+            <ProductClassification><ProductClass>PHARMA</ProductClass></ProductClassification>
+          </MedicinalProduct>
+          <PackagedProduct>
+            <RegulatedAuthorisationIdentifier>00585001</RegulatedAuthorisationIdentifier>
+            <DataCarrierIdentifier>7680005850010</DataCarrierIdentifier>
+            <Name><Language>DE</Language><FullName>VARILRIX DE</FullName></Name>
+          </PackagedProduct>
+        </Article>
+      </Articles>`;
+    const articles = collectArticles(parseXmlString(xml));
 
     const cat = emptyCatalogue("custom-ch", "CH", "0.1.0");
     const pkgId = canonicalId({
       jurisdiction: "CH",
       identityAuthority: "swissmedic",
       entityType: "Package",
-      authorityKey: authorityKey(["001", "01", "001"]),
+      authorityKey: authorityKey(["585", "01", "1"]),
     });
     const mpId = canonicalId({
       jurisdiction: "CH",
       identityAuthority: "swissmedic",
       entityType: "MedicinalProduct",
-      authorityKey: authorityKey(["001", "01"]),
+      authorityKey: authorityKey(["585", "01"]),
     });
     const pkg: Package = {
       id: pkgId,
       jurisdiction: "CH",
       identityAuthority: "swissmedic",
-      authorityKey: "001|01|001",
+      authorityKey: "585|01|1",
       medicinalProductId: mpId,
       domain: medicinalProductDomain("Human"),
-      description: "001 10 tablet(s)",
+      description: "585 10 tablet(s)",
       quantity: { structured: false },
       regulatoryStatus: { system: SWISSMEDIC_SYSTEMS.regulatoryStatus, code: "Z" },
-      identifiers: [{ system: SWISSMEDIC_SYSTEMS.package, value: "001|01|001" }],
+      identifiers: [{ system: SWISSMEDIC_SYSTEMS.package, value: "585|01|1" }],
       fieldProvenance: {},
       sourceRecords: [],
     };
     cat.packages.push(pkg);
     cat.sourceSnapshots.push(snap());
     applyRefdata(cat, articles, snap());
-    expect(pkg.gtin).toBe("7680123450017");
-    expect(pkg.marketingStatus?.code).toBe("inCommerce");
-    expect(pkg.names).toEqual([
-      { language: "de", text: "Prednison DE" },
-      { language: "fr", text: "Prednisone FR" },
-    ]);
-    expect(pkg.marketingValidFrom).toBe("2020-01-01");
-    expect(pkg.marketingValidTo).toBe("2099-12-31");
+    expect(pkg.gtin).toBe("7680005850010");
+    expect(pkg.identifiers.some((i) => i.system === "https://www.gs1.org/gtin" && i.value === "7680005850010")).toBe(true);
+    expect(pkg.names).toEqual([{ language: "de", text: "VARILRIX DE" }]);
+    expect(pkg.fieldProvenance.gtin?.originalField).toBe("PackagedProduct/DataCarrierIdentifier");
+  });
+
+  it("does not join articles across human/veterinary domains", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+      <Articles xmlns="https://simisinfo.refdata.ch/Articles/1.0/">
+        <Article>
+          <MedicinalProduct>
+            <Domain>Human</Domain>
+            <ProductClassification><ProductClass>PHARMA</ProductClass></ProductClassification>
+          </MedicinalProduct>
+          <PackagedProduct>
+            <RegulatedAuthorisationIdentifier>90001001</RegulatedAuthorisationIdentifier>
+            <DataCarrierIdentifier>7680900010018</DataCarrierIdentifier>
+            <Name><Language>DE</Language><FullName>Wrong-domain name</FullName></Name>
+          </PackagedProduct>
+        </Article>
+      </Articles>`;
+    const articles = collectArticles(parseXmlString(xml));
+
+    const cat = emptyCatalogue("custom-ch", "CH", "0.1.0");
+    const pkgId = canonicalId({
+      jurisdiction: "CH",
+      identityAuthority: "swissmedic",
+      entityType: "Package",
+      authorityKey: authorityKey(["90001", "1", "1"]),
+    });
+    const mpId = canonicalId({
+      jurisdiction: "CH",
+      identityAuthority: "swissmedic",
+      entityType: "MedicinalProduct",
+      authorityKey: authorityKey(["90001", "1"]),
+    });
+    const pkg: Package = {
+      id: pkgId,
+      jurisdiction: "CH",
+      identityAuthority: "swissmedic",
+      authorityKey: "90001|1|1",
+      medicinalProductId: mpId,
+      domain: medicinalProductDomain("Veterinary"),
+      description: "1 10 ml",
+      quantity: { structured: false },
+      regulatoryStatus: { system: SWISSMEDIC_SYSTEMS.regulatoryStatus, code: "Z" },
+      identifiers: [{ system: SWISSMEDIC_SYSTEMS.package, value: "90001|1|1" }],
+      fieldProvenance: {},
+      sourceRecords: [],
+    };
+    cat.packages.push(pkg);
+    cat.sourceSnapshots.push(snap());
+    applyRefdata(cat, articles, snap());
+    expect(pkg.gtin).toBeUndefined();
+    expect(pkg.names).toBeUndefined();
+  });
+
+  it("skips articles without a data carrier identifier instead of crashing", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+      <Articles xmlns="https://simisinfo.refdata.ch/Articles/1.0/">
+        <Article>
+          <MedicinalProduct>
+            <Domain>Human</Domain>
+            <ProductClassification><ProductClass>PHARMA</ProductClass></ProductClassification>
+          </MedicinalProduct>
+          <PackagedProduct>
+            <RegulatedAuthorisationIdentifier>99998001</RegulatedAuthorisationIdentifier>
+            <Name><Language>DE</Language><FullName>Erythrozytenkonzentrat</FullName></Name>
+          </PackagedProduct>
+        </Article>
+      </Articles>`;
+    const articles = collectArticles(parseXmlString(xml));
+    expect(articles[0]?.gtin).toBeUndefined();
+    expect(articles[0]?.authNr).toBe("99998");
   });
 });
 

@@ -42,6 +42,27 @@ jobs:
       - name: Rebuild native modules
         if: steps.next.outputs.skip != 'true'
         run: pnpm rebuild:native
+      - name: Fetch previous release baseline
+        # Quality gates compare against the last published quality report
+        # (package-count regressions, "all GTINs disappeared").
+        if: steps.next.outputs.skip != 'true'
+        id: prev
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ART="${{ matrix.artifact }}"
+          TAG="${{ steps.next.outputs.tag }}"
+          PREV_TAG=$(gh release list --limit 300 | awk -v p="^${ART}-" -v cur="^${TAG}\$" '$1 ~ p && $1 !~ cur {print $1; exit}')
+          if [ -n "$PREV_TAG" ]; then
+            echo "Previous release: $PREV_TAG"
+            rm -rf previous && mkdir -p previous/release
+            gh release download "$PREV_TAG" --pattern "*.zip" --dir previous/zip
+            unzip -q previous/zip/*.zip -d previous/extract
+            cp previous/extract/quality-report.json previous/release/quality-report.json
+            echo "has_previous=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No previous release for ${ART}"
+          fi
       - uses: actions/setup-java@v4
         if: steps.next.outputs.skip != 'true'
         with:
@@ -60,8 +81,12 @@ jobs:
           REFDATA_API_KEY: ${{ secrets.REFDATA_API_KEY }}
         run: |
           LOG="${{ runner.temp }}/omc-build.log"
+          ARGS=(pnpm omc build ${{ matrix.artifact }} --month "${{ steps.next.outputs.month }}" --out "output/${{ matrix.artifact }}")
+          if [ "${{ steps.prev.outputs.has_previous }}" = "true" ]; then
+            ARGS+=(--previous previous)
+          fi
           set +e
-          pnpm omc build ${{ matrix.artifact }} --month "${{ steps.next.outputs.month }}" --out "output/${{ matrix.artifact }}" 2>&1 | tee "$LOG"
+          "${ARGS[@]}" 2>&1 | tee "$LOG"
           code=${PIPESTATUS[0]}
           set -e
           if grep -q "not yet available" "$LOG" || [ -f "output/${{ matrix.artifact }}/.not-yet-available" ]; then
@@ -77,6 +102,31 @@ jobs:
       - name: Java FHIR validate
         if: steps.next.outputs.skip != 'true' && steps.build.outputs.not_yet != 'true'
         run: pnpm omc fhir-validate --dir "output/${{ matrix.artifact }}/release"
+      - name: Smoke test release contents
+        # Independent of the in-process gates: verify the artifact we are
+        # about to publish actually contains the data it must carry.
+        if: steps.next.outputs.skip != 'true' && steps.build.outputs.not_yet != 'true'
+        run: |
+          ZIP=$(ls output/${{ matrix.artifact }}/*.zip | head -n 1)
+          rm -rf smoke && mkdir smoke && unzip -q "$ZIP" -d smoke
+          TOTAL=$(sqlite3 smoke/database/medication.sqlite "SELECT COUNT(*) FROM package")
+          WITHGTIN=$(sqlite3 smoke/database/medication.sqlite "SELECT COUNT(gtin) FROM package")
+          echo "packages=$TOTAL with_gtin=$WITHGTIN"
+          case "${{ matrix.artifact }}" in
+            ch-enriched|ch-vet-enriched|fr-base|pl-base|pl-vet-base)
+              if [ "${TOTAL:-0}" -gt 0 ]; then
+                PCT=$(( WITHGTIN * 100 / TOTAL ))
+                echo "GTIN coverage: ${PCT}%"
+                if [ "$PCT" -lt 70 ]; then
+                  echo "::error::GTIN coverage ${PCT}% is below the 70% floor"
+                  exit 1
+                fi
+              fi
+              ;;
+            *)
+              echo "No GTIN floor for this artifact (source carries none by design)"
+              ;;
+          esac
       - name: Publish GitHub Release
         if: steps.next.outputs.skip != 'true' && steps.build.outputs.not_yet != 'true'
         env:

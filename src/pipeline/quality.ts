@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Catalogue } from "../canonical/types.js";
+import type { Catalogue, MappingCoverageReport } from "../canonical/types.js";
+import { WHO_ATC_SYSTEM } from "../canonical/types.js";
+import type { QualityGates } from "../artifacts.js";
 
 export interface QualityReport {
   artifactId: string;
@@ -17,6 +19,8 @@ export interface QualityReport {
   percentProductsWithAtc: number;
   percentPackagesWithMarketingStatus: number;
   unknownFields: string[];
+  /** Per-source field mapping counts; a silently empty join is visible here. */
+  mappingCoverage: MappingCoverageReport[];
   sourceFreshness: { sourceId: string; sourceEffectiveDate?: string; retrievedAt: string }[];
 }
 
@@ -27,7 +31,14 @@ export function qualityReport(catalogue: Catalogue): QualityReport {
   const withAuth = pkgs.filter((p) => p.identifiers.length > 0).length;
   const withIng = mps.filter((p) => p.ingredients.length > 0).length;
   const withForm = mps.filter((p) => p.doseForm).length;
-  const withAtc = catalogue.productGroups.filter((g) => g.atc).length;
+  // ATC lives on ProductGroups (CH) or on product identifiers (PL); count
+  // products covered either way so group-less catalogs are not reported as 0%.
+  const groupsWithAtc = new Set(catalogue.productGroups.filter((g) => g.atc).map((g) => g.id));
+  const withAtc = mps.filter(
+    (p) =>
+      p.identifiers.some((i) => i.system === WHO_ATC_SYSTEM) ||
+      (p.productGroupId !== undefined && groupsWithAtc.has(p.productGroupId)),
+  ).length;
   const withMkt = pkgs.filter((p) => p.marketingStatus).length;
   const unknown = catalogue.mappingCoverage.flatMap((m) => m.unknownFields.map((f) => `${m.sourceId}:${f}`));
   const counts: Record<string, number> = {};
@@ -48,9 +59,10 @@ export function qualityReport(catalogue: Catalogue): QualityReport {
     percentPackagesWithGtin: pct(withGtin, pkgs.length),
     percentProductsWithIngredients: pct(withIng, mps.length),
     percentProductsWithDoseForm: pct(withForm, mps.length),
-    percentProductsWithAtc: pct(withAtc, catalogue.productGroups.length),
+    percentProductsWithAtc: pct(withAtc, mps.length),
     percentPackagesWithMarketingStatus: pct(withMkt, pkgs.length),
     unknownFields: unknown,
+    mappingCoverage: catalogue.mappingCoverage,
     sourceFreshness: catalogue.sourceSnapshots.map((s) => ({
       sourceId: s.sourceId,
       sourceEffectiveDate: s.sourceEffectiveDate,
@@ -69,10 +81,33 @@ export function detectAnomalies(current: QualityReport, previous?: QualityReport
   if (previous && previous.percentPackagesWithGtin > 10 && current.percentPackagesWithGtin === 0) {
     out.push("all GTINs disappeared");
   }
-  if (current.unknownFields.length > 0) {
-    out.push(`unknown source fields: ${current.unknownFields.join(", ")}`);
+  return out;
+}
+
+/** Absolute per-recipe floors; anomalies only catch regressions against a baseline. */
+export function qualityGateViolations(quality: QualityReport, gates?: QualityGates): string[] {
+  if (!gates) return [];
+  const out: string[] = [];
+  if (
+    gates.minPercentPackagesWithGtin !== undefined &&
+    quality.percentPackagesWithGtin < gates.minPercentPackagesWithGtin
+  ) {
+    out.push(
+      `percentPackagesWithGtin ${quality.percentPackagesWithGtin}% is below the ${gates.minPercentPackagesWithGtin}% floor`,
+    );
   }
   return out;
+}
+
+/** Load the previous release's quality report for baseline comparisons. */
+export function readPreviousQualityReport(previousDir?: string): QualityReport | undefined {
+  if (!previousDir) return undefined;
+  for (const candidate of [path.join(previousDir, "release", "quality-report.json"), path.join(previousDir, "quality-report.json")]) {
+    if (fs.existsSync(candidate)) {
+      return JSON.parse(fs.readFileSync(candidate, "utf8")) as QualityReport;
+    }
+  }
+  return undefined;
 }
 
 export interface ChangeReport {
