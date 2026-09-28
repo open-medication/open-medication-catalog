@@ -8,6 +8,21 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+/**
+ * Regression guard for #25: manifest sources must carry the real fetch
+ * wall-clock time, not the Unix epoch placeholder.
+ */
+function expectFreshRetrievedAt(sources: { retrievedAt: string }[]): void {
+  expect(sources.length).toBeGreaterThan(0);
+  const now = Date.now();
+  for (const s of sources) {
+    const ts = new Date(s.retrievedAt).getTime();
+    expect(Number.isNaN(ts)).toBe(false);
+    expect(ts).toBeGreaterThan(now - 15 * 60_000);
+    expect(ts).toBeLessThanOrEqual(now);
+  }
+}
+
 describe("ch-base fixture build", () => {
   it("builds SQLite and FHIR from the Swissmedic fixture", async () => {
     const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-build-"));
@@ -63,8 +78,9 @@ describe("ch-base fixture build", () => {
     const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
     const licenceReadme = fs.readFileSync(path.join(out, "release", "licensing", "README.md"), "utf8");
     const manifest = JSON.parse(fs.readFileSync(path.join(out, "release", "manifest.json"), "utf8")) as {
-      sources: { id: string; licensing?: { termsUrl: string; commercialUse: string; checksum?: string } }[];
+      sources: { id: string; retrievedAt: string; licensing?: { termsUrl: string; commercialUse: string; checksum?: string } }[];
     };
+    expectFreshRetrievedAt(manifest.sources);
     expect(licenceReadme).toMatch(/not liable/i);
     expect(sourcesMd).toContain("https://opendata.swiss/en/terms-of-use#terms_open");
     expect(sourcesMd).toContain("commercialUse: allowed");
@@ -382,8 +398,9 @@ describe("fr-enriched fixture build", () => {
     expect(mpd).toContain("L02BG03");
 
     const manifest = JSON.parse(fs.readFileSync(path.join(out, "release", "manifest.json"), "utf8")) as {
-      sources: { id: string; licensing?: { termsUrl: string; commercialUse: string } }[];
+      sources: { id: string; retrievedAt: string; licensing?: { termsUrl: string; commercialUse: string } }[];
     };
+    expectFreshRetrievedAt(manifest.sources);
     const openmedic = manifest.sources.find((s) => s.id === "openmedic")?.licensing;
     expect(openmedic?.termsUrl).toContain("ETALAB-Licence-Ouverte-v2.0");
     expect(openmedic?.commercialUse).toBe("allowed");
@@ -782,6 +799,17 @@ describe("us-base fixture build", () => {
     const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
     expect(sourcesMd).toContain("website-policies#linking");
     expect(sourcesMd).toContain("attributionRequired: false");
+
+    // #25: the NDC source must record when this build retrieved it, not epoch 0.
+    const manifest = JSON.parse(fs.readFileSync(path.join(out, "release", "manifest.json"), "utf8")) as {
+      sources: { id: string; retrievedAt: string }[];
+    };
+    expectFreshRetrievedAt(manifest.sources);
+    expect(result.catalogue.sourceSnapshots.every((s) => new Date(s.retrievedAt).getTime() > 0)).toBe(true);
+    const qualityReport = JSON.parse(
+      fs.readFileSync(path.join(out, "release", "quality-report.json"), "utf8"),
+    ) as { sourceFreshness: { sourceId: string; retrievedAt: string }[] };
+    expectFreshRetrievedAt(qualityReport.sourceFreshness);
 
     const sqlite = path.join(out, "release", "database", "medication.sqlite");
     expect(searchPackages(sqlite, "Metformin").length).toBeGreaterThan(0);

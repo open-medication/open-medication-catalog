@@ -418,7 +418,7 @@ function snapshotFrom(buf: Buffer, ctx: AdapterContext, uri: string): SourceSnap
     id: sha256(buf).slice(0, 16),
     sourceId: SOURCE_ID,
     identityAuthority: AUTHORITY,
-    retrievedAt: new Date(0).toISOString(),
+    retrievedAt: new Date().toISOString(),
     sourceEffectiveDate: ctx.cutoffDate,
     sha256: sha256(buf),
     uri,
