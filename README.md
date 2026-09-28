@@ -50,7 +50,7 @@ omc build pl-vet-base      # RPL veterinary (weterynaryjny) only
 omc build us-base          # FDA NDC Directory (finished human drugs)
 ```
 
-`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched` / `ch-vet-base` / `ch-vet-enriched` / `pl-base` / `pl-vet-base` / `us-base`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata. BAG is not used on veterinary recipes. Saudi Arabia has no public recipe: `omc build SA --source sfda --input <file>` reads a workbook the operator already holds.
+`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched` / `ch-vet-base` / `ch-vet-enriched` / `pl-base` / `pl-vet-base` / `us-base`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata. BAG is not used on veterinary recipes. Saudi Arabia has no public recipe. `omc build SA --source sfda` downloads the workbook linked from the CHI formulary page. `--input <file>` still overrides that download. The build cannot be `--publish`ed.
 
 ```text
 pnpm install

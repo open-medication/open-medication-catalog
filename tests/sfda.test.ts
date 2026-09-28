@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
-import { SfdaAdapter } from "../src/adapters/sa/sfda.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { SfdaAdapter, humanDrugListUrl } from "../src/adapters/sa/sfda.js";
 import type { AdapterContext } from "../src/adapters/types.js";
 import type { SourceSnapshot } from "../src/canonical/types.js";
 import type { SfdaParsed } from "../src/adapters/sa/sfda-xlsx.js";
@@ -243,8 +243,69 @@ describe("SFDA normalize", () => {
   });
 });
 
+const FORMULARY = "https://www.chi.gov.sa/en/Rules/Pages/DamanDrugFormulary.aspx";
+
+function card(title: string, href: string): string {
+  return `<div class="regulations-first-tab-card"><p class="regulations-title text-[#131826]">${title}</p><a href="${href}">Download File</a></div>`;
+}
+
+describe("SFDA formulary href", () => {
+  const page = [
+    card("CHI Drug\n                                    Formulary ", "/Style%20Library/IDF_Branding/files/CHI%20Drug%20Formulary%20ed59.xlsx"),
+    card("CHI Active Ingredient", "/Style%20Library/IDF_Branding/files/CHI%20Active%20Ingredient.xlsx"),
+    card("SFDA\n                                    Human Drug List ", "/Style%20Library/IDF_Branding/files/Human%20Drug%20List%204-2026.xlsx"),
+  ].join("\n");
+
+  it("follows the SFDA Human Drug List card and ignores the other workbooks", () => {
+    expect(humanDrugListUrl(page, FORMULARY)).toBe(
+      "https://www.chi.gov.sa/Style%20Library/IDF_Branding/files/Human%20Drug%20List%204-2026.xlsx",
+    );
+  });
+
+  it("rejects a page with no human-drug-list card", () => {
+    expect(() => humanDrugListUrl(card("CHI Drug Formulary", "/files/other.xlsx"), FORMULARY)).toThrow(/no SFDA Human Drug List/);
+  });
+
+  it("rejects a card whose link is not an xlsx on chi.gov.sa", () => {
+    expect(() => humanDrugListUrl(card("SFDA Human Drug List", "https://example.com/list.xlsx"), FORMULARY)).toThrow(
+      /not on chi.gov.sa/,
+    );
+    expect(() => humanDrugListUrl(card("SFDA Human Drug List", "/files/list.pdf"), FORMULARY)).toThrow(/not an xlsx/);
+  });
+});
+
 describe("SFDA fixture workbook", () => {
-  it("requires --input and maps the synthetic sheet", async () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("downloads the workbook linked from the formulary page", async () => {
+    const xlsx = fs.readFileSync(repoPath("fixtures/sa/sfda/drugs-list.xlsx"));
+    const fileUrl = "https://www.chi.gov.sa/Style%20Library/IDF_Branding/files/Human%20Drug%20List%209-2026.xlsx";
+    const html = card("SFDA Human Drug List", fileUrl);
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url === FORMULARY) return new Response(html, { status: 200 });
+      if (url === fileUrl) return new Response(xlsx, { status: 200 });
+      return new Response("missing", { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const adapter = new SfdaAdapter();
+    const cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), "sfda-live-"));
+    const fetched = await adapter.fetch({
+      cacheDir,
+      secrets: {},
+      releaseMonth: "2026.09",
+      cutoffDate: "2026-09-30",
+      archiveMonth: "202609",
+      domain: "Human",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetched.snapshot.uri).toBe(fileUrl);
+    expect(fetched.files[0] && fs.readFileSync(fetched.files[0]).equals(xlsx)).toBe(true);
+  });
+
+  it("maps the synthetic sheet from --input", async () => {
     const adapter = new SfdaAdapter();
     expect(adapter.metadata().commercialUse).toBe("review-required");
     expect(adapter.metadata().redistribution).toBe("review-required");
@@ -257,8 +318,6 @@ describe("SFDA fixture workbook", () => {
       archiveMonth: "202604",
       domain: "Human",
     };
-    await expect(adapter.fetch(fixtureCtx)).rejects.toThrow(/--input/);
-
     const fetched = await adapter.fetch({
       ...fixtureCtx,
       inputPath: repoPath("fixtures/sa/sfda/drugs-list.xlsx"),

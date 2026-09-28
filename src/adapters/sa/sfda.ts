@@ -27,12 +27,13 @@ import {
 import { fhirCode } from "../../fhir/serialize.js";
 import { canonicalId } from "../../identity.js";
 import { repoPath } from "../../paths.js";
-import { extractZip, fileSignatureOk, sha256, writeDeterministicZip } from "../../security.js";
+import { extractZip, fetchBinary, fileSignatureOk, sha256, writeDeterministicZip } from "../../security.js";
 import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
+import { SFDA_FORMULARY_PAGE, humanDrugListUrl } from "./sfda-href.js";
 import { canonicalSfdaHeader, type MappingFile, type SfdaParsed } from "./sfda-xlsx.js";
 
-export { canonicalSfdaHeader };
+export { canonicalSfdaHeader, humanDrugListUrl, SFDA_FORMULARY_PAGE };
 
 const ADAPTER_DIR = repoPath("adapters/sa/sfda");
 const JURISDICTION = "SA";
@@ -41,6 +42,12 @@ const SOURCE_ID = "sfda";
 const XLSX_NAME = "drugs-list.xlsx";
 const REQUIRED_HEADERS = ["registerNumber", "tradeName", "scientificName"] as const;
 const ATC_TOKEN = /^[A-Z][0-9]{2}[A-Z]{0,2}[0-9]{0,2}$/i;
+const PAGE_HEADERS = {
+  Accept: "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
+  "Accept-Language": "en",
+  "User-Agent": "open-medication-catalog (sfda-fetch; https://github.com/open-medication/open-medication-catalog)",
+};
+
 const ACTIVE_ROLE: CodedValue = {
   system: SFDA_SYSTEMS.ingredientRole,
   code: "active",
@@ -55,10 +62,8 @@ export class SfdaAdapter implements Adapter {
   async fetch(ctx: AdapterContext): Promise<FetchResult> {
     const work = path.join(ctx.cacheDir, "sfda");
     fs.mkdirSync(work, { recursive: true });
-    if (!ctx.inputPath) {
-      throw new Error("SFDA fetch requires --input");
-    }
-    return loadInput(ctx, work);
+    if (ctx.inputPath) return loadInput(ctx, work);
+    return downloadFromFormulary(ctx, work);
   }
 
   async validateSource(_ctx: AdapterContext, fetched: FetchResult): Promise<void> {
@@ -714,6 +719,25 @@ async function isXlsxBuffer(buf: Buffer): Promise<boolean> {
   if (!fileSignatureOk(buf, "zip")) return false;
   const zip = await JSZip.loadAsync(buf);
   return Object.keys(zip.files).some((name) => name.startsWith("xl/"));
+}
+
+async function downloadFromFormulary(ctx: AdapterContext, work: string): Promise<FetchResult> {
+  const pageUrl = loadSourceDescriptor(ADAPTER_DIR).terms.datasetUrl ?? SFDA_FORMULARY_PAGE;
+  const html = (await fetchBinary(pageUrl, { headers: PAGE_HEADERS })).toString("utf8");
+  const fileUrl = humanDrugListUrl(html, pageUrl);
+  const buf = await fetchBinary(fileUrl, {
+    headers: { "User-Agent": PAGE_HEADERS["User-Agent"], Accept: "*/*" },
+  });
+  if (!(await isXlsxBuffer(buf))) throw new Error("CHI human drug list download is not an xlsx");
+  const dest = path.join(work, "extracted");
+  fs.rmSync(dest, { recursive: true, force: true });
+  fs.mkdirSync(dest, { recursive: true });
+  const destFile = path.join(dest, XLSX_NAME);
+  fs.writeFileSync(destFile, buf);
+  return {
+    files: [destFile],
+    snapshot: snapshotFrom(buf, ctx, fileUrl),
+  };
 }
 
 async function loadInput(ctx: AdapterContext, work: string): Promise<FetchResult> {

@@ -10,7 +10,7 @@ The copy this adapter reads is the file on the [CHI Drug Formulary](https://www.
 
 The CHI privacy policy and the Policies tab are not dataset licences. The CHI open-data page does not list this workbook. A data-sharing request is not a grant. If a later build takes the same list from sfda.gov.sa, review that host on its own. Do not carry this `review-required` reading, or a CHI consent, across to an SFDA download.
 
-The CHI Drug Formulary workbook and the CHI Active Ingredient workbook on the same page are out of scope. The herbal list is out of scope. `fetch` requires `--input`. The adapter does not download the live list.
+The CHI Drug Formulary workbook and the CHI Active Ingredient workbook on the same page are out of scope. The herbal list is out of scope. Without `--input`, fetch reads the formulary page and downloads the `.xlsx` linked from the “SFDA Human Drug List” card. `--input` still overrides that download. There is no `sa-base` recipe.
 
 ## Identity
 
@@ -49,8 +49,11 @@ None. This workbook is not a payer file.
 Local only:
 
 ```text
+pnpm omc build SA --source sfda --month 2026.04
 pnpm omc build SA --source sfda --input <file> --month 2026.04
 ```
+
+The first command reads the current workbook href on the formulary page. The month tag is the operator’s snapshot label; CHI does not publish a monthly archive URL.
 
 The committed fixture under `fixtures/sa/sfda/` is synthetic rows in this column shape. The repo does not vendor the CHI workbook. Custom `--source` builds cannot be `--publish`ed.
 
