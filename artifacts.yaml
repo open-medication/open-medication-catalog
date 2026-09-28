@@ -21,11 +21,13 @@ artifacts:
     attachRawSources:
       - swissmedic
     # 2026-08 regression: every release shipped 18,309 packages with 0 GTINs
-    # because the Refdata join silently matched nothing. Floors leave room for
-    # real source coverage (Refdata misses only GTIN-less packs, e.g. blood
-    # products) while making a zero-match join fail the official build.
+    # because the Refdata join silently matched nothing. Refdata is a
+    # voluntary registration database: measured coverage on the 2026-08
+    # snapshot is 79.7% of HAM packs (80% of active ones; revoked packs are
+    # never registered). The floor catches a broken join, not registration
+    # drift — leave room below the measured value.
     qualityGates:
-      minPercentPackagesWithGtin: 70
+      minPercentPackagesWithGtin: 65
   ch-vet-base:
     jurisdiction: CH
     domain: Veterinary
@@ -41,8 +43,11 @@ artifacts:
       - refdata
     attachRawSources:
       - swissmedic
+    # TAM registration is lower than HAM: measured 61.8% of TAM packs on the
+    # 2026-08 snapshot. Same rationale as ch-enriched: catch a broken join,
+    # tolerate registration drift.
     qualityGates:
-      minPercentPackagesWithGtin: 70
+      minPercentPackagesWithGtin: 50
   fr-base:
     jurisdiction: FR
     domain: Human

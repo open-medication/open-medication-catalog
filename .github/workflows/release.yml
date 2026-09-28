@@ -117,8 +117,11 @@ jobs:
               if [ "${TOTAL:-0}" -gt 0 ]; then
                 PCT=$(( WITHGTIN * 100 / TOTAL ))
                 echo "GTIN coverage: ${PCT}%"
-                if [ "$PCT" -lt 70 ]; then
-                  echo "::error::GTIN coverage ${PCT}% is below the 70% floor"
+                # Coarse backstop only; the per-recipe floors in artifacts.yaml
+                # carry the precise gates (Refdata is a voluntary registry:
+                # measured 79.7% HAM / 61.8% TAM on 2026-08).
+                if [ "$PCT" -lt 50 ]; then
+                  echo "::error::GTIN coverage ${PCT}% is below the 50% backstop"
                   exit 1
                 fi
               fi

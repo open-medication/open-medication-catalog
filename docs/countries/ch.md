@@ -39,6 +39,10 @@ Refdata names are pack-level trade names, not sequence names. They go on `Packag
 
 `ProductClass=NONPHARMA` articles and articles without a `DataCarrierIdentifier` (e.g. blood products under the collective registration 99999) are not applied. Articles whose `Domain` differs from the package's domain (Human vs Veterinary) are skipped. ATC and `LegalStatusOfSupply` (Abgabekategorie) mismatches against Swissmedic are recorded as intentionally ignored. Official `ch-enriched` / `ch-vet-enriched` builds fail if GTIN coverage drops below the recipe floor in `artifacts.yaml`.
 
+**Coverage is partial by construction**: Refdata is a voluntary registration database — manufacturers register their articles with GTIN. Measured on the 2026-08 snapshot: 79.7% of HAM packs (80% of active `Z` packs; revoked `D` packs are never registered) and 61.8% of TAM packs carry a GTIN after the join. The recipe floors (65% HAM / 50% TAM) exist to catch a broken join, not to police registration rates.
+
+The Refdata 2.0 API file also carries elements OMC does not map yet (`marketingStatus`, `productPrice`, `documentReference`, `hpc`); they surface as unknown fields in every quality report so the drift stays visible.
+
 The Refdata download is nested SIMIS XML (`Article/MedicinalProduct`, `Article/PackagedProduct`); `PackagedProduct/DataCarrierIdentifier` is the GTIN. Unknown elements are surfaced as unknown fields instead of being guessed at — the 2026.08 releases shipped 18,309 packages with zero GTINs because the parser had been written against an invented flat format that Refdata never produced.
 
 ## BAG join
