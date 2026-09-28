@@ -34,7 +34,7 @@ describe("licence flags from source.yaml", () => {
   });
 
   it("discovers every committed source.yaml", () => {
-    expect(listSourceDirs().map((s) => s.sourceId).sort()).toEqual(["bag", "bdpm", "ndc", "refdata", "rpl", "swissmedic"]);
+    expect(listSourceDirs().map((s) => s.sourceId).sort()).toEqual(["bag", "bdpm", "ndc", "refdata", "rpl", "sfda", "swissmedic"]);
   });
 
   it("artifact recipes list sources that have licence descriptors", () => {
@@ -69,6 +69,13 @@ describe("licence flags from source.yaml", () => {
     expect(loadSourceDescriptorById("bag").commercialUse).toBe("review-required");
     expect(loadSourceDescriptorById("bag").redistribution).toBe("review-required");
     expect(loadSourceDescriptorById("bag").releasePolicy?.public).toBe(false);
+    expect(loadSourceDescriptorById("sfda").commercialUse).toBe("review-required");
+    expect(loadSourceDescriptorById("sfda").redistribution).toBe("review-required");
+    expect(loadSourceDescriptorById("sfda").releasePolicy?.public).toBe(false);
+    expect(loadSourceDescriptorById("sfda").terms.url).toBe("https://www.sfda.gov.sa/en/open-data");
+    expect(loadSourceDescriptorById("sfda").terms.datasetUrl).toBe("https://www.sfda.gov.sa/en/drugs-list");
+    expect(loadSourceDescriptorById("sfda").terms.notes).toMatch(/data-sharing form/i);
+    expect(loadSourceDescriptorById("sfda").terms.notes).toMatch(/not itself a grant/i);
     for (const id of ["swissmedic", "refdata"]) {
       expect(loadSourceDescriptorById(id).terms.url.length).toBeGreaterThan(0);
     }

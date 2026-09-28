@@ -1,0 +1,23 @@
+country: SA
+sourceId: sfda
+identityAuthority: sfda
+authority: Saudi Food and Drug Authority (SFDA)
+dataset: Registered human medicines list (drugs list and 2023 open-data files)
+sourceType: regulatory
+jurisdiction: SA
+updateFrequency: monthly
+commercialUse: review-required
+redistribution: review-required
+attributionRequired: true
+credentialsRequired: false
+required: false
+parserSchemaVersion: "0.1.0"
+terms:
+  url: "https://www.sfda.gov.sa/en/open-data"
+  datasetUrl: "https://www.sfda.gov.sa/en/drugs-list"
+  reviewedAt: "2026-09-28"
+  checksum: "76f382c7fca861b1e0bd2f4fdbf620ea3e0aed8651b4a0863e5fad01db9016d3"
+  notes: "Both the live drugs list and the 2023 human-medicine open-data files stay review-required. The open-data page is the statement about the data (terms.url); the drugs list has no licence of its own (terms.datasetUrl). Website terms of use (https://www.sfda.gov.sa/en/terms-of-use) are a portal policy, not a dataset licence, so they are not used to set disallowed. The data-sharing form (https://www.sfda.gov.sa/en/form/open-data-request) is not itself a grant. Adapter is local --source sfda only; no public recipe."
+releasePolicy:
+  public: false
+  required: false

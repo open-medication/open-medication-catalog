@@ -25,6 +25,7 @@ const SOURCE_LABELS: Record<string, string> = {
   bdpm: "BDPM",
   rpl: "RPL",
   ndc: "FDA NDC",
+  sfda: "SFDA drugs list",
 };
 
 function repoRoot(): string {
@@ -74,7 +75,7 @@ export function allSourceLicences(): SourceLicence[] {
       if (fs.existsSync(file)) out.push(parseSourceYaml(file));
     }
   }
-  const order = ["swissmedic", "refdata", "bag", "bdpm", "rpl", "ndc"];
+  const order = ["swissmedic", "refdata", "bag", "bdpm", "rpl", "ndc", "sfda"];
   out.sort((a, b) => {
     const ai = order.indexOf(a.sourceId);
     const bi = order.indexOf(b.sourceId);
