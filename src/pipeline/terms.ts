@@ -22,6 +22,16 @@ export interface TermsStatus {
   fetchError?: string;
 }
 
+/**
+ * CMS/WAF stacks intermittently block datacenter runner IPs with 401/403
+ * (seen on fda.gov/Akamai: 1 of ~8 CI runs). A later attempt often succeeds,
+ * so space out a few retries before recording the fetch-error — a terms
+ * *change* still fails the gate immediately; only transient fetch noise
+ * gets the grace window.
+ */
+const TERMS_FETCH_ATTEMPTS = 3;
+const TERMS_FETCH_RETRY_DELAY_MS = 30_000;
+
 function normalizeHtml(html: string): string {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, "")
@@ -87,7 +97,8 @@ export function termsChecksumBytes(buf: Buffer, opts?: { url?: string; fragment?
   return termsChecksum(buf.toString("utf8"), opts?.fragment);
 }
 
-export async function checkTerms(sourceDir: string): Promise<TermsStatus> {
+export async function checkTerms(sourceDir: string, opts?: { retryDelayMs?: number }): Promise<TermsStatus> {
+  const retryDelayMs = opts?.retryDelayMs ?? TERMS_FETCH_RETRY_DELAY_MS;
   const desc = YAML.parse(fs.readFileSync(path.join(sourceDir, "source.yaml"), "utf8")) as {
     sourceId: string;
     terms: { url: string; reviewedAt: string; checksum?: string; fragment?: string };
@@ -98,14 +109,21 @@ export async function checkTerms(sourceDir: string): Promise<TermsStatus> {
   if (desc.terms.checksum) stored = desc.terms.checksum;
   let current: string | undefined;
   let fetchError: string | undefined;
-  try {
-    const buf = await fetchBinary(desc.terms.url, {
-      maxBytes: 5 * 1024 * 1024,
-      headers: TERMS_PAGE_HEADERS,
-    });
-    current = termsChecksumBytes(buf, { url: desc.terms.url, fragment: desc.terms.fragment });
-  } catch (err) {
-    fetchError = err instanceof Error ? err.message : String(err);
+  for (let attempt = 1; attempt <= TERMS_FETCH_ATTEMPTS; attempt++) {
+    try {
+      const buf = await fetchBinary(desc.terms.url, {
+        maxBytes: 5 * 1024 * 1024,
+        headers: TERMS_PAGE_HEADERS,
+      });
+      current = termsChecksumBytes(buf, { url: desc.terms.url, fragment: desc.terms.fragment });
+      fetchError = undefined;
+      break;
+    } catch (err) {
+      fetchError = err instanceof Error ? err.message : String(err);
+      if (attempt < TERMS_FETCH_ATTEMPTS) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+      }
+    }
   }
   const changed = Boolean(stored && current && stored !== current);
   return {

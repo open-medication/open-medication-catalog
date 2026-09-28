@@ -46,4 +46,28 @@ describe("terms page fetch", () => {
     expect(headers.get("Accept")).toBe(TERMS_PAGE_HEADERS.Accept);
     expect(headers.get("Accept-Language")).toBe(TERMS_PAGE_HEADERS["Accept-Language"]);
   });
+
+  it("retries a WAF 401 before recording a fetch error", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(null, { status: 401, statusText: "Unauthorized" }))
+      .mockResolvedValueOnce(new Response(null, { status: 401, statusText: "Unauthorized" }))
+      .mockResolvedValueOnce(new Response("<html></html>", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const dir = sourceDirFor("refdata");
+    const status = await checkTerms(dir!, { retryDelayMs: 0 });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(status.fetchError).toBeUndefined();
+    expect(status.currentChecksum).toBeTruthy();
+  });
+
+  it("records the fetch error after exhausting retries", async () => {
+    const fetchMock = vi.fn(async () => new Response(null, { status: 401, statusText: "Unauthorized" }));
+    vi.stubGlobal("fetch", fetchMock);
+    const dir = sourceDirFor("refdata");
+    const status = await checkTerms(dir!, { retryDelayMs: 0 });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(status.fetchError).toMatch(/401/);
+    expect(status.changed).toBe(false);
+  });
 });
