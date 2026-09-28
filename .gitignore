@@ -15,6 +15,7 @@ fhir/*/input-cache/
 .env
 .env.*
 !.env.example
+adapters/sa/sfda/*.xlsx
 site/node_modules/
 site/dist/
 site/.astro/

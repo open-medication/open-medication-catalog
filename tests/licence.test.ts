@@ -5,6 +5,7 @@ import { SwissmedicAdapter } from "../src/adapters/ch/swissmedic.js";
 import { BdpmAdapter } from "../src/adapters/fr/bdpm.js";
 import { RplAdapter } from "../src/adapters/pl/rpl.js";
 import { NdcAdapter } from "../src/adapters/us/ndc.js";
+import { SfdaAdapter } from "../src/adapters/sa/sfda.js";
 import { listSourceDirs, loadSourceDescriptorById } from "../src/adapters/descriptor.js";
 import { getRecipe } from "../src/artifacts.js";
 import { licensingTexts, sourceLicensing } from "../src/pipeline/licensing.js";
@@ -16,6 +17,7 @@ const adapters = [
   new BdpmAdapter(),
   new RplAdapter(),
   new NdcAdapter(),
+  new SfdaAdapter(),
 ];
 
 describe("licence flags from source.yaml", () => {

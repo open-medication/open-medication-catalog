@@ -8,6 +8,7 @@ import { BagAdapter, loadFhirResources } from "../adapters/ch/bag.js";
 import { BdpmAdapter } from "../adapters/fr/bdpm.js";
 import { RplAdapter } from "../adapters/pl/rpl.js";
 import { NdcAdapter } from "../adapters/us/ndc.js";
+import { SfdaAdapter } from "../adapters/sa/sfda.js";
 import type { Adapter, AdapterContext, FetchResult } from "../adapters/types.js";
 import { assertValidCatalogue } from "../canonical/validate.js";
 import { repoPath } from "../paths.js";
@@ -47,6 +48,7 @@ const adapters: Record<string, Adapter> = {
   bdpm: new BdpmAdapter(),
   rpl: new RplAdapter(),
   ndc: new NdcAdapter(),
+  sfda: new SfdaAdapter(),
 };
 
 export async function build(opts: BuildOptions): Promise<BuildResult> {
