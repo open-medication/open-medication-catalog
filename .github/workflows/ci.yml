@@ -49,6 +49,10 @@ jobs:
         env:
           OMC_SKIP_TERMS: "1"
         run: pnpm omc build fr-base --input fixtures/fr/bdpm/BDPM_FIXTURE.zip --month 2026.09 --out /tmp/omc-ci-fr
+      - name: Fixture official build (France enriched)
+        env:
+          OMC_SKIP_TERMS: "1"
+        run: pnpm omc build fr-enriched --input bdpm=fixtures/fr/bdpm/BDPM_FIXTURE.zip --input openmedic=fixtures/fr/openmedic/OPEN_MEDIC_FIXTURE.zip --month 2026.09 --out /tmp/omc-ci-fr-enriched
       - name: Fixture official build (Poland)
         env:
           OMC_SKIP_TERMS: "1"
@@ -73,6 +77,7 @@ jobs:
           pnpm omc fhir-validate --dir /tmp/omc-ci-ch-enriched/release
           pnpm omc fhir-validate --dir /tmp/omc-ci-ch-vet-enriched/release
           pnpm omc fhir-validate --dir /tmp/omc-ci-fr/release
+          pnpm omc fhir-validate --dir /tmp/omc-ci-fr-enriched/release
           pnpm omc fhir-validate --dir /tmp/omc-ci-pl/release
           pnpm omc fhir-validate --dir /tmp/omc-ci-pl-vet/release
           pnpm omc fhir-validate --dir /tmp/omc-ci-us/release

@@ -8,6 +8,8 @@ export type MedicinalProductDomainCode = "Human" | "Veterinary";
 export interface QualityGates {
   /** Minimum share of packages carrying a GTIN. Omit for recipes whose sources carry none. */
   minPercentPackagesWithGtin?: number;
+  /** Minimum share of products carrying an ATC code. */
+  minPercentProductsWithAtc?: number;
 }
 
 export interface ArtifactRecipe {

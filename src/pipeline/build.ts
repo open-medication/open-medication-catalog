@@ -1,11 +1,20 @@
 import fs from "node:fs";
 import path from "node:path";
 import { getRecipe, isOfficialArtifactId, type ArtifactRecipe } from "../artifacts.js";
-import { emptyCatalogue, enrichWithBag, enrichWithRefdata, finalizeSwissmedic, mergePartials, sortCatalogue } from "../adapters/compose.js";
+import {
+  emptyCatalogue,
+  enrichWithBag,
+  enrichWithOpenMedic,
+  enrichWithRefdata,
+  finalizeSwissmedic,
+  mergePartials,
+  sortCatalogue,
+} from "../adapters/compose.js";
 import { SwissmedicAdapter, SourceNotYetAvailableError } from "../adapters/ch/swissmedic.js";
 import { RefdataAdapter, type RefdataParsed } from "../adapters/ch/refdata.js";
 import { BagAdapter, loadFhirResources } from "../adapters/ch/bag.js";
 import { BdpmAdapter } from "../adapters/fr/bdpm.js";
+import { OpenMedicAdapter, type OpenMedicParsed } from "../adapters/fr/openmedic.js";
 import { RplAdapter } from "../adapters/pl/rpl.js";
 import { NdcAdapter } from "../adapters/us/ndc.js";
 import type { Adapter, AdapterContext, FetchResult } from "../adapters/types.js";
@@ -52,6 +61,7 @@ const adapters: Record<string, Adapter> = {
   refdata: new RefdataAdapter(),
   bag: new BagAdapter(),
   bdpm: new BdpmAdapter(),
+  openmedic: new OpenMedicAdapter(),
   rpl: new RplAdapter(),
   ndc: new NdcAdapter(),
 };
@@ -153,6 +163,11 @@ export async function build(opts: BuildOptions): Promise<BuildResult> {
   if (sourceIds.includes("bag")) {
     const snap = fetched.get("bag")!.snapshot;
     enrichWithBag(catalogue, loadFhirResources(fetched.get("bag")!.files), snap.id);
+  }
+  if (sourceIds.includes("openmedic")) {
+    const snap = fetched.get("openmedic")!.snapshot;
+    const parsedOpenMedic = parsed.get("openmedic") as OpenMedicParsed;
+    enrichWithOpenMedic(catalogue, parsedOpenMedic, snap.id);
   }
 
   assertValidCatalogue(catalogue);

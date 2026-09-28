@@ -22,7 +22,8 @@ Landing page: [`https://openmedicationcatalog.org`](https://openmedicationcatalo
 | CH | Swissmedic | production (this repo) | allowed (`terms_open`) | no |
 | CH | Refdata | optional enrichment (`ch-enriched`, `ch-vet-enriched`) | derived fields, not the raw ZIP | yes |
 | CH | BAG SL | implemented; local `--enable-bag` only | review-required | no |
-| FR | BDPM | production (`fr-base`) | French Open Licence | no |
+| FR | BDPM | production (`fr-base`, `fr-enriched`) | French Open Licence | no |
+| FR | Open Medic | optional enrichment (`fr-enriched`) — ATC (ANSM dropped the ATC dump from BDM v4) | Licence Ouverte 2.0 | no |
 | PL | RPL | production (`pl-base`, `pl-vet-base`) | CC BY 4.0; cite dump date | no |
 | GB | dm+d | planned | review-required (TRUD) | yes |
 | NO | FEST | planned | NLOD | no |
@@ -45,20 +46,24 @@ omc build ch-enriched      # Swissmedic HAM + Refdata (all-or-nothing)
 omc build ch-vet-base      # Swissmedic TAM only
 omc build ch-vet-enriched  # Swissmedic TAM + Refdata
 omc build fr-base          # BDPM only
+omc build fr-enriched      # BDPM + Open Medic (ATC)
 omc build pl-base          # RPL human (ludzki) only
 omc build pl-vet-base      # RPL veterinary (weterynaryjny) only
 omc build us-base          # FDA NDC Directory (finished human drugs)
 ```
 
-`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched` / `ch-vet-base` / `ch-vet-enriched` / `pl-base` / `pl-vet-base` / `us-base`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata. BAG is not used on veterinary recipes.
+`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched` / `ch-vet-base` / `ch-vet-enriched` / `fr-base` / `fr-enriched` / `pl-base` / `pl-vet-base` / `us-base`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata. BAG is not used on veterinary recipes.
 
-GTIN provenance: `ch-enriched` / `ch-vet-enriched` carry GTINs from the Refdata join (Swissmedic OGD has no GTIN field — `ch-base` / `ch-vet-base` never carry GTINs). `fr-base` uses CIP13, `pl-base` / `pl-vet-base` use the RPL `kodGTIN` (RPL has none for ~10% of packs), and `us-base` carries no GTINs (FDA NDC is not a GTIN). Official builds fail if GTIN coverage drops below the per-recipe floor declared in `artifacts.yaml`.
+GTIN provenance: `ch-enriched` / `ch-vet-enriched` carry GTINs from the Refdata join (Swissmedic OGD has no GTIN field — `ch-base` / `ch-vet-base` never carry GTINs). `fr-base` / `fr-enriched` use CIP13, `pl-base` / `pl-vet-base` use the RPL `kodGTIN` (RPL has none for ~10% of packs), and `us-base` carries no GTINs (FDA NDC is not a GTIN). Official builds fail if GTIN coverage drops below the per-recipe floor declared in `artifacts.yaml`.
+
+ATC provenance: CH carries Swissmedic `ATC_CODE` (87.5% of product groups), PL carries RPL `kodATC` (~95% of products). ANSM removed `CIS_ATC_bdpm.txt` from the public BDM v4 file set, so `fr-base` has no ATC; `fr-enriched` adds it from Open Medic (Assurance Maladie) — partial by construction (~61% of products, reimbursed city-delivered medicines only; see [docs/countries/fr.md](docs/countries/fr.md)). US has no ATC source in the NDC directory.
 
 ```text
 pnpm install
 pnpm omc build ch-base --input fixtures/ch/swissmedic/OGD_FIXTURE.zip --month 2026.08
 pnpm omc build ch-vet-base --input fixtures/ch/swissmedic/OGD_FIXTURE.zip --month 2026.08
 pnpm omc build fr-base --input fixtures/fr/bdpm/BDPM_FIXTURE.zip --month 2026.09
+pnpm omc build fr-enriched --input bdpm=fixtures/fr/bdpm/BDPM_FIXTURE.zip --input openmedic=fixtures/fr/openmedic/OPEN_MEDIC_FIXTURE.zip --month 2026.09
 pnpm omc build pl-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09
 pnpm omc build pl-vet-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09
 pnpm omc build us-base --input fixtures/us/ndc/NDC_FIXTURE.zip --month 2026.09

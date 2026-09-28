@@ -96,6 +96,14 @@ export function qualityGateViolations(quality: QualityReport, gates?: QualityGat
       `percentPackagesWithGtin ${quality.percentPackagesWithGtin}% is below the ${gates.minPercentPackagesWithGtin}% floor`,
     );
   }
+  if (
+    gates.minPercentProductsWithAtc !== undefined &&
+    quality.percentProductsWithAtc < gates.minPercentProductsWithAtc
+  ) {
+    out.push(
+      `percentProductsWithAtc ${quality.percentProductsWithAtc}% is below the ${gates.minPercentProductsWithAtc}% floor`,
+    );
+  }
   return out;
 }
 

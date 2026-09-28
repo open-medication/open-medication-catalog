@@ -344,6 +344,55 @@ describe("fr-base fixture build", () => {
   });
 });
 
+describe("fr-enriched fixture build", () => {
+  it("adds ATC from Open Medic without touching fr-base identity keys", async () => {
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-fr-enr-"));
+    const result = await build({
+      artifactId: "fr-enriched",
+      inputBySource: {
+        bdpm: repoPath("fixtures/fr/bdpm/BDPM_FIXTURE.zip"),
+        openmedic: repoPath("fixtures/fr/openmedic/OPEN_MEDIC_FIXTURE.zip"),
+      },
+      outDir: out,
+      dataMonth: "2026.09",
+    });
+    expect(result.official).toBe(true);
+    expect(result.catalogue.sourceSnapshots.map((s) => s.sourceId)).toEqual(["bdpm", "openmedic"]);
+
+    // ATC identifier on the product (CIP13 → CIS join, presentations must agree)
+    const ana = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "60002283");
+    expect(ana?.identifiers.some((i) => i.system === "http://www.whocc.no/atc" && i.value === "L02BG03")).toBe(true);
+    const beclo = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "60003620");
+    expect(beclo?.identifiers.some((i) => i.system === "http://www.whocc.no/atc" && i.value === "R03BA01")).toBe(true);
+    // Non-reimbursed product without an Open Medic row keeps no ATC
+    const a313 = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "61266250");
+    expect(a313?.identifiers.some((i) => i.system === "http://www.whocc.no/atc")).toBe(false);
+
+    // GTIN provenance unchanged (CIP13); ATC coverage floor is met by the fixture
+    expect(result.catalogue.packages.every((p) => p.gtin)).toBe(true);
+    const quality = JSON.parse(fs.readFileSync(path.join(out, "release", "quality-report.json"), "utf8")) as {
+      percentProductsWithAtc: number;
+      percentPackagesWithGtin: number;
+    };
+    expect(quality.percentProductsWithAtc).toBe(66.7);
+    expect(quality.percentPackagesWithGtin).toBe(100);
+
+    const mpd = fs.readFileSync(path.join(out, "release", "fhir-r5", "MedicinalProductDefinition.ndjson"), "utf8");
+    expect(mpd).toContain("http://www.whocc.no/atc");
+    expect(mpd).toContain("L02BG03");
+
+    const manifest = JSON.parse(fs.readFileSync(path.join(out, "release", "manifest.json"), "utf8")) as {
+      sources: { id: string; licensing?: { termsUrl: string; commercialUse: string } }[];
+    };
+    const openmedic = manifest.sources.find((s) => s.id === "openmedic")?.licensing;
+    expect(openmedic?.termsUrl).toContain("ETALAB-Licence-Ouverte-v2.0");
+    expect(openmedic?.commercialUse).toBe("allowed");
+
+    const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
+    expect(sourcesMd).toContain("data.gouv.fr/datasets/open-medic");
+  });
+});
+
 describe("pl-base fixture build", () => {
   it("builds SQLite and FHIR from the RPL fixture", async () => {
     const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-pl-"));
