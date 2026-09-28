@@ -15,9 +15,9 @@ import path from "node:path";
 const program = new Command();
 program.name("omc").description("Open Medication Catalogue generator").version("0.1.0");
 
-function parseInputs(input: string[] | undefined, artifactId?: string): Record<string, string> {
+function parseInputs(input: string[] | undefined, artifactId?: string, customSources?: string[]): Record<string, string> {
   const out: Record<string, string> = {};
-  const fallback = defaultInputSource(artifactId);
+  const fallback = customSources?.length === 1 ? customSources[0]! : defaultInputSource(artifactId);
   for (const item of input ?? []) {
     const idx = item.indexOf("=");
     if (idx === -1) {
@@ -66,7 +66,7 @@ program
       artifactId: custom ? undefined : target,
       jurisdiction: custom ? target : undefined,
       sources: custom ? opts.source : undefined,
-      inputBySource: parseInputs(opts.input, custom ? undefined : target),
+      inputBySource: parseInputs(opts.input, custom ? undefined : target, custom ? opts.source : undefined),
       outDir: opts.out,
       dataMonth: opts.month,
       previousDir: opts.previous,

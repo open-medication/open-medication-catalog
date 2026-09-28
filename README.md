@@ -28,10 +28,10 @@ Landing page: [`https://openmedicationcatalog.org`](https://openmedicationcatalo
 | NO | FEST | planned | NLOD | no |
 | CA | DPD | planned | OGL-Canada | no |
 | US | FDA NDC | production (`us-base`) | public domain (US government work) | no |
-| SA | SFDA | planned | review-required | TBD |
+| SA | SFDA | implemented; local `--source sfda` only | review-required | no |
 | ID | BPOM | planned | review-required (reach out to BPOM) | TBD |
 
-Country notes: [Switzerland](docs/countries/ch.md), [France](docs/countries/fr.md), [Poland](docs/countries/pl.md), [United States](docs/countries/us.md).
+Country notes: [Switzerland](docs/countries/ch.md), [France](docs/countries/fr.md), [Poland](docs/countries/pl.md), [United States](docs/countries/us.md), [Saudi Arabia](docs/countries/sa.md).
 
 A **global** database will be the union of national catalogues (`requiredArtifacts` on a future recipe), not a cross-country ontology.
 
@@ -50,7 +50,7 @@ omc build pl-vet-base      # RPL veterinary (weterynaryjny) only
 omc build us-base          # FDA NDC Directory (finished human drugs)
 ```
 
-`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched` / `ch-vet-base` / `ch-vet-enriched` / `pl-base` / `pl-vet-base` / `us-base`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata. BAG is not used on veterinary recipes.
+`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched` / `ch-vet-base` / `ch-vet-enriched` / `pl-base` / `pl-vet-base` / `us-base`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata. BAG is not used on veterinary recipes. Saudi Arabia has no public recipe: `omc build SA --source sfda --input <file>` reads a workbook the operator already holds.
 
 ```text
 pnpm install
@@ -60,6 +60,7 @@ pnpm omc build fr-base --input fixtures/fr/bdpm/BDPM_FIXTURE.zip --month 2026.09
 pnpm omc build pl-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09
 pnpm omc build pl-vet-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09
 pnpm omc build us-base --input fixtures/us/ndc/NDC_FIXTURE.zip --month 2026.09
+pnpm omc build SA --source sfda --input fixtures/sa/sfda/drugs-list.xlsx --month 2026.04
 pnpm omc search output/ch-base/release/database/medication.sqlite Metformin
 ```
 

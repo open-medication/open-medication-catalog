@@ -40,15 +40,18 @@ A source may have `redistribution: allowed` for **derived fields only** while `r
 | BDPM | allowed (Licence Ouverte) | allowed | required | [BDPM Licence Ouverte PDF](https://base-donnees-publique.medicaments.gouv.fr/docs/telechargement/licence_bdpm.pdf) |
 | RPL | allowed (CC BY 4.0) | allowed | required | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/legalcode.txt); dataset [dane.gov.pl 397](https://dane.gov.pl/pl/dataset/397,rejestr-produktow-leczniczych) |
 | FDA NDC | allowed (public domain) | allowed | not required | [FDA website policies, linking](https://www.fda.gov/about-fda/about-website/website-policies#linking) |
+| SFDA human drug list (CHI-hosted copy) | review-required | review-required | required | [CHI terms of use](https://www.chi.gov.sa/en/Help/Pages/TermsOfUse.aspx); dataset [CHI Drug Formulary](https://www.chi.gov.sa/en/Rules/Pages/DamanDrugFormulary.aspx) |
 
 BAG flags stay `review-required` until a written reuse grant. Outreach to `epl@bag.admin.ch` (Cc `Arzneimittel-Krankenversicherung@bag.admin.ch`) is in progress. Fetch still requires `--input`. Do not treat the download SPA or CH EPL IG CC0 as a data licence.
+
+SFDA flags stay `review-required`. The adapter reads the human drug list workbook that CHI hosts on the Drug Formulary page. CHI’s [terms of use](https://www.chi.gov.sa/en/Help/Pages/TermsOfUse.aspx) allow only personal, non-profit use, and a public or commercial derived catalog needs prior written consent. The [privacy policy](https://www.chi.gov.sa/en/Help/Pages/PrivacyPolicy.aspx) and the [Policies](https://www.chi.gov.sa/en/Rules/Pages/Policies.aspx) tab are not dataset licences. The [open-data](https://www.chi.gov.sa/en/open-data/Pages/openData.aspx) page does not list this workbook, and a data-sharing request is not itself a grant. There is no `sa-base` recipe. Fetch requires `--input` and does not download the live file. A consent request is drafted in [Saudi Arabia](countries/sa.md). A later copy taken from sfda.gov.sa needs its own review.
 
 Flags live in `adapters/<jurisdiction>/<source>/source.yaml`. Adapter `metadata()` must read them from that file.
 
 ## How to verify
 
 1. Open `terms.url` (on the [licence page](https://openmedicationcatalog.org/licence), on each download card, and in every release `licensing/SOURCES.md` / `manifest.json`).
-2. Compare the live page to `terms.checksum`. HTML pages are SHA-256 of normalized text (or of the `#fragment` slice when set). PDFs are SHA-256 of the file bytes. Swissmedic hashes the `#terms_open` definition only, so CMS chrome on opendata.swiss does not block releases. BDPM hashes the Licence Ouverte PDF. RPL hashes the CC BY 4.0 `legalcode.txt` (not the dane.gov.pl CMS chrome). The portal timestamp condition still requires citing the dump date. FDA NDC hashes the `#linking` section of the FDA website policies page (public domain; credit is appreciated but not required).
+2. Compare the live page to `terms.checksum`. HTML pages are SHA-256 of normalized text (or of the `#fragment` slice when set). PDFs are SHA-256 of the file bytes. Swissmedic hashes the `#terms_open` definition only, so CMS chrome on opendata.swiss does not block releases. BDPM hashes the Licence Ouverte PDF. RPL hashes the CC BY 4.0 `legalcode.txt` (not the dane.gov.pl CMS chrome). The portal timestamp condition still requires citing the dump date. FDA NDC hashes the `#linking` section of the FDA website policies page (public domain; credit is appreciated but not required). SFDA hashes the CHI terms of use page.
 3. A material change still blocks official redistribution until `terms.reviewedAt` and the snapshot are updated (`pnpm omc terms`).
 
 To challenge a flag, open an issue with the `terms.url` and the passage you think we misread. Fixing it is an update to `source.yaml` plus a checksum refresh.

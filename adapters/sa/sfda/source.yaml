@@ -2,10 +2,10 @@ country: SA
 sourceId: sfda
 identityAuthority: sfda
 authority: Saudi Food and Drug Authority (SFDA)
-dataset: Registered human medicines list (drugs list and 2023 open-data files)
+dataset: CHI-hosted SFDA registered human medicines list (Human Drug List)
 sourceType: regulatory
 jurisdiction: SA
-updateFrequency: monthly
+updateFrequency: irregular
 commercialUse: review-required
 redistribution: review-required
 attributionRequired: true
@@ -13,11 +13,11 @@ credentialsRequired: false
 required: false
 parserSchemaVersion: "0.1.0"
 terms:
-  url: "https://www.sfda.gov.sa/en/open-data"
-  datasetUrl: "https://www.sfda.gov.sa/en/drugs-list"
+  url: "https://www.chi.gov.sa/en/Help/Pages/TermsOfUse.aspx"
+  datasetUrl: "https://www.chi.gov.sa/en/Rules/Pages/DamanDrugFormulary.aspx"
   reviewedAt: "2026-09-28"
-  checksum: "76f382c7fca861b1e0bd2f4fdbf620ea3e0aed8651b4a0863e5fad01db9016d3"
-  notes: "Both the live drugs list and the 2023 human-medicine open-data files stay review-required. The open-data page is the statement about the data (terms.url); the drugs list has no licence of its own (terms.datasetUrl). Website terms of use (https://www.sfda.gov.sa/en/terms-of-use) are a portal policy, not a dataset licence, so they are not used to set disallowed. The data-sharing form (https://www.sfda.gov.sa/en/form/open-data-request) is not itself a grant. Adapter is local --source sfda only; no public recipe."
+  checksum: "f0e21871b8787df3c20829bbbba3dec7e9ecf95003b699684c60061e024d599f"
+  notes: "The workbook this adapter reads is the SFDA human drug list hosted on the CHI Drug Formulary page, so CHI portal terms apply to that copy. terms.url is the terms of use: only personal and a public or commercial derived work needs prior written consent. terms.datasetUrl is the formulary page. The CHI privacy policy and the Policies tab are not dataset licences. The CHI open-data page does not list this workbook. A data-sharing request is not itself a grant. The only permitted use still requires naming the CHI Portal. Adapter is local --source sfda only; no public recipe. A later file taken from sfda.gov.sa needs its own review; do not carry this review-required reading, or a CHI consent, across to that host."
 releasePolicy:
   public: false
   required: false

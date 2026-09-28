@@ -73,11 +73,18 @@ describe("licence flags from source.yaml", () => {
     expect(loadSourceDescriptorById("bag").releasePolicy?.public).toBe(false);
     expect(loadSourceDescriptorById("sfda").commercialUse).toBe("review-required");
     expect(loadSourceDescriptorById("sfda").redistribution).toBe("review-required");
+    expect(loadSourceDescriptorById("sfda").attributionRequired).toBe(true);
     expect(loadSourceDescriptorById("sfda").releasePolicy?.public).toBe(false);
-    expect(loadSourceDescriptorById("sfda").terms.url).toBe("https://www.sfda.gov.sa/en/open-data");
-    expect(loadSourceDescriptorById("sfda").terms.datasetUrl).toBe("https://www.sfda.gov.sa/en/drugs-list");
-    expect(loadSourceDescriptorById("sfda").terms.notes).toMatch(/data-sharing form/i);
+    expect(loadSourceDescriptorById("sfda").terms.url).toBe("https://www.chi.gov.sa/en/Help/Pages/TermsOfUse.aspx");
+    expect(loadSourceDescriptorById("sfda").terms.datasetUrl).toBe(
+      "https://www.chi.gov.sa/en/Rules/Pages/DamanDrugFormulary.aspx",
+    );
+    expect(loadSourceDescriptorById("sfda").terms.notes).toMatch(/privacy policy/i);
+    expect(loadSourceDescriptorById("sfda").terms.notes).toMatch(/Policies tab/i);
+    expect(loadSourceDescriptorById("sfda").terms.notes).toMatch(/not dataset licences/i);
+    expect(loadSourceDescriptorById("sfda").terms.notes).toMatch(/open-data page does not list/i);
     expect(loadSourceDescriptorById("sfda").terms.notes).toMatch(/not itself a grant/i);
+    expect(() => getRecipe("sa-base")).toThrow(/Unknown artifact/);
     for (const id of ["swissmedic", "refdata"]) {
       expect(loadSourceDescriptorById(id).terms.url.length).toBeGreaterThan(0);
     }

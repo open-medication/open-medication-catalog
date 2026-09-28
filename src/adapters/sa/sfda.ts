@@ -159,7 +159,7 @@ export class SfdaAdapter implements Adapter {
       let mp = existing;
       let auth = authByRegister.get(registerNumber);
       if (!mp) {
-        const built = buildIngredients(snapshot, registerNumber, row);
+        const built = buildIngredients(registerNumber, row);
         for (const substance of built.substances) {
           if (!substanceByKey.has(substance.authorityKey)) {
             substanceByKey.set(substance.authorityKey, substance);
@@ -405,12 +405,10 @@ function atcTokens(...columns: (string | undefined)[]): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
   for (const column of columns) {
-    for (const token of (column ?? "").split(/[\s,;/]+/)) {
-      const code = token.trim().toUpperCase();
-      if (!ATC_TOKEN.test(code) || seen.has(code)) continue;
-      seen.add(code);
-      out.push(code);
-    }
+    const code = (column ?? "").trim().toUpperCase();
+    if (!code || code.startsWith("Q") || !ATC_TOKEN.test(code) || seen.has(code)) continue;
+    seen.add(code);
+    out.push(code);
   }
   return out;
 }
@@ -485,29 +483,43 @@ function packFill(size: string, sizeUnit: string | undefined): PackageUnit[] | u
   return [{ additionalInfo: size }];
 }
 
-function csvParts(value: string | undefined): string[] {
-  if (!value?.trim()) return [];
-  return value.split(",").map((part) => part.trim());
+/** Split on commas that are outside parentheses, so a strain name stays one token. */
+function splitList(value: string | undefined): string[] {
+  const text = value?.trim() ?? "";
+  if (!text) return [];
+  const parts: string[] = [];
+  let token = "";
+  let depth = 0;
+  for (const ch of text) {
+    if (ch === "(") depth += 1;
+    else if (ch === ")" && depth > 0) depth -= 1;
+    if (ch === "," && depth === 0) {
+      if (token.trim()) parts.push(token.trim());
+      token = "";
+    } else {
+      token += ch;
+    }
+  }
+  if (token.trim()) parts.push(token.trim());
+  return parts;
+}
+
+function plainNumber(value: string): boolean {
+  return /^\d+(?:\.\d+)?$/.test(value);
 }
 
 function buildIngredients(
-  snapshot: SourceSnapshot,
   registerNumber: string,
   row: Record<string, string>,
 ): { declarationRows: DeclarationRow[]; ingredients: Ingredient[]; substances: Substance[] } {
-  const names = csvParts(row.scientificName).filter(Boolean);
-  const numbers = csvParts(row.strength).filter(Boolean);
-  const units = csvParts(row.strengthUnit).filter(Boolean);
-  const unitFor = (index: number): string => (units.length === 1 ? units[0]! : (units[index] ?? ""));
-  const aligned =
-    names.length > 0 && names.length === numbers.length && (units.length === names.length || units.length === 1);
+  const parts = ingredientStrengths(row);
   const declarationRows: DeclarationRow[] = [];
   const ingredients: Ingredient[] = [];
   const substances: Substance[] = [];
 
-  names.forEach((name, index) => {
+  parts.forEach((part, index) => {
     const rowNo = String(index + 1);
-    const substanceKey = name.replace(/\s+/g, " ");
+    const substanceKey = part.name.replace(/\s+/g, " ");
     const partKey = authorityKey([registerNumber, substanceKey, rowNo]);
     const rowId = canonicalId({
       jurisdiction: JURISDICTION,
@@ -525,26 +537,21 @@ function buildIngredients(
       id: substanceId,
       identityAuthority: AUTHORITY,
       authorityKey: substanceKey,
-      name,
+      name: part.name,
       identifiers: [{ system: SFDA_SYSTEMS.substance, value: substanceKey }],
     });
-    const strength = aligned
-      ? structuredStrength(numbers[index] ?? "", unitFor(index))
-      : {
-          text: [name, row.strength, row.strengthUnit].map((part) => part?.trim()).filter(Boolean).join(" "),
-          structured: false as const,
-        };
+    const strength = part.strength;
     declarationRows.push({
       id: rowId,
       componentNumber: "1",
       rowNumber: rowNo,
       rowType: "active",
       substanceId,
-      substanceName: name,
+      substanceName: part.name,
       roleCode: ACTIVE_ROLE,
       quantity: strength.structured ? strength.numeratorValue : undefined,
       quantityUnit: strength.structured ? strength.numeratorUnit : undefined,
-      sourceText: strength.text ?? name,
+      sourceText: strength.text ?? part.name,
     });
     ingredients.push({
       id: canonicalId({
@@ -554,7 +561,7 @@ function buildIngredients(
         authorityKey: partKey,
       }),
       declarationRowId: rowId,
-      name,
+      name: part.name,
       role: ACTIVE_ROLE,
       strength,
     });
@@ -562,9 +569,48 @@ function buildIngredients(
   return { declarationRows, ingredients, substances };
 }
 
+/**
+ * Parallel comma lists. Structure a strength only when each name has its own plain number
+ * and the units either match that list or one unit covers every name.
+ * One shared number, a blank strength, or a non-numeric token (a range) stays source text per name.
+ * A split that does not line up (a thousands comma, a comma inside a name) stays one source-text ingredient.
+ */
+function ingredientStrengths(row: Record<string, string>): { name: string; strength: Strength }[] {
+  const scientific = (row.scientificName ?? "").trim().replace(/\s+/g, " ");
+  if (!scientific) return [];
+  const names = splitList(scientific);
+  const numbers = splitList(row.strength);
+  const units = splitList(row.strengthUnit);
+  if (names.length === 0) return [{ name: scientific, strength: { text: scientific, structured: false } }];
+
+  const unitAt = (index: number): string => (units.length === 1 ? units[0]! : (units[index] ?? ""));
+  const paired =
+    names.length === numbers.length && (units.length === names.length || units.length === 1);
+  const sharedNumber = names.length > 1 && numbers.length === 1 && plainNumber(numbers[0] ?? "");
+
+  if (paired && numbers.every(plainNumber)) {
+    return names.map((name, index) => ({ name, strength: structuredStrength(numbers[index]!, unitAt(index)) }));
+  }
+  if (paired || sharedNumber || numbers.length === 0) {
+    return names.map((name, index) => ({
+      name,
+      strength: { text: looseStrengthText(name, numbers, units, index, sharedNumber), structured: false },
+    }));
+  }
+  const text = [scientific, row.strength, row.strengthUnit].map((part) => part?.trim()).filter(Boolean).join(" ");
+  return [{ name: scientific, strength: { text, structured: false } }];
+}
+
+function looseStrengthText(name: string, numbers: string[], units: string[], index: number, shared: boolean): string {
+  if (numbers.length === 0) return name;
+  if (shared) return [name, numbers[0], units[0]].filter(Boolean).join(" ");
+  const unit = units.length === 1 ? units[0] : units[index];
+  return [numbers[index], unit].filter(Boolean).join(" ");
+}
+
 function structuredStrength(number: string, unit: string): Strength {
   const text = [number, unit].filter(Boolean).join(" ");
-  if (!/^\d+(?:\.\d+)?$/.test(number)) return { text, structured: false };
+  if (!plainNumber(number)) return { text, structured: false };
   const numeratorUnit = sourceCoded(SFDA_SYSTEMS.strengthUnit, unit);
   if (!numeratorUnit) return { text, structured: false };
   const ratio = unit.match(/^([^/]+)\/(.+)$/);

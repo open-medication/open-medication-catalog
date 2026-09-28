@@ -25,7 +25,7 @@ const SOURCE_LABELS: Record<string, string> = {
   bdpm: "BDPM",
   rpl: "RPL",
   ndc: "FDA NDC",
-  sfda: "SFDA drugs list",
+  sfda: "SFDA human drug list",
 };
 
 function repoRoot(): string {

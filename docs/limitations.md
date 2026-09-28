@@ -11,4 +11,5 @@
 - Official recipes split human vs veterinary (`ch-base` / `ch-vet-base`, `pl-base` / `pl-vet-base`). `pl-base` is RPL `ludzki` only. NFZ reimbursement is not in RPL and is not mapped.
 - `us-base` is the FDA NDC Directory of finished marketed drugs (`ndctext.zip`). Animal drugs are not in that directory. Unfinished, compounded, and excluded listing files are not mapped. An NDC listing is not an FDA approval and not a coverage decision. The uniform 12-digit NDC format takes effect in 2033; releases keep the hyphenated directory code and the 11-digit HIPAA form.
 - ATCvet codes in RPL (for example `QI09AL01`) are emitted on `http://www.whocc.no/atc`, the same system as human ATC.
+- The Saudi adapter is local only (`omc build SA --source sfda --input <file>`). Licence flags stay `review-required`. There is no `sa-base` recipe, and fetch does not download the workbook.
 - Sigstore/attestations are post-MVP.
