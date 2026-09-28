@@ -117,7 +117,6 @@ export class SfdaAdapter implements Adapter {
     const substances: Substance[] = [];
     const substanceByKey = new Map<string, Substance>();
     let skippedNonHuman = 0;
-    let skippedHealth = 0;
     let skippedDuplicatePackage = 0;
 
     for (const row of data.rows) {
@@ -127,10 +126,6 @@ export class SfdaAdapter implements Adapter {
         skippedNonHuman += 1;
         continue;
       }
-      if (droppedHealth(row.drugType)) {
-        skippedHealth += 1;
-        continue;
-      }
 
       const holder = upsertOrg(
         orgByKey,
@@ -138,7 +133,6 @@ export class SfdaAdapter implements Adapter {
         row.marketingCompany,
         "marketing-authorisation-holder",
         snapshot,
-        row.marketingCompanyId,
       );
       upsertOrg(orgByKey, organizations, row.manufacturerName, "manufacturer", snapshot);
       upsertOrg(orgByKey, organizations, row.secondManufacturerName, "manufacturer", snapshot);
@@ -303,7 +297,6 @@ export class SfdaAdapter implements Adapter {
 
     data.coverage.fields.push(
       { name: "drugs-list.nonHumanProductType", classification: "intentionally-ignored", count: skippedNonHuman },
-      { name: "drugs-list.healthDrugType", classification: "intentionally-ignored", count: skippedHealth },
       { name: "drugs-list.duplicatePackage", classification: "intentionally-ignored", count: skippedDuplicatePackage },
     );
 
@@ -354,11 +347,8 @@ function ref(snapshot: SourceSnapshot, recordKey: string) {
 
 function droppedNonHuman(productType: string | undefined): boolean {
   const value = productType?.trim() ?? "";
-  return value !== "Human";
-}
-
-function droppedHealth(drugType: string | undefined): boolean {
-  return (drugType?.trim() ?? "").toLowerCase() === "health";
+  if (!value) return false;
+  return value.toLowerCase() !== "human";
 }
 
 function productNames(row: Record<string, string>, fallback: string): { text: string; language: string }[] {
@@ -448,16 +438,12 @@ function upsertOrg(
   name: string | undefined,
   role: Organization["role"],
   snapshot: SourceSnapshot,
-  companyId?: string,
 ): Organization | undefined {
   const trimmed = name?.trim() ?? "";
   if (!trimmed) return undefined;
   const key = `${role}|${trimmed}`;
   const existing = orgByKey.get(key);
   if (existing) return existing;
-  const identifiers: Organization["identifiers"] = [{ system: SFDA_SYSTEMS.organization, value: trimmed }];
-  const denr = companyId?.trim();
-  if (denr) identifiers.push({ system: SFDA_SYSTEMS.organization, value: denr, use: "secondary" });
   const org: Organization = {
     id: canonicalId({
       jurisdiction: JURISDICTION,
@@ -470,7 +456,7 @@ function upsertOrg(
     authorityKey: key,
     name: trimmed,
     role,
-    identifiers,
+    identifiers: [{ system: SFDA_SYSTEMS.organization, value: trimmed }],
     sourceRecords: [ref(snapshot, key)],
   };
   orgByKey.set(key, org);
@@ -512,7 +498,9 @@ function buildIngredients(
   const names = csvParts(row.scientificName).filter(Boolean);
   const numbers = csvParts(row.strength).filter(Boolean);
   const units = csvParts(row.strengthUnit).filter(Boolean);
-  const aligned = names.length > 0 && names.length === numbers.length && names.length === units.length;
+  const unitFor = (index: number): string => (units.length === 1 ? units[0]! : (units[index] ?? ""));
+  const aligned =
+    names.length > 0 && names.length === numbers.length && (units.length === names.length || units.length === 1);
   const declarationRows: DeclarationRow[] = [];
   const ingredients: Ingredient[] = [];
   const substances: Substance[] = [];
@@ -541,7 +529,7 @@ function buildIngredients(
       identifiers: [{ system: SFDA_SYSTEMS.substance, value: substanceKey }],
     });
     const strength = aligned
-      ? structuredStrength(numbers[index] ?? "", units[index] ?? "")
+      ? structuredStrength(numbers[index] ?? "", unitFor(index))
       : {
           text: [name, row.strength, row.strengthUnit].map((part) => part?.trim()).filter(Boolean).join(" "),
           structured: false as const,
