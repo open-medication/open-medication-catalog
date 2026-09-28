@@ -53,6 +53,21 @@ artifacts:
     # CIP13 is a GTIN; observed coverage is 100%.
     qualityGates:
       minPercentPackagesWithGtin: 90
+  fr-enriched:
+    jurisdiction: FR
+    domain: Human
+    requiredSources:
+      - bdpm
+      - openmedic
+    attachRawSources:
+      - bdpm
+    # ATC comes from Open Medic (ANSM removed CIS_ATC_bdpm.txt from the
+    # public BDM v4 file set). Open Medic covers reimbursed city-delivered
+    # medicines only — measured ~61% of products on the 2025 edition — so
+    # the floor catches a zero-match join, not partial coverage.
+    qualityGates:
+      minPercentPackagesWithGtin: 90
+      minPercentProductsWithAtc: 50
   pl-base:
     jurisdiction: PL
     domain: Human
