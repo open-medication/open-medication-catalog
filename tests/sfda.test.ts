@@ -160,6 +160,31 @@ describe("SFDA R4 ingredient strength", () => {
 });
 
 describe("SFDA normalize", () => {
+  it("splits ingredients when names and strengths align and the unit is blank", async () => {
+    const catalogue = await products([
+      {
+        registerNumber: "blank-unit-1",
+        tradeName: "Example",
+        scientificName: "ASCORBIC ACID, PARACETAMOL, PHENYLEPHRINE HYDROCHLORIDE",
+        strength: "600, 40, 10",
+        strengthUnit: "",
+        productType: "Human",
+        authorizationStatus: "Valid",
+      },
+    ]);
+    const product = catalogue.medicinalProducts[0]!;
+    expect(product.ingredients.map((ingredient) => ingredient.name)).toEqual([
+      "ASCORBIC ACID",
+      "PARACETAMOL",
+      "PHENYLEPHRINE HYDROCHLORIDE",
+    ]);
+    expect(product.ingredients.map((ingredient) => ingredient.strength)).toEqual([
+      expect.objectContaining({ text: "600", structured: false }),
+      expect.objectContaining({ text: "40", structured: false }),
+      expect.objectContaining({ text: "10", structured: false }),
+    ]);
+  });
+
   it("applies one strength unit to every ingredient", async () => {
     const catalogue = await products([
       {

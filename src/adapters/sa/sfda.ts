@@ -530,7 +530,7 @@ function buildIngredients(
 
 /**
  * Parallel comma lists. Structure a strength only when each name has its own plain number
- * and the units either match that list or one unit covers every name.
+ * and the units either match that list, one unit covers every name, or the unit is blank.
  * One shared number, a blank strength, or a non-numeric token (a range) stays source text per name.
  * A split that does not line up (a thousands comma, a comma inside a name) stays one source-text ingredient.
  */
@@ -544,7 +544,8 @@ function ingredientStrengths(row: Record<string, string>): { name: string; stren
 
   const unitAt = (index: number): string => (units.length === 1 ? units[0]! : (units[index] ?? ""));
   const paired =
-    names.length === numbers.length && (units.length === names.length || units.length === 1);
+    names.length === numbers.length &&
+    (units.length === 0 || units.length === names.length || units.length === 1);
   const sharedNumber = names.length > 1 && numbers.length === 1 && plainNumber(numbers[0] ?? "");
 
   if (paired && numbers.every(plainNumber)) {
