@@ -103,6 +103,60 @@ describe("SFDA R4 medication status", () => {
   });
 });
 
+describe("SFDA R4 ingredient strength", () => {
+  it("exports numerator-only structured strengths with denominator 1", async () => {
+    const partial = await products([
+      {
+        registerNumber: "600mg-1",
+        tradeName: "Example",
+        scientificName: "PARACETAMOL",
+        strength: "600",
+        strengthUnit: "mg",
+        productType: "Human",
+        authorizationStatus: "Valid",
+      },
+    ]);
+    const catalogue = { ...emptyCatalogue("custom-sa", "SA", "0.1.0"), ...partial };
+    const r4 = exportR4(catalogue, "custom-sa-2026.04")["Medication.ndjson"]!.map((line) => JSON.parse(line) as {
+      ingredient?: {
+        itemCodeableConcept?: { text?: string };
+        strength?: { numerator?: { value?: number; unit?: string }; denominator?: { value?: number; unit?: string } };
+      }[];
+    });
+    const med = r4.find((resource) =>
+      resource.ingredient?.some((ingredient) => ingredient.itemCodeableConcept?.text === "PARACETAMOL"),
+    );
+    expect(med?.ingredient?.[0]?.strength).toEqual({
+      numerator: { value: 600, unit: "mg" },
+      denominator: { value: 1 },
+    });
+  });
+
+  it("keeps explicit presentation ratios when denominator unit is present", async () => {
+    const partial = await products([
+      {
+        registerNumber: "ratio-1",
+        tradeName: "Example",
+        scientificName: "EXAMPLE",
+        strength: "4",
+        strengthUnit: "mg/5 ml",
+        productType: "Human",
+        authorizationStatus: "Valid",
+      },
+    ]);
+    const catalogue = { ...emptyCatalogue("custom-sa", "SA", "0.1.0"), ...partial };
+    const r4 = exportR4(catalogue, "custom-sa-2026.04")["Medication.ndjson"]!.map((line) => JSON.parse(line) as {
+      ingredient?: {
+        strength?: { numerator?: { value?: number; unit?: string }; denominator?: { value?: number; unit?: string } };
+      }[];
+    });
+    expect(r4[0]?.ingredient?.[0]?.strength).toEqual({
+      numerator: { value: 4, unit: "mg" },
+      denominator: { value: 1, unit: "5 ml" },
+    });
+  });
+});
+
 describe("SFDA normalize", () => {
   it("applies one strength unit to every ingredient", async () => {
     const catalogue = await products([

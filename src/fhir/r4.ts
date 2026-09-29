@@ -143,8 +143,12 @@ function fhirRatio(
   denominatorUnit?: string,
 ): { numerator: { value: number; unit?: string }; denominator: { value: number; unit?: string } } | undefined {
   const n = parseFhirDecimal(numerator);
-  const d = parseFhirDecimal(denominator);
-  if (n === undefined || d === undefined) return undefined;
+  if (n === undefined) return undefined;
+  const d =
+    denominator == null || denominator.trim() === ""
+      ? 1
+      : parseFhirDecimal(denominator);
+  if (d === undefined) return undefined;
   return {
     numerator: { value: n, unit: numeratorUnit },
     denominator: { value: d, unit: denominatorUnit },
