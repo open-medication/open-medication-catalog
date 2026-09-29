@@ -1,5 +1,5 @@
 import { FHIR_CANONICAL_BASE } from "../constants.js";
-import type { Catalogue, MedicinalProduct, Package } from "../canonical/types.js";
+import { SFDA_SYSTEMS, type Catalogue, type MedicinalProduct, type Package } from "../canonical/types.js";
 import { fhirCode, jsonLine, parseFhirDecimal } from "./serialize.js";
 import { packageDisplayName, translationExtensions } from "./translation.js";
 import { reimbursementDetailExtension } from "./reimbursement.js";
@@ -19,6 +19,18 @@ const R4_ACTIVE_INGREDIENT_ROLES = new Set([
 /** Catalogue-record lifecycle only. Not marketing or reimbursement. */
 export function medicationStatus(pkg: Package): "active" | "inactive" | undefined {
   const code = pkg.regulatoryStatus.code;
+  if (pkg.regulatoryStatus.system === SFDA_SYSTEMS.authorizationStatus) {
+    if (code === "Valid" || code === "Conditional Approval") return "active";
+    if (
+      code === "Invalid" ||
+      code === "Suspended" ||
+      code === "Withdrawn by MAH" ||
+      code === "Withdrawn by regulatory authority"
+    ) {
+      return "inactive";
+    }
+    return undefined;
+  }
   if (code === "D" || code === "BA" || code === "U" || code === "skasowane") return "inactive";
   if (code === "Z" || code === "B" || code === "S" || code === "N" || code === "A" || code === "aktywne") {
     return "active";

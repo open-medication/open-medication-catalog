@@ -2,9 +2,16 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { emptyCatalogue } from "../src/adapters/compose.js";
 import { SfdaAdapter, humanDrugListUrl } from "../src/adapters/sa/sfda.js";
 import type { AdapterContext } from "../src/adapters/types.js";
-import type { SourceSnapshot } from "../src/canonical/types.js";
+import {
+  SFDA_SYSTEMS,
+  medicinalProductDomain,
+  type Package,
+  type SourceSnapshot,
+} from "../src/canonical/types.js";
+import { exportR4, medicationStatus } from "../src/fhir/r4.js";
 import type { SfdaParsed } from "../src/adapters/sa/sfda-xlsx.js";
 import { repoPath } from "../src/paths.js";
 
@@ -26,6 +33,75 @@ async function products(rows: Record<string, string>[]) {
   const catalogue = await new SfdaAdapter().normalize(ctx, parsed(rows), snapshot);
   return catalogue;
 }
+
+function sfdaPackage(status: string): Package {
+  return {
+    id: "00000000-0000-5000-8000-000000000001",
+    jurisdiction: "SA",
+    identityAuthority: "sfda",
+    authorityKey: "test",
+    medicinalProductId: "00000000-0000-5000-8000-000000000002",
+    description: "Example",
+    quantity: { structured: false },
+    domain: medicinalProductDomain("Human"),
+    regulatoryStatus: { system: SFDA_SYSTEMS.authorizationStatus, code: status },
+    identifiers: [],
+    fieldProvenance: {},
+    sourceRecords: [],
+  };
+}
+
+describe("SFDA R4 medication status", () => {
+  it("maps SFDA authorization status to Medication.status", () => {
+    expect(medicationStatus(sfdaPackage("Valid"))).toBe("active");
+    expect(medicationStatus(sfdaPackage("Conditional Approval"))).toBe("active");
+    expect(medicationStatus(sfdaPackage("Withdrawn by MAH"))).toBe("inactive");
+    expect(medicationStatus(sfdaPackage("Withdrawn by regulatory authority"))).toBe("inactive");
+    expect(medicationStatus(sfdaPackage("Invalid"))).toBe("inactive");
+    expect(medicationStatus(sfdaPackage("Suspended"))).toBe("inactive");
+    expect(medicationStatus(sfdaPackage("unknown"))).toBeUndefined();
+  });
+
+  it("exports status on R4 Medication resources", async () => {
+    const partial = await products([
+      {
+        registerNumber: "valid-1",
+        tradeName: "Valid Product",
+        scientificName: "EXAMPLE",
+        strength: "10",
+        strengthUnit: "mg",
+        productType: "Human",
+        authorizationStatus: "Valid",
+      },
+      {
+        registerNumber: "withdrawn-1",
+        tradeName: "Withdrawn Product",
+        scientificName: "EXAMPLE TWO",
+        strength: "10",
+        strengthUnit: "mg",
+        productType: "Human",
+        authorizationStatus: "Withdrawn by MAH",
+      },
+    ]);
+    const catalogue = { ...emptyCatalogue("custom-sa", "SA", "0.1.0"), ...partial };
+    const r4 = exportR4(catalogue, "custom-sa-2026.04")["Medication.ndjson"]!.map((line) => JSON.parse(line) as {
+      status?: string;
+      extension?: { url?: string; valueCoding?: { code?: string } }[];
+    });
+    const valid = r4.find((med) =>
+      med.extension?.some(
+        (ext) => ext.url?.endsWith("/regulatory-status") && ext.valueCoding?.code === "Valid",
+      ),
+    );
+    const withdrawn = r4.find((med) =>
+      med.extension?.some(
+        (ext) => ext.url?.endsWith("/regulatory-status") && ext.valueCoding?.code === "Withdrawn by MAH",
+      ),
+    );
+    expect(valid?.status).toBe("active");
+    expect(withdrawn?.status).toBe("inactive");
+  });
+});
 
 describe("SFDA normalize", () => {
   it("applies one strength unit to every ingredient", async () => {
