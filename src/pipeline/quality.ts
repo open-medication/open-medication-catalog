@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Catalogue } from "../canonical/types.js";
+import { WHO_ATC_SYSTEM, type Catalogue, type MedicinalProduct, type ProductGroup } from "../canonical/types.js";
 
 export interface QualityReport {
   artifactId: string;
@@ -27,7 +27,8 @@ export function qualityReport(catalogue: Catalogue): QualityReport {
   const withAuth = pkgs.filter((p) => p.identifiers.length > 0).length;
   const withIng = mps.filter((p) => p.ingredients.length > 0).length;
   const withForm = mps.filter((p) => p.doseForm).length;
-  const withAtc = catalogue.productGroups.filter((g) => g.atc).length;
+  const groupById = new Map(catalogue.productGroups.map((g) => [g.id, g]));
+  const withAtc = mps.filter((mp) => medicinalProductHasAtc(mp, groupById)).length;
   const withMkt = pkgs.filter((p) => p.marketingStatus).length;
   const unknown = catalogue.mappingCoverage.flatMap((m) => m.unknownFields.map((f) => `${m.sourceId}:${f}`));
   const counts: Record<string, number> = {};
@@ -48,7 +49,7 @@ export function qualityReport(catalogue: Catalogue): QualityReport {
     percentPackagesWithGtin: pct(withGtin, pkgs.length),
     percentProductsWithIngredients: pct(withIng, mps.length),
     percentProductsWithDoseForm: pct(withForm, mps.length),
-    percentProductsWithAtc: pct(withAtc, catalogue.productGroups.length),
+    percentProductsWithAtc: pct(withAtc, mps.length),
     percentPackagesWithMarketingStatus: pct(withMkt, pkgs.length),
     unknownFields: unknown,
     sourceFreshness: catalogue.sourceSnapshots.map((s) => ({
@@ -104,6 +105,12 @@ export function diffCatalogues(prev: Catalogue, next: Catalogue): ChangeReport {
 export function writeJson(file: string, value: unknown): void {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function medicinalProductHasAtc(mp: MedicinalProduct, groupById: Map<string, ProductGroup>): boolean {
+  if (mp.identifiers.some((identifier) => identifier.system === WHO_ATC_SYSTEM)) return true;
+  if (mp.productGroupId) return Boolean(groupById.get(mp.productGroupId)?.atc);
+  return false;
 }
 
 function pct(n: number, d: number): number {

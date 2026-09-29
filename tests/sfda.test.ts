@@ -12,6 +12,7 @@ import {
   type SourceSnapshot,
 } from "../src/canonical/types.js";
 import { exportR4, medicationStatus } from "../src/fhir/r4.js";
+import { qualityReport } from "../src/pipeline/quality.js";
 import type { SfdaParsed } from "../src/adapters/sa/sfda-xlsx.js";
 import { repoPath } from "../src/paths.js";
 
@@ -518,5 +519,8 @@ describe("SFDA fixture workbook", () => {
     const blank = catalogue.medicinalProducts.find((product) => product.authorityKey === "10-4")!;
     expect(blank.metadata?.productType).toBeUndefined();
     expect(blank.domain?.code).toBe("Human");
+
+    const quality = qualityReport({ ...emptyCatalogue("custom-sa", "SA", "0.1.0"), ...catalogue });
+    expect(quality.percentProductsWithAtc).toBe(50);
   });
 });
