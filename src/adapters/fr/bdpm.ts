@@ -19,18 +19,20 @@ import {
   type Substance,
   medicinalProductDomain,
 } from "../../canonical/types.js";
-import { fhirCode } from "../../fhir/serialize.js";
 import { canonicalId } from "../../identity.js";
 import { repoPath } from "../../paths.js";
 import {
   HttpStatusError,
-  extractZip,
   fetchBinary,
   fileSignatureOk,
   httpExists,
   sha256,
   writeDeterministicZip,
 } from "../../security.js";
+import { sourceCodedValue } from "../shared/coded.js";
+import { extractInputZip, findFile, prepareExtractDir } from "../shared/files.js";
+import { splitDelimitedList } from "../shared/lists.js";
+import { compactMeta } from "../shared/meta.js";
 import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import { SourceNotYetAvailableError } from "../ch/swissmedic.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
@@ -248,7 +250,7 @@ export class BdpmAdapter implements Adapter {
         names: [{ text: row.denomination?.trim() || cis, language: "fr" }],
         domain: medicinalProductDomain("Human"),
         doseForm: coded(BDPM_SYSTEMS.doseForm, row.formePharmaceutique),
-        routes: splitList(row.voiesAdministration)
+        routes: splitDelimitedList(row.voiesAdministration, ";")
           .map((r) => coded(BDPM_SYSTEMS.route, r))
           .filter((c): c is CodedValue => Boolean(c)),
         regulatoryStatus: coded(BDPM_SYSTEMS.regulatoryStatus, row.statutAMM) ?? {
@@ -433,17 +435,7 @@ function ref(snapshot: SourceSnapshot, recordKey: string) {
 }
 
 function coded(system: string, value?: string): CodedValue | undefined {
-  const display = value?.trim();
-  if (!display) return undefined;
-  return { system, code: fhirCode(display), display };
-}
-
-function splitList(value?: string): string[] {
-  if (!value) return [];
-  return value
-    .split(/[;]/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+  return sourceCodedValue(system, value);
 }
 
 function frenchDate(value?: string): string | undefined {
@@ -468,15 +460,6 @@ function parseRates(taux?: string, indications?: string): { rate: string; indica
     .filter(Boolean);
   if (parts.length === 0) return [];
   return parts.map((rate) => (indications ? { rate, indications } : { rate }));
-}
-
-function compactMeta(values: Record<string, string | undefined>): Record<string, string> | undefined {
-  const out: Record<string, string> = {};
-  for (const [k, v] of Object.entries(values)) {
-    const t = v?.trim();
-    if (t) out[k] = t;
-  }
-  return Object.keys(out).length ? out : undefined;
 }
 
 function decodeBdpm(buf: Buffer): string {
@@ -577,9 +560,7 @@ function buildComposition(
 
 async function loadInput(ctx: AdapterContext, work: string): Promise<FetchResult> {
   const input = ctx.inputPath!;
-  const dest = path.join(work, "extracted");
-  fs.rmSync(dest, { recursive: true, force: true });
-  fs.mkdirSync(dest, { recursive: true });
+  const dest = prepareExtractDir(work);
 
   if (fs.statSync(input).isDirectory()) {
     for (const name of BDPM_FILES) {
@@ -602,9 +583,7 @@ async function loadInput(ctx: AdapterContext, work: string): Promise<FetchResult
 
   const buf = fs.readFileSync(input);
   if (fileSignatureOk(buf, "zip")) {
-    await extractZip(buf, dest);
-    const archiveCopy = path.join(work, path.basename(input));
-    fs.copyFileSync(input, archiveCopy);
+    const archiveCopy = await extractInputZip(input, work, dest);
     return {
       files: listedBdpm(dest),
       rawArchivePath: archiveCopy,
@@ -628,9 +607,3 @@ function extractDir(fetched: FetchResult): string {
   return path.dirname(first);
 }
 
-function findFile(dir: string, name: string): string | undefined {
-  const direct = path.join(dir, name);
-  if (fs.existsSync(direct)) return direct;
-  const found = fs.readdirSync(dir).find((f) => f.toLowerCase() === name.toLowerCase());
-  return found ? path.join(dir, found) : undefined;
-}

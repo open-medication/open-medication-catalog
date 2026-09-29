@@ -24,10 +24,14 @@ import {
   type Strength,
   type Substance,
 } from "../../canonical/types.js";
-import { fhirCode } from "../../fhir/serialize.js";
 import { canonicalId } from "../../identity.js";
 import { repoPath } from "../../paths.js";
 import { extractZip, fetchBinary, fileSignatureOk, sha256, writeDeterministicZip } from "../../security.js";
+import { sourceCodedValue } from "../shared/coded.js";
+import { extractInputZip, prepareExtractDir, walkFiles } from "../shared/files.js";
+import { splitParentheticalCommaList } from "../shared/lists.js";
+import { compactMeta } from "../shared/meta.js";
+import { createOrganizationUpserter } from "../shared/organizations.js";
 import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
 import { SFDA_FORMULARY_PAGE, humanDrugListUrl } from "./sfda-href.js";
@@ -123,6 +127,13 @@ export class SfdaAdapter implements Adapter {
     const substanceByKey = new Map<string, Substance>();
     let skippedNonHuman = 0;
     let skippedDuplicatePackage = 0;
+    const upsertOrg = createOrganizationUpserter({
+      jurisdiction: JURISDICTION,
+      identityAuthority: AUTHORITY,
+      organizationSystem: SFDA_SYSTEMS.organization,
+      snapshot,
+      sourceRef: ref,
+    });
 
     for (const row of data.rows) {
       const registerNumber = row.registerNumber?.trim() ?? "";
@@ -132,18 +143,12 @@ export class SfdaAdapter implements Adapter {
         continue;
       }
 
-      const holder = upsertOrg(
-        orgByKey,
-        organizations,
-        row.marketingCompany,
-        "marketing-authorisation-holder",
-        snapshot,
-      );
-      upsertOrg(orgByKey, organizations, row.manufacturerName, "manufacturer", snapshot);
-      upsertOrg(orgByKey, organizations, row.secondManufacturerName, "manufacturer", snapshot);
-      upsertOrg(orgByKey, organizations, row.firstAgent, "supplier", snapshot);
-      upsertOrg(orgByKey, organizations, row.secondAgent, "supplier", snapshot);
-      upsertOrg(orgByKey, organizations, row.thirdAgent, "supplier", snapshot);
+      const holder = upsertOrg(orgByKey, organizations, row.marketingCompany, "marketing-authorisation-holder");
+      upsertOrg(orgByKey, organizations, row.manufacturerName, "manufacturer");
+      upsertOrg(orgByKey, organizations, row.secondManufacturerName, "manufacturer");
+      upsertOrg(orgByKey, organizations, row.firstAgent, "supplier");
+      upsertOrg(orgByKey, organizations, row.secondAgent, "supplier");
+      upsertOrg(orgByKey, organizations, row.thirdAgent, "supplier");
 
       const status = sourceCoded(SFDA_SYSTEMS.authorizationStatus, row.authorizationStatus) ?? {
         system: SFDA_SYSTEMS.authorizationStatus,
@@ -392,12 +397,14 @@ function routesFrom(value: string | undefined): CodedValue[] {
 }
 
 function sourceCoded(system: string, value?: string): CodedValue | undefined {
-  const display = value?.trim();
-  if (!display || display === "--") return undefined;
-  if (/[\u0600-\u06FF]/.test(display)) {
-    throw new Error(`SFDA coded value is Arabic with no English map: ${display}`);
-  }
-  return { system, code: fhirCode(display), display };
+  return sourceCodedValue(system, value, {
+    blankSentinels: ["--"],
+    rejectDisplay: (display) => {
+      if (/[\u0600-\u06FF]/.test(display)) {
+        throw new Error(`SFDA coded value is Arabic with no English map: ${display}`);
+      }
+    },
+  });
 }
 
 function blankUnit(value?: string): string | undefined {
@@ -435,38 +442,6 @@ function packIdentifiers(registerNumber: string, packKey: string, gtin: string |
   return identifiers;
 }
 
-function upsertOrg(
-  orgByKey: Map<string, Organization>,
-  organizations: Organization[],
-  name: string | undefined,
-  role: Organization["role"],
-  snapshot: SourceSnapshot,
-): Organization | undefined {
-  const trimmed = name?.trim() ?? "";
-  if (!trimmed) return undefined;
-  const key = `${role}|${trimmed}`;
-  const existing = orgByKey.get(key);
-  if (existing) return existing;
-  const org: Organization = {
-    id: canonicalId({
-      jurisdiction: JURISDICTION,
-      identityAuthority: AUTHORITY,
-      entityType: "Organization",
-      authorityKey: key,
-    }),
-    jurisdiction: JURISDICTION,
-    identityAuthority: AUTHORITY,
-    authorityKey: key,
-    name: trimmed,
-    role,
-    identifiers: [{ system: SFDA_SYSTEMS.organization, value: trimmed }],
-    sourceRecords: [ref(snapshot, key)],
-  };
-  orgByKey.set(key, org);
-  organizations.push(org);
-  return org;
-}
-
 function packageQuantity(packageSize: string | undefined): PackageQuantity {
   const trimmed = packageSize?.trim() ?? "";
   const match = trimmed.match(/^(\d+(?:\.\d+)?)$/);
@@ -486,27 +461,6 @@ function packFill(size: string, sizeUnit: string | undefined): PackageUnit[] | u
     ];
   }
   return [{ additionalInfo: size }];
-}
-
-/** Split on commas that are outside parentheses, so a strain name stays one token. */
-function splitList(value: string | undefined): string[] {
-  const text = value?.trim() ?? "";
-  if (!text) return [];
-  const parts: string[] = [];
-  let token = "";
-  let depth = 0;
-  for (const ch of text) {
-    if (ch === "(") depth += 1;
-    else if (ch === ")" && depth > 0) depth -= 1;
-    if (ch === "," && depth === 0) {
-      if (token.trim()) parts.push(token.trim());
-      token = "";
-    } else {
-      token += ch;
-    }
-  }
-  if (token.trim()) parts.push(token.trim());
-  return parts;
 }
 
 function plainNumber(value: string): boolean {
@@ -583,9 +537,9 @@ function buildIngredients(
 function ingredientStrengths(row: Record<string, string>): { name: string; strength: Strength }[] {
   const scientific = (row.scientificName ?? "").trim().replace(/\s+/g, " ");
   if (!scientific) return [];
-  const names = splitList(scientific);
-  const numbers = splitList(row.strength);
-  const units = splitList(row.strengthUnit);
+  const names = splitParentheticalCommaList(scientific);
+  const numbers = splitParentheticalCommaList(row.strength);
+  const units = splitParentheticalCommaList(row.strengthUnit);
   if (names.length === 0) return [{ name: scientific, strength: { text: scientific, structured: false } }];
 
   const unitAt = (index: number): string => (units.length === 1 ? units[0]! : (units[index] ?? ""));
@@ -634,15 +588,6 @@ function structuredStrength(number: string, unit: string): Strength {
     }
   }
   return { numeratorValue: number, numeratorUnit, text, structured: true };
-}
-
-function compactMeta(values: Record<string, string | undefined>): Record<string, string> | undefined {
-  const out: Record<string, string> = {};
-  for (const [key, value] of Object.entries(values)) {
-    const trimmed = value?.trim();
-    if (trimmed) out[key] = trimmed;
-  }
-  return Object.keys(out).length ? out : undefined;
 }
 
 function cellText(value: ExcelJS.CellValue): string {
@@ -742,9 +687,7 @@ async function downloadFromFormulary(ctx: AdapterContext, work: string): Promise
 
 async function loadInput(ctx: AdapterContext, work: string): Promise<FetchResult> {
   const input = ctx.inputPath!;
-  const dest = path.join(work, "extracted");
-  fs.rmSync(dest, { recursive: true, force: true });
-  fs.mkdirSync(dest, { recursive: true });
+  const dest = prepareExtractDir(work);
 
   if (fs.statSync(input).isDirectory()) {
     const found = fs.readdirSync(input).find((name) => name.toLowerCase().endsWith(".xlsx"));
@@ -771,11 +714,9 @@ async function loadInput(ctx: AdapterContext, work: string): Promise<FetchResult
     };
   }
   if (fileSignatureOk(buf, "zip")) {
-    await extractZip(buf, dest);
+    const archiveCopy = await extractInputZip(input, work, dest);
     const xlsx = walkFiles(dest).find((file) => file.toLowerCase().endsWith(".xlsx"));
     if (!xlsx) throw new Error("SFDA zip has no xlsx");
-    const archiveCopy = path.join(work, path.basename(input));
-    fs.copyFileSync(input, archiveCopy);
     return {
       files: [xlsx],
       rawArchivePath: archiveCopy,
@@ -785,12 +726,3 @@ async function loadInput(ctx: AdapterContext, work: string): Promise<FetchResult
   throw new Error("SFDA input must be an xlsx, a zip containing an xlsx, or a directory of xlsx files");
 }
 
-function walkFiles(dir: string): string[] {
-  const out: string[] = [];
-  for (const name of fs.readdirSync(dir).sort()) {
-    const fp = path.join(dir, name);
-    if (fs.statSync(fp).isDirectory()) out.push(...walkFiles(fp));
-    else out.push(fp);
-  }
-  return out;
-}
