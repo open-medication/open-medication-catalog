@@ -590,10 +590,15 @@ function structuredStrength(number: string, unit: string): Strength {
   return { numeratorValue: number, numeratorUnit, text, structured: true };
 }
 
-function cellText(value: ExcelJS.CellValue): string {
+function cellText(cell: ExcelJS.Cell, header?: string): string {
+  return valueText(cell.value, header, cell);
+}
+
+function valueText(value: ExcelJS.CellValue, header?: string, cell?: ExcelJS.Cell): string {
   if (value == null || value === "") return "";
   if (typeof value === "number") {
-    return Number.isInteger(value) ? String(value) : String(value);
+    if (header === "gtin") return gtinFromExcelNumber(value, cell);
+    return String(value);
   }
   if (typeof value === "boolean") return value ? "true" : "false";
   if (typeof value === "string") return value.trim();
@@ -602,10 +607,19 @@ function cellText(value: ExcelJS.CellValue): string {
     const rec = value as { text?: string; richText?: { text: string }[]; result?: ExcelJS.CellValue; hyperlink?: string };
     if (typeof rec.text === "string") return rec.text.trim();
     if (Array.isArray(rec.richText)) return rec.richText.map((part) => part.text).join("").trim();
-    if (rec.result !== undefined) return cellText(rec.result);
+    if (rec.result !== undefined) return valueText(rec.result, header, cell);
     if (typeof rec.hyperlink === "string") return rec.hyperlink.trim();
   }
   return String(value).trim();
+}
+
+/** Excel stores identifier cells as IEEE numbers, which drop a leading zero from GTIN-14. */
+function gtinFromExcelNumber(value: number, cell?: ExcelJS.Cell): string {
+  const formattedDigits = (cell?.text ?? "").replace(/\D/g, "");
+  const valueDigits = Number.isInteger(value) && value >= 0 ? String(value) : "";
+  const digits = formattedDigits.length > valueDigits.length ? formattedDigits : valueDigits || formattedDigits;
+  if (digits.length === 13) return digits.padStart(14, "0");
+  return digits || String(value);
 }
 
 async function readXlsxRows(file: string): Promise<{
@@ -635,7 +649,7 @@ async function readXlsxRows(file: string): Promise<{
   const rows: Record<string, string>[] = [];
   const lastRow = Math.max(sheet.rowCount, sheet.actualRowCount);
   for (let r = 2; r <= lastRow; r++) {
-    const cells = rowCells(sheet.getRow(r), headerCells.length);
+    const cells = rowCells(sheet.getRow(r), headerCells.length, headers);
     if (cells.every((cell) => !cell)) continue;
     const row: Record<string, string> = {};
     for (let i = 0; i < headers.length; i++) {
@@ -648,10 +662,10 @@ async function readXlsxRows(file: string): Promise<{
   return { rows, originalHeaders, unknownHeaders, headers };
 }
 
-function rowCells(row: ExcelJS.Row, colCount: number): string[] {
+function rowCells(row: ExcelJS.Row, colCount: number, headers?: string[]): string[] {
   const out: string[] = [];
   for (let i = 1; i <= colCount; i++) {
-    out.push(cellText(row.getCell(i).value));
+    out.push(cellText(row.getCell(i), headers?.[i - 1]));
   }
   return out;
 }

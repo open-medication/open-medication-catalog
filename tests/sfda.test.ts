@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import ExcelJS from "exceljs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { emptyCatalogue } from "../src/adapters/compose.js";
 import { SfdaAdapter, humanDrugListUrl } from "../src/adapters/sa/sfda.js";
@@ -522,5 +523,34 @@ describe("SFDA fixture workbook", () => {
 
     const quality = qualityReport({ ...emptyCatalogue("custom-sa", "SA", "0.1.0"), ...catalogue });
     expect(quality.percentProductsWithAtc).toBe(50);
+  });
+
+  it("restores a leading zero when GTIN is stored as an Excel number", async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("list");
+    sheet.addRow(["RegisterNumber", "Trade Name", "Scientific Name", "Product type", "GTIN"]);
+    sheet.addRow(["n-1", "Example", "EXAMPLE", "Human", 6281112223334]);
+    const cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), "sfda-gtin-"));
+    const inputPath = path.join(cacheDir, "drugs-list.xlsx");
+    await workbook.xlsx.writeFile(inputPath);
+
+    const adapter = new SfdaAdapter();
+    const fixtureCtx: AdapterContext = {
+      cacheDir,
+      secrets: {},
+      releaseMonth: "2026.04",
+      cutoffDate: "2026-04-30",
+      archiveMonth: "202604",
+      domain: "Human",
+    };
+    const fetched = await adapter.fetch({ ...fixtureCtx, inputPath });
+    const parsed = await adapter.parse(fixtureCtx, fetched);
+    const catalogue = await adapter.normalize(fixtureCtx, parsed, fetched.snapshot);
+    expect(catalogue.packages[0]?.gtin).toBe("06281112223334");
+    expect(
+      catalogue.packages[0]?.identifiers?.some(
+        (id) => id.system === "https://www.gs1.org/gtin" && id.value === "06281112223334",
+      ),
+    ).toBe(true);
   });
 });
