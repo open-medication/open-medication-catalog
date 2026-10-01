@@ -1,67 +1,67 @@
 {
   "artifacts": {
     "ch-base": {
-      "latest": "2026.08",
-      "tag": "ch-base-2026.08",
-      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-base-2026.08",
-      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-base-2026.08/ch-base-2026.08.zip",
-      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-base-2026.08/manifest.json"
+      "latest": "2026.09",
+      "tag": "ch-base-2026.09",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-base-2026.09",
+      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-base-2026.09/ch-base-2026.09.zip",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-base-2026.09/manifest.json"
     },
     "ch-enriched": {
-      "latest": "2026.08",
-      "tag": "ch-enriched-2026.08",
-      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-enriched-2026.08",
-      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-enriched-2026.08/ch-enriched-2026.08.zip",
-      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-enriched-2026.08/manifest.json"
+      "latest": "2026.09",
+      "tag": "ch-enriched-2026.09",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-enriched-2026.09",
+      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-enriched-2026.09/ch-enriched-2026.09.zip",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-enriched-2026.09/manifest.json"
     },
     "ch-vet-base": {
-      "latest": "2026.08",
-      "tag": "ch-vet-base-2026.08",
-      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-vet-base-2026.08",
-      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-vet-base-2026.08/ch-vet-base-2026.08.zip",
-      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-vet-base-2026.08/manifest.json"
+      "latest": "2026.09",
+      "tag": "ch-vet-base-2026.09",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-vet-base-2026.09",
+      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-vet-base-2026.09/ch-vet-base-2026.09.zip",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-vet-base-2026.09/manifest.json"
     },
     "ch-vet-enriched": {
-      "latest": "2026.08",
-      "tag": "ch-vet-enriched-2026.08",
-      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-vet-enriched-2026.08",
-      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-vet-enriched-2026.08/ch-vet-enriched-2026.08.zip",
-      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-vet-enriched-2026.08/manifest.json"
+      "latest": "2026.09",
+      "tag": "ch-vet-enriched-2026.09",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/ch-vet-enriched-2026.09",
+      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-vet-enriched-2026.09/ch-vet-enriched-2026.09.zip",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/ch-vet-enriched-2026.09/manifest.json"
     },
     "fr-base": {
-      "latest": "2026.09",
-      "tag": "fr-base-2026.09",
-      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/fr-base-2026.09",
-      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/fr-base-2026.09/fr-base-2026.09.zip",
-      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/fr-base-2026.09/manifest.json"
+      "latest": "2026.10",
+      "tag": "fr-base-2026.10",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/fr-base-2026.10",
+      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/fr-base-2026.10/fr-base-2026.10.zip",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/fr-base-2026.10/manifest.json"
     },
     "fr-enriched": {
-      "latest": "2026.09",
-      "tag": "fr-enriched-2026.09",
-      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/fr-enriched-2026.09",
-      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/fr-enriched-2026.09/fr-enriched-2026.09.zip",
-      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/fr-enriched-2026.09/manifest.json"
+      "latest": "2026.10",
+      "tag": "fr-enriched-2026.10",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/fr-enriched-2026.10",
+      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/fr-enriched-2026.10/fr-enriched-2026.10.zip",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/fr-enriched-2026.10/manifest.json"
     },
     "pl-base": {
-      "latest": "2026.09",
-      "tag": "pl-base-2026.09",
-      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/pl-base-2026.09",
-      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/pl-base-2026.09/pl-base-2026.09.zip",
-      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/pl-base-2026.09/manifest.json"
+      "latest": "2026.10",
+      "tag": "pl-base-2026.10",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/pl-base-2026.10",
+      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/pl-base-2026.10/pl-base-2026.10.zip",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/pl-base-2026.10/manifest.json"
     },
     "pl-vet-base": {
-      "latest": "2026.09",
-      "tag": "pl-vet-base-2026.09",
-      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/pl-vet-base-2026.09",
-      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/pl-vet-base-2026.09/pl-vet-base-2026.09.zip",
-      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/pl-vet-base-2026.09/manifest.json"
+      "latest": "2026.10",
+      "tag": "pl-vet-base-2026.10",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/pl-vet-base-2026.10",
+      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/pl-vet-base-2026.10/pl-vet-base-2026.10.zip",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/pl-vet-base-2026.10/manifest.json"
     },
     "us-base": {
-      "latest": "2026.09",
-      "tag": "us-base-2026.09",
-      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/us-base-2026.09",
-      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/us-base-2026.09/us-base-2026.09.zip",
-      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/us-base-2026.09/manifest.json"
+      "latest": "2026.10",
+      "tag": "us-base-2026.10",
+      "url": "https://github.com/open-medication/open-medication-catalog/releases/tag/us-base-2026.10",
+      "zip": "https://github.com/open-medication/open-medication-catalog/releases/download/us-base-2026.10/us-base-2026.10.zip",
+      "manifest": "https://github.com/open-medication/open-medication-catalog/releases/download/us-base-2026.10/manifest.json"
     }
   }
 }
