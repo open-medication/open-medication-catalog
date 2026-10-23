@@ -34,6 +34,7 @@ import { sourceCodedValue } from "../shared/coded.js";
 import { extractInputZip, findFile, prepareExtractDir } from "../shared/files.js";
 import { splitDelimitedList } from "../shared/lists.js";
 import { compactMeta } from "../shared/meta.js";
+import { splitRatioUnit } from "../shared/units.js";
 import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import { SourceNotYetAvailableError } from "../ch/swissmedic.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
@@ -558,7 +559,7 @@ function buildIngredients(
 function structuredStrength(number: string, unit: string): Strength {
   const text = [number, unit].filter(Boolean).join(" ");
   if (!/^\d+(?:\.\d+)?$/.test(number)) return { text, structured: false };
-  const split = splitFdaUnit(unit);
+  const split = splitRatioUnit(unit);
   if (!split) {
     const numeratorUnit = coded(FDA_SYSTEMS.strengthUnit, unit);
     if (!numeratorUnit) return { text, structured: false };
@@ -572,16 +573,6 @@ function structuredStrength(number: string, unit: string): Strength {
     text,
     structured: true,
   };
-}
-
-function splitFdaUnit(unit: string): { numeratorUnit: string; denominatorValue: string; denominatorUnit: string } | undefined {
-  const match = unit.match(/^([^/]+)\/(\d+(?:\.\d+)?)?(.*)$/);
-  if (!match) return undefined;
-  const numeratorUnit = match[1]!.trim();
-  if (!numeratorUnit) return undefined;
-  const denominatorValue = match[2] && match[2].length > 0 ? match[2] : "1";
-  const denominatorUnit = match[3]!.trim() || "1";
-  return { numeratorUnit, denominatorValue, denominatorUnit };
 }
 
 function parseTsvWithHeader(text: string): {

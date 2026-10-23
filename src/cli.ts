@@ -2,7 +2,8 @@
 import { Command } from "commander";
 import { build } from "./pipeline/build.js";
 import { searchPackages } from "./sqlite/writer.js";
-import { isOfficialArtifactId, getRecipe } from "./artifacts.js";
+import { parseInputs } from "./cli-inputs.js";
+import { isOfficialArtifactId } from "./artifacts.js";
 import { SourceNotYetAvailableError } from "./adapters/ch/swissmedic.js";
 import { rebuildCatalogFromGithubReleases } from "./pipeline/packager.js";
 import { discoverNextDataMonth, formatNextMonthSummary, githubOutputLines } from "./pipeline/discover.js";
@@ -14,28 +15,6 @@ import path from "node:path";
 
 const program = new Command();
 program.name("omc").description("Open Medication Catalogue generator").version("0.1.0");
-
-function parseInputs(input: string[] | undefined, artifactId?: string, customSources?: string[]): Record<string, string> {
-  const out: Record<string, string> = {};
-  const fallback = customSources?.length === 1 ? customSources[0]! : defaultInputSource(artifactId);
-  for (const item of input ?? []) {
-    const idx = item.indexOf("=");
-    if (idx === -1) {
-      out[fallback] = path.resolve(item);
-    } else {
-      out[item.slice(0, idx)] = path.resolve(item.slice(idx + 1));
-    }
-  }
-  return out;
-}
-
-function defaultInputSource(artifactId?: string): string {
-  if (artifactId && isOfficialArtifactId(artifactId)) {
-    const sources = getRecipe(artifactId).requiredSources;
-    if (sources[0]) return sources[0];
-  }
-  return "swissmedic";
-}
 
 program
   .command("build")

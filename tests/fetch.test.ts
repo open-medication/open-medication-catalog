@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { sourceDirFor } from "../src/adapters/descriptor.js";
 import { TERMS_PAGE_HEADERS, checkTerms } from "../src/pipeline/terms.js";
-import { HttpStatusError, fetchBinary } from "../src/security.js";
+import { HttpStatusError, fetchBinary, fetchText } from "../src/security.js";
 
 describe("fetchBinary retries", () => {
   afterEach(() => {
@@ -26,6 +26,45 @@ describe("fetchBinary retries", () => {
       HttpStatusError,
     );
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("fetchText", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("decodes a windows-1256 page per the charset label", async () => {
+    const body = new Uint8Array([
+      ...new TextEncoder().encode("<html>"),
+      0xC7, 0xE1, 0xDA, 0xC7, 0xE1, 0xE3, // "العالم" in windows-1256
+      ...new TextEncoder().encode("</html>"),
+    ]);
+    const fetchMock = vi.fn(
+      async () => new Response(body, { status: 200, headers: { "content-type": "text/html; charset=windows-1256" } }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const text = await fetchText("https://example.com/page");
+    expect(text).toContain("العالم");
+  });
+
+  it("strips a utf-8 BOM and defaults to utf-8 without a charset label", async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(new Uint8Array([0xef, 0xbb, 0xbf, ...new TextEncoder().encode("<html></html>")]), {
+          status: 200,
+        }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const text = await fetchText("https://example.com/bom");
+    expect(text.startsWith("\uFEFF")).toBe(false);
+    expect(text).toBe("<html></html>");
+  });
+
+  it("defaults to utf-8 when no charset is declared", async () => {
+    const fetchMock = vi.fn(async () => new Response("plain", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    expect(await fetchText("https://example.com/plain")).toBe("plain");
   });
 });
 

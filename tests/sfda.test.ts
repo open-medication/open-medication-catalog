@@ -134,7 +134,7 @@ describe("SFDA R4 ingredient strength", () => {
     });
   });
 
-  it("keeps explicit presentation ratios when denominator unit is present", async () => {
+  it("splits presentation ratios into denominator value and bare unit", async () => {
     const partial = await products([
       {
         registerNumber: "ratio-1",
@@ -146,6 +146,20 @@ describe("SFDA R4 ingredient strength", () => {
         authorizationStatus: "Valid",
       },
     ]);
+    const product = partial.medicinalProducts[0]!;
+    expect(product.ingredients[0]!.strength).toEqual(
+      expect.objectContaining({
+        numeratorValue: "4",
+        denominatorValue: "5",
+        structured: true,
+      }),
+    );
+    expect(product.ingredients[0]!.strength.numeratorUnit).toEqual(
+      expect.objectContaining({ code: "mg" }),
+    );
+    expect(product.ingredients[0]!.strength.denominatorUnit).toEqual(
+      expect.objectContaining({ code: "ml" }),
+    );
     const catalogue = { ...emptyCatalogue("custom-sa", "SA", "0.1.0"), ...partial };
     const r4 = exportR4(catalogue, "custom-sa-2026.04")["Medication.ndjson"]!.map((line) => JSON.parse(line) as {
       ingredient?: {
@@ -154,7 +168,7 @@ describe("SFDA R4 ingredient strength", () => {
     });
     expect(r4[0]?.ingredient?.[0]?.strength).toEqual({
       numerator: { value: 4, unit: "mg" },
-      denominator: { value: 1, unit: "5 ml" },
+      denominator: { value: 5, unit: "ml" },
     });
   });
 });
@@ -419,6 +433,13 @@ describe("SFDA formulary href", () => {
     );
   });
 
+  it("accepts a card title with an edition suffix", () => {
+    const suffixed = card("SFDA Human Drug List 9-2026", "/Style%20Library/IDF_Branding/files/Human%20Drug%20List%209-2026.xlsx");
+    expect(humanDrugListUrl(suffixed, FORMULARY)).toBe(
+      "https://www.chi.gov.sa/Style%20Library/IDF_Branding/files/Human%20Drug%20List%209-2026.xlsx",
+    );
+  });
+
   it("rejects a page with no human-drug-list card", () => {
     expect(() => humanDrugListUrl(card("CHI Drug Formulary", "/files/other.xlsx"), FORMULARY)).toThrow(/no SFDA Human Drug List/);
   });
@@ -496,6 +517,8 @@ describe("SFDA fixture workbook", () => {
     ]);
     expect(fetched.snapshot.termsChecksum).toMatch(/^[a-f0-9]{64}$/);
     expect(fetched.snapshot.termsReviewedAt).toBe("2026-09-28");
+    expect(fetched.snapshot.retrievedAt).not.toBe("1970-01-01T00:00:00.000Z");
+    expect(fetched.snapshot.retrievedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
 
     const cold = catalogue.medicinalProducts.find((product) => product.authorityKey === "10-1")!;
     expect(cold.ingredients.map((ingredient) => ingredient.strength.numeratorValue)).toEqual(["600", "40", "10"]);

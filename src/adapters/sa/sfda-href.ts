@@ -27,7 +27,7 @@ export function humanDrugListUrl(html: string, pageUrl: string): string {
   const found: string[] = [];
   for (const match of html.matchAll(TITLE)) {
     const title = collapse(match[1] ?? "");
-    if (!/^SFDA Human Drug List$/i.test(title)) continue;
+    if (!/^SFDA Human Drug List\b/i.test(title)) continue;
     const start = (match.index ?? 0) + match[0].length;
     const after = html.slice(start);
     const nextTitle = after.search(/<p\b[^>]*\bregulations-title\b/i);

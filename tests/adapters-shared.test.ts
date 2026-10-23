@@ -3,6 +3,7 @@ import { sourceCodedValue } from "../src/adapters/shared/coded.js";
 import { compactMeta } from "../src/adapters/shared/meta.js";
 import { splitDelimitedList, splitParentheticalCommaList } from "../src/adapters/shared/lists.js";
 import { createOrganizationUpserter } from "../src/adapters/shared/organizations.js";
+import { splitRatioUnit } from "../src/adapters/shared/units.js";
 import type { Organization, SourceSnapshot } from "../src/canonical/types.js";
 
 const snapshot: SourceSnapshot = {
@@ -27,6 +28,13 @@ describe("shared adapter helpers", () => {
       "B (JERYL LYNN, STRAIN)",
       "C",
     ]);
+  });
+
+  it("splits ratio units into numerator unit, denominator value, and bare denominator unit", () => {
+    expect(splitRatioUnit("mg/5 ml")).toEqual({ numeratorUnit: "mg", denominatorValue: "5", denominatorUnit: "ml" });
+    expect(splitRatioUnit("mg/ml")).toEqual({ numeratorUnit: "mg", denominatorValue: "1", denominatorUnit: "ml" });
+    expect(splitRatioUnit("mg")).toBeUndefined();
+    expect(splitRatioUnit("/ml")).toBeUndefined();
   });
 
   it("maps coded values with optional blank sentinels", () => {

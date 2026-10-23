@@ -55,6 +55,8 @@ pnpm omc build SA --source sfda --input <file> --month 2026.04
 
 The first command reads the current workbook href on the formulary page. The month tag is the operator’s snapshot label; CHI does not publish a monthly archive URL.
 
+Live fetch depends on the CHI formulary page’s card markup (the “SFDA Human Drug List” card); the page is decoded by its declared charset and the workbook link is validated to be https, on `chi.gov.sa`, and an `.xlsx`. A CHI page redesign can still break the scrape, and fetch fails loudly rather than falling back to a stale URL. `--input <file>` is the escape hatch and always overrides the download.
+
 The committed fixture under `fixtures/sa/sfda/` is synthetic rows in this column shape. The repo does not vendor the CHI workbook. Custom `--source` builds cannot be `--publish`ed.
 
 ## Consent request

@@ -26,12 +26,13 @@ import {
 } from "../../canonical/types.js";
 import { canonicalId } from "../../identity.js";
 import { repoPath } from "../../paths.js";
-import { extractZip, fetchBinary, fileSignatureOk, sha256, writeDeterministicZip } from "../../security.js";
+import { extractZip, fetchBinary, fetchText, fileSignatureOk, sha256, writeDeterministicZip } from "../../security.js";
 import { sourceCodedValue } from "../shared/coded.js";
 import { extractInputZip, prepareExtractDir, walkFiles } from "../shared/files.js";
 import { splitParentheticalCommaList } from "../shared/lists.js";
 import { compactMeta } from "../shared/meta.js";
 import { createOrganizationUpserter } from "../shared/organizations.js";
+import { splitRatioUnit } from "../shared/units.js";
 import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
 import { SFDA_FORMULARY_PAGE, humanDrugListUrl } from "./sfda-href.js";
@@ -343,7 +344,7 @@ function snapshotFrom(buf: Buffer, ctx: AdapterContext, uri: string): SourceSnap
     id: sha256(buf).slice(0, 16),
     sourceId: SOURCE_ID,
     identityAuthority: AUTHORITY,
-    retrievedAt: new Date(0).toISOString(),
+    retrievedAt: new Date().toISOString(),
     sourceEffectiveDate: ctx.cutoffDate,
     sha256: sha256(buf),
     uri,
@@ -451,7 +452,7 @@ function packageQuantity(packageSize: string | undefined): PackageQuantity {
 
 function packFill(size: string, sizeUnit: string | undefined): PackageUnit[] | undefined {
   if (!size) return undefined;
-  if (/^\d+(?:\.\d+)?$/.test(size)) {
+  if (plainNumber(size)) {
     const unit = blankUnit(sizeUnit);
     return [
       {
@@ -571,23 +572,22 @@ function looseStrengthText(name: string, numbers: string[], units: string[], ind
 function structuredStrength(number: string, unit: string): Strength {
   const text = [number, unit].filter(Boolean).join(" ");
   if (!plainNumber(number)) return { text, structured: false };
+  const split = splitRatioUnit(unit);
+  if (split) {
+    const numeratorUnit = sourceCoded(SFDA_SYSTEMS.strengthUnit, split.numeratorUnit);
+    const denominatorUnit = sourceCoded(SFDA_SYSTEMS.strengthUnit, split.denominatorUnit);
+    if (!numeratorUnit || !denominatorUnit) return { text, structured: false };
+    return {
+      numeratorValue: number,
+      numeratorUnit,
+      denominatorValue: split.denominatorValue,
+      denominatorUnit,
+      text,
+      structured: true,
+    };
+  }
   const numeratorUnit = sourceCoded(SFDA_SYSTEMS.strengthUnit, unit);
   if (!numeratorUnit) return { text, structured: false };
-  const ratio = unit.match(/^([^/]+)\/(.+)$/);
-  if (ratio) {
-    const numUnit = sourceCoded(SFDA_SYSTEMS.strengthUnit, ratio[1]);
-    const denUnit = sourceCoded(SFDA_SYSTEMS.strengthUnit, ratio[2]);
-    if (numUnit && denUnit) {
-      return {
-        numeratorValue: number,
-        numeratorUnit: numUnit,
-        denominatorValue: "1",
-        denominatorUnit: denUnit,
-        text,
-        structured: true,
-      };
-    }
-  }
   return { numeratorValue: number, numeratorUnit, text, structured: true };
 }
 
@@ -683,11 +683,9 @@ async function isXlsxBuffer(buf: Buffer): Promise<boolean> {
 
 async function downloadFromFormulary(ctx: AdapterContext, work: string): Promise<FetchResult> {
   const pageUrl = loadSourceDescriptor(ADAPTER_DIR).terms.datasetUrl ?? SFDA_FORMULARY_PAGE;
-  const html = (await fetchBinary(pageUrl, { headers: PAGE_HEADERS })).toString("utf8");
+  const html = await fetchText(pageUrl, { headers: PAGE_HEADERS });
   const fileUrl = humanDrugListUrl(html, pageUrl);
-  const buf = await fetchBinary(fileUrl, {
-    headers: { "User-Agent": PAGE_HEADERS["User-Agent"], Accept: "*/*" },
-  });
+  const buf = await fetchBinary(fileUrl, { headers: { ...PAGE_HEADERS, Accept: "*/*" } });
   if (!(await isXlsxBuffer(buf))) throw new Error("CHI human drug list download is not an xlsx");
   const dest = path.join(work, "extracted");
   fs.rmSync(dest, { recursive: true, force: true });
