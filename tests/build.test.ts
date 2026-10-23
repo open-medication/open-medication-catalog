@@ -8,6 +8,21 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+/**
+ * Regression guard for #25: manifest sources must carry the real fetch
+ * wall-clock time, not the Unix epoch placeholder.
+ */
+function expectFreshRetrievedAt(sources: { retrievedAt: string }[]): void {
+  expect(sources.length).toBeGreaterThan(0);
+  const now = Date.now();
+  for (const s of sources) {
+    const ts = new Date(s.retrievedAt).getTime();
+    expect(Number.isNaN(ts)).toBe(false);
+    expect(ts).toBeGreaterThan(now - 15 * 60_000);
+    expect(ts).toBeLessThanOrEqual(now);
+  }
+}
+
 describe("ch-base fixture build", () => {
   it("builds SQLite and FHIR from the Swissmedic fixture", async () => {
     const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-build-"));
@@ -63,8 +78,9 @@ describe("ch-base fixture build", () => {
     const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
     const licenceReadme = fs.readFileSync(path.join(out, "release", "licensing", "README.md"), "utf8");
     const manifest = JSON.parse(fs.readFileSync(path.join(out, "release", "manifest.json"), "utf8")) as {
-      sources: { id: string; licensing?: { termsUrl: string; commercialUse: string; checksum?: string } }[];
+      sources: { id: string; retrievedAt: string; licensing?: { termsUrl: string; commercialUse: string; checksum?: string } }[];
     };
+    expectFreshRetrievedAt(manifest.sources);
     expect(licenceReadme).toMatch(/not liable/i);
     expect(sourcesMd).toContain("https://opendata.swiss/en/terms-of-use#terms_open");
     expect(sourcesMd).toContain("commercialUse: allowed");
@@ -102,7 +118,7 @@ describe("ch-enriched fixture build", () => {
   const refdata = repoPath("fixtures/ch/refdata/articles.xml");
   const bag = repoPath("fixtures/ch/bag/epl-paxlovid.json");
 
-  it("maps Refdata names and dates and stays official without BAG", async () => {
+  it("maps Refdata GTINs and names and stays official without BAG", async () => {
     const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-enr-"));
     const result = await build({
       artifactId: "ch-enriched",
@@ -114,9 +130,10 @@ describe("ch-enriched fixture build", () => {
     expect(result.catalogue.sourceSnapshots.map((s) => s.sourceId)).toEqual(["swissmedic", "refdata"]);
     const pkg = result.catalogue.packages.find((p) => p.authorityKey === "10029|2|2");
     expect(pkg?.gtin).toBe("7680687930017");
-    expect(pkg?.names?.map((n) => n.language)).toEqual(["de", "fr", "it", "en"]);
-    expect(pkg?.marketingValidFrom).toBe("2020-01-01");
-    expect(pkg?.marketingStatus?.code).toBe("inCommerce");
+    expect(pkg?.names?.map((n) => n.language)).toEqual(["de", "fr", "it"]);
+    // Every fixture package has a Refdata article; the quality floor would
+    // fail the build otherwise.
+    expect(result.catalogue.packages.every((p) => p.gtin)).toBe(true);
 
     const manifest = JSON.parse(fs.readFileSync(path.join(out, "release", "manifest.json"), "utf8")) as {
       experimentalBag?: boolean;
@@ -250,7 +267,7 @@ describe("ch-vet-base fixture build", () => {
     expect(result.official).toBe(true);
     const pkg = result.catalogue.packages.find((p) => p.authorityKey === "90001|1|1");
     expect(pkg?.gtin).toBe("7680900010018");
-    expect(pkg?.names?.map((n) => n.language)).toEqual(["de", "fr", "it", "en"]);
+    expect(pkg?.names?.map((n) => n.language)).toEqual(["de", "fr"]);
     expect(pkg?.domain.code).toBe("Veterinary");
 
     await expect(
@@ -340,6 +357,56 @@ describe("fr-base fixture build", () => {
     const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
     expect(sourcesMd).toContain("licence_bdpm.pdf");
     expect(sourcesMd).toContain("commercialUse: allowed");
+  });
+});
+
+describe("fr-enriched fixture build", () => {
+  it("adds ATC from Open Medic without touching fr-base identity keys", async () => {
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), "omc-fr-enr-"));
+    const result = await build({
+      artifactId: "fr-enriched",
+      inputBySource: {
+        bdpm: repoPath("fixtures/fr/bdpm/BDPM_FIXTURE.zip"),
+        openmedic: repoPath("fixtures/fr/openmedic/OPEN_MEDIC_FIXTURE.zip"),
+      },
+      outDir: out,
+      dataMonth: "2026.09",
+    });
+    expect(result.official).toBe(true);
+    expect(result.catalogue.sourceSnapshots.map((s) => s.sourceId)).toEqual(["bdpm", "openmedic"]);
+
+    // ATC identifier on the product (CIP13 → CIS join, presentations must agree)
+    const ana = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "60002283");
+    expect(ana?.identifiers.some((i) => i.system === "http://www.whocc.no/atc" && i.value === "L02BG03")).toBe(true);
+    const beclo = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "60003620");
+    expect(beclo?.identifiers.some((i) => i.system === "http://www.whocc.no/atc" && i.value === "R03BA01")).toBe(true);
+    // Non-reimbursed product without an Open Medic row keeps no ATC
+    const a313 = result.catalogue.medicinalProducts.find((p) => p.authorityKey === "61266250");
+    expect(a313?.identifiers.some((i) => i.system === "http://www.whocc.no/atc")).toBe(false);
+
+    // GTIN provenance unchanged (CIP13); ATC coverage floor is met by the fixture
+    expect(result.catalogue.packages.every((p) => p.gtin)).toBe(true);
+    const quality = JSON.parse(fs.readFileSync(path.join(out, "release", "quality-report.json"), "utf8")) as {
+      percentProductsWithAtc: number;
+      percentPackagesWithGtin: number;
+    };
+    expect(quality.percentProductsWithAtc).toBe(66.7);
+    expect(quality.percentPackagesWithGtin).toBe(100);
+
+    const mpd = fs.readFileSync(path.join(out, "release", "fhir-r5", "MedicinalProductDefinition.ndjson"), "utf8");
+    expect(mpd).toContain("http://www.whocc.no/atc");
+    expect(mpd).toContain("L02BG03");
+
+    const manifest = JSON.parse(fs.readFileSync(path.join(out, "release", "manifest.json"), "utf8")) as {
+      sources: { id: string; retrievedAt: string; licensing?: { termsUrl: string; commercialUse: string } }[];
+    };
+    expectFreshRetrievedAt(manifest.sources);
+    const openmedic = manifest.sources.find((s) => s.id === "openmedic")?.licensing;
+    expect(openmedic?.termsUrl).toContain("ETALAB-Licence-Ouverte-v2.0");
+    expect(openmedic?.commercialUse).toBe("allowed");
+
+    const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
+    expect(sourcesMd).toContain("data.gouv.fr/datasets/open-medic");
   });
 });
 
@@ -732,6 +799,17 @@ describe("us-base fixture build", () => {
     const sourcesMd = fs.readFileSync(path.join(out, "release", "licensing", "SOURCES.md"), "utf8");
     expect(sourcesMd).toContain("website-policies#linking");
     expect(sourcesMd).toContain("attributionRequired: false");
+
+    // #25: the NDC source must record when this build retrieved it, not epoch 0.
+    const manifest = JSON.parse(fs.readFileSync(path.join(out, "release", "manifest.json"), "utf8")) as {
+      sources: { id: string; retrievedAt: string }[];
+    };
+    expectFreshRetrievedAt(manifest.sources);
+    expect(result.catalogue.sourceSnapshots.every((s) => new Date(s.retrievedAt).getTime() > 0)).toBe(true);
+    const qualityReport = JSON.parse(
+      fs.readFileSync(path.join(out, "release", "quality-report.json"), "utf8"),
+    ) as { sourceFreshness: { sourceId: string; retrievedAt: string }[] };
+    expectFreshRetrievedAt(qualityReport.sourceFreshness);
 
     const sqlite = path.join(out, "release", "database", "medication.sqlite");
     expect(searchPackages(sqlite, "Metformin").length).toBeGreaterThan(0);

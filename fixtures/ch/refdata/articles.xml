@@ -1,29 +1,324 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ARTICLES>
-  <ARTICLE>
-    <GTIN>7680687930017</GTIN>
-    <AUTHNR>10029</AUTHNR>
-    <PACKCODE>2</PACKCODE>
-    <STATUS>inCommerce</STATUS>
-    <TYPE>PHARMA</TYPE>
-    <NAME_DE>Emser Salz Lösung Pack DE</NAME_DE>
-    <NAME_FR>Emser Salz Lösung Pack FR</NAME_FR>
-    <NAME_IT>Emser Salz Lösung Pack IT</NAME_IT>
-    <NAME_EN>Emser Salz Lösung Pack EN</NAME_EN>
-    <VALIDFROM>2020-01-01</VALIDFROM>
-    <VALIDTO>2099-12-31</VALIDTO>
-  </ARTICLE>
-  <ARTICLE>
-    <GTIN>7680900010018</GTIN>
-    <AUTHNR>90001</AUTHNR>
-    <PACKCODE>1</PACKCODE>
-    <STATUS>inCommerce</STATUS>
-    <TYPE>PHARMA</TYPE>
-    <NAME_DE>Fixture Vet Drops Pack DE</NAME_DE>
-    <NAME_FR>Fixture Vet Drops Pack FR</NAME_FR>
-    <NAME_IT>Fixture Vet Drops Pack IT</NAME_IT>
-    <NAME_EN>Fixture Vet Drops Pack EN</NAME_EN>
-    <VALIDFROM>2021-01-01</VALIDFROM>
-    <VALIDTO>2099-12-31</VALIDTO>
-  </ARTICLE>
-</ARTICLES>
+<!-- Modeled on the real Refdata Articles download (SIMIS format,
+     https://simisinfo.refdata.ch/Articles/1.0/). One <Article> per package in
+     the Swissmedic fixture (OGD_FIXTURE.zip) so the join and the quality gates
+     are exercised end-to-end. RegulatedAuthorisationIdentifier is the
+     zero-padded Swissmedic number: PackagedProduct = auth(5)+pack(3),
+     MedicinalProduct = auth(5)+seq(2). -->
+<Articles xmlns="https://simisinfo.refdata.ch/Articles/1.0/" totalArticles="11" generatedOn="2026-08-31T01:00:07Z">
+  <Article>
+    <MedicinalProduct>
+      <Identifier>CH-7601001001137-10029</Identifier>
+      <Domain>Human</Domain>
+      <LegalStatusOfSupply>D</LegalStatusOfSupply>
+      <RegulatedAuthorisationIdentifier>1002902</RegulatedAuthorisationIdentifier>
+      <ProductClassification>
+        <ProductClass>PHARMA</ProductClass>
+      </ProductClassification>
+    </MedicinalProduct>
+    <PackagedProduct>
+      <Identifier>CH-7601001001137-10029-002</Identifier>
+      <RegulatedAuthorisationIdentifier>10029002</RegulatedAuthorisationIdentifier>
+      <DataCarrierIdentifier>7680687930017</DataCarrierIdentifier>
+      <Holder>
+        <Identifier>7601001001137</Identifier>
+        <Name>Emser Pharma AG</Name>
+      </Holder>
+      <Name>
+        <Language>DE</Language>
+        <FullName>Emser Salz Lösung Pack DE</FullName>
+      </Name>
+      <Name>
+        <Language>FR</Language>
+        <FullName>Emser Salz Lösung Pack FR</FullName>
+      </Name>
+      <Name>
+        <Language>IT</Language>
+        <FullName>Emser Salz Lösung Pack IT</FullName>
+      </Name>
+    </PackagedProduct>
+  </Article>
+  <Article>
+    <MedicinalProduct>
+      <Identifier>CH-7601001001144-10167</Identifier>
+      <Domain>Human</Domain>
+      <LegalStatusOfSupply>D</LegalStatusOfSupply>
+      <RegulatedAuthorisationIdentifier>1016701</RegulatedAuthorisationIdentifier>
+      <ProductClassification>
+        <ProductClass>PHARMA</ProductClass>
+      </ProductClassification>
+    </MedicinalProduct>
+    <PackagedProduct>
+      <Identifier>CH-7601001001144-10167-001</Identifier>
+      <RegulatedAuthorisationIdentifier>10167001</RegulatedAuthorisationIdentifier>
+      <DataCarrierIdentifier>7680101670011</DataCarrierIdentifier>
+      <Holder>
+        <Identifier>7601001001144</Identifier>
+        <Name>Fixture Pharma AG</Name>
+      </Holder>
+      <Name>
+        <Language>DE</Language>
+        <FullName>Fixture Beutel DE</FullName>
+      </Name>
+      <Name>
+        <Language>FR</Language>
+        <FullName>Sachet Fixture FR</FullName>
+      </Name>
+    </PackagedProduct>
+  </Article>
+  <Article>
+    <MedicinalProduct>
+      <Identifier>CH-7601001001144-10167</Identifier>
+      <Domain>Human</Domain>
+      <LegalStatusOfSupply>D</LegalStatusOfSupply>
+      <RegulatedAuthorisationIdentifier>1016701</RegulatedAuthorisationIdentifier>
+      <ProductClassification>
+        <ProductClass>PHARMA</ProductClass>
+      </ProductClassification>
+    </MedicinalProduct>
+    <PackagedProduct>
+      <Identifier>CH-7601001001144-10167-002</Identifier>
+      <RegulatedAuthorisationIdentifier>10167002</RegulatedAuthorisationIdentifier>
+      <DataCarrierIdentifier>7680101670028</DataCarrierIdentifier>
+      <Holder>
+        <Identifier>7601001001144</Identifier>
+        <Name>Fixture Pharma AG</Name>
+      </Holder>
+      <Name>
+        <Language>DE</Language>
+        <FullName>Fixture Beutel DE</FullName>
+      </Name>
+      <Name>
+        <Language>FR</Language>
+        <FullName>Sachet Fixture FR</FullName>
+      </Name>
+    </PackagedProduct>
+  </Article>
+  <Article>
+    <MedicinalProduct>
+      <Identifier>CH-7601001001144-10167</Identifier>
+      <Domain>Human</Domain>
+      <LegalStatusOfSupply>D</LegalStatusOfSupply>
+      <RegulatedAuthorisationIdentifier>1016701</RegulatedAuthorisationIdentifier>
+      <ProductClassification>
+        <ProductClass>PHARMA</ProductClass>
+      </ProductClassification>
+    </MedicinalProduct>
+    <PackagedProduct>
+      <Identifier>CH-7601001001144-10167-003</Identifier>
+      <RegulatedAuthorisationIdentifier>10167003</RegulatedAuthorisationIdentifier>
+      <DataCarrierIdentifier>7680101670035</DataCarrierIdentifier>
+      <Holder>
+        <Identifier>7601001001144</Identifier>
+        <Name>Fixture Pharma AG</Name>
+      </Holder>
+      <Name>
+        <Language>DE</Language>
+        <FullName>Fixture Beutel DE</FullName>
+      </Name>
+      <Name>
+        <Language>FR</Language>
+        <FullName>Sachet Fixture FR</FullName>
+      </Name>
+    </PackagedProduct>
+  </Article>
+  <Article>
+    <MedicinalProduct>
+      <Identifier>CH-7601001001144-10167</Identifier>
+      <Domain>Human</Domain>
+      <LegalStatusOfSupply>D</LegalStatusOfSupply>
+      <RegulatedAuthorisationIdentifier>1016701</RegulatedAuthorisationIdentifier>
+      <ProductClassification>
+        <ProductClass>PHARMA</ProductClass>
+      </ProductClassification>
+    </MedicinalProduct>
+    <PackagedProduct>
+      <Identifier>CH-7601001001144-10167-029</Identifier>
+      <RegulatedAuthorisationIdentifier>10167029</RegulatedAuthorisationIdentifier>
+      <DataCarrierIdentifier>7680101670294</DataCarrierIdentifier>
+      <Holder>
+        <Identifier>7601001001144</Identifier>
+        <Name>Fixture Pharma AG</Name>
+      </Holder>
+      <Name>
+        <Language>DE</Language>
+        <FullName>Fixture Beutel DE</FullName>
+      </Name>
+      <Name>
+        <Language>FR</Language>
+        <FullName>Sachet Fixture FR</FullName>
+      </Name>
+    </PackagedProduct>
+  </Article>
+  <Article>
+    <MedicinalProduct>
+      <Identifier>CH-7601001001144-10167</Identifier>
+      <Domain>Human</Domain>
+      <LegalStatusOfSupply>D</LegalStatusOfSupply>
+      <RegulatedAuthorisationIdentifier>1016701</RegulatedAuthorisationIdentifier>
+      <ProductClassification>
+        <ProductClass>PHARMA</ProductClass>
+      </ProductClassification>
+    </MedicinalProduct>
+    <PackagedProduct>
+      <Identifier>CH-7601001001144-10167-030</Identifier>
+      <RegulatedAuthorisationIdentifier>10167030</RegulatedAuthorisationIdentifier>
+      <DataCarrierIdentifier>7680101670300</DataCarrierIdentifier>
+      <Holder>
+        <Identifier>7601001001144</Identifier>
+        <Name>Fixture Pharma AG</Name>
+      </Holder>
+      <Name>
+        <Language>DE</Language>
+        <FullName>Fixture Beutel DE</FullName>
+      </Name>
+      <Name>
+        <Language>FR</Language>
+        <FullName>Sachet Fixture FR</FullName>
+      </Name>
+    </PackagedProduct>
+  </Article>
+  <Article>
+    <MedicinalProduct>
+      <Identifier>CH-7601001001175-30514</Identifier>
+      <Domain>Human</Domain>
+      <LegalStatusOfSupply>A</LegalStatusOfSupply>
+      <RegulatedAuthorisationIdentifier>3051402</RegulatedAuthorisationIdentifier>
+      <ProductClassification>
+        <ProductClass>PHARMA</ProductClass>
+      </ProductClassification>
+    </MedicinalProduct>
+    <PackagedProduct>
+      <Identifier>CH-7601001001175-30514-025</Identifier>
+      <RegulatedAuthorisationIdentifier>30514025</RegulatedAuthorisationIdentifier>
+      <DataCarrierIdentifier>7680305140025</DataCarrierIdentifier>
+      <Holder>
+        <Identifier>7601001001175</Identifier>
+        <Name>Fixture OTC AG</Name>
+      </Holder>
+      <Name>
+        <Language>DE</Language>
+        <FullName>Fixture OTC Lösung DE</FullName>
+      </Name>
+      <Name>
+        <Language>FR</Language>
+        <FullName>Solution OTC Fixture FR</FullName>
+      </Name>
+    </PackagedProduct>
+  </Article>
+  <Article>
+    <MedicinalProduct>
+      <Identifier>CH-7601001001188-32238</Identifier>
+      <Domain>Human</Domain>
+      <LegalStatusOfSupply>D</LegalStatusOfSupply>
+      <RegulatedAuthorisationIdentifier>3223801</RegulatedAuthorisationIdentifier>
+      <ProductClassification>
+        <ProductClass>PHARMA</ProductClass>
+      </ProductClassification>
+    </MedicinalProduct>
+    <PackagedProduct>
+      <Identifier>CH-7601001001188-32238-001</Identifier>
+      <RegulatedAuthorisationIdentifier>32238001</RegulatedAuthorisationIdentifier>
+      <DataCarrierIdentifier>7680322380013</DataCarrierIdentifier>
+      <Holder>
+        <Identifier>7601001001188</Identifier>
+        <Name>Fixture Injekt AG</Name>
+      </Holder>
+      <Name>
+        <Language>DE</Language>
+        <FullName>Fixture Injektionslösung DE</FullName>
+      </Name>
+      <Name>
+        <Language>FR</Language>
+        <FullName>Solution injectable Fixture FR</FullName>
+      </Name>
+    </PackagedProduct>
+  </Article>
+  <Article>
+    <MedicinalProduct>
+      <Identifier>CH-7601001001199-90001</Identifier>
+      <Domain>Veterinary</Domain>
+      <LegalStatusOfSupply>D</LegalStatusOfSupply>
+      <RegulatedAuthorisationIdentifier>9000101</RegulatedAuthorisationIdentifier>
+      <ProductClassification>
+        <ProductClass>PHARMA</ProductClass>
+      </ProductClassification>
+    </MedicinalProduct>
+    <PackagedProduct>
+      <Identifier>CH-7601001001199-90001-001</Identifier>
+      <RegulatedAuthorisationIdentifier>90001001</RegulatedAuthorisationIdentifier>
+      <DataCarrierIdentifier>7680900010018</DataCarrierIdentifier>
+      <Holder>
+        <Identifier>7601001001199</Identifier>
+        <Name>Fixture Vet AG</Name>
+      </Holder>
+      <Name>
+        <Language>DE</Language>
+        <FullName>Fixture Vet Drops Pack DE</FullName>
+      </Name>
+      <Name>
+        <Language>FR</Language>
+        <FullName>Fixture Vet Drops Pack FR</FullName>
+      </Name>
+    </PackagedProduct>
+  </Article>
+  <!-- Non-pharma products must never join medicinal-product packages. -->
+  <Article>
+    <MedicinalProduct>
+      <Identifier>CH-7601009999999-99997</Identifier>
+      <Domain>Human</Domain>
+      <LegalStatusOfSupply>D</LegalStatusOfSupply>
+      <RegulatedAuthorisationIdentifier>9999701</RegulatedAuthorisationIdentifier>
+      <ProductClassification>
+        <ProductClass>NONPHARMA</ProductClass>
+      </ProductClassification>
+    </MedicinalProduct>
+    <PackagedProduct>
+      <Identifier>CH-7601009999999-99997-001</Identifier>
+      <RegulatedAuthorisationIdentifier>99997001</RegulatedAuthorisationIdentifier>
+      <DataCarrierIdentifier>7611234567890</DataCarrierIdentifier>
+      <Holder>
+        <Identifier>7601009999999</Identifier>
+        <Name>Fixture NonPharma AG</Name>
+      </Holder>
+      <Name>
+        <Language>DE</Language>
+        <FullName>Fixture Verbandmaterial DE</FullName>
+      </Name>
+      <Name>
+        <Language>FR</Language>
+        <FullName>Pansement Fixture FR</FullName>
+      </Name>
+    </PackagedProduct>
+  </Article>
+  <!-- Some PHARMA articles (e.g. blood products under the collective
+       registration 99999) carry no data carrier identifier; they must be
+       skipped, not crash the extraction. -->
+  <Article>
+    <MedicinalProduct>
+      <Identifier>CH-7601009999999-99998</Identifier>
+      <Domain>Human</Domain>
+      <LegalStatusOfSupply>D</LegalStatusOfSupply>
+      <RegulatedAuthorisationIdentifier>9999801</RegulatedAuthorisationIdentifier>
+      <ProductClassification>
+        <ProductClass>PHARMA</ProductClass>
+      </ProductClassification>
+    </MedicinalProduct>
+    <PackagedProduct>
+      <Identifier>CH-7601009999999-99998-001</Identifier>
+      <RegulatedAuthorisationIdentifier>99998001</RegulatedAuthorisationIdentifier>
+      <Holder>
+        <Identifier>7601009999999</Identifier>
+        <Name>Blutspendedienst Fixture</Name>
+      </Holder>
+      <Name>
+        <Language>DE</Language>
+        <FullName>Erythrozytenkonzentrat Fixture</FullName>
+      </Name>
+      <Name>
+        <Language>FR</Language>
+        <FullName>Concentré érythrocytaire Fixture</FullName>
+      </Name>
+    </PackagedProduct>
+  </Article>
+</Articles>

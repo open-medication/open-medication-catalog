@@ -20,6 +20,14 @@ artifacts:
       # bag is added only after redistribution terms are recorded.
     attachRawSources:
       - swissmedic
+    # 2026-08 regression: every release shipped 18,309 packages with 0 GTINs
+    # because the Refdata join silently matched nothing. Refdata is a
+    # voluntary registration database: measured coverage on the 2026-08
+    # snapshot is 79.7% of HAM packs (80% of active ones; revoked packs are
+    # never registered). The floor catches a broken join, not registration
+    # drift — leave room below the measured value.
+    qualityGates:
+      minPercentPackagesWithGtin: 65
   ch-vet-base:
     jurisdiction: CH
     domain: Veterinary
@@ -35,6 +43,11 @@ artifacts:
       - refdata
     attachRawSources:
       - swissmedic
+    # TAM registration is lower than HAM: measured 61.8% of TAM packs on the
+    # 2026-08 snapshot. Same rationale as ch-enriched: catch a broken join,
+    # tolerate registration drift.
+    qualityGates:
+      minPercentPackagesWithGtin: 50
   fr-base:
     jurisdiction: FR
     domain: Human
@@ -42,6 +55,24 @@ artifacts:
       - bdpm
     attachRawSources:
       - bdpm
+    # CIP13 is a GTIN; observed coverage is 100%.
+    qualityGates:
+      minPercentPackagesWithGtin: 90
+  fr-enriched:
+    jurisdiction: FR
+    domain: Human
+    requiredSources:
+      - bdpm
+      - openmedic
+    attachRawSources:
+      - bdpm
+    # ATC comes from Open Medic (ANSM removed CIS_ATC_bdpm.txt from the
+    # public BDM v4 file set). Open Medic covers reimbursed city-delivered
+    # medicines only — measured ~61% of products on the 2025 edition — so
+    # the floor catches a zero-match join, not partial coverage.
+    qualityGates:
+      minPercentPackagesWithGtin: 90
+      minPercentProductsWithAtc: 50
   pl-base:
     jurisdiction: PL
     domain: Human
@@ -49,6 +80,10 @@ artifacts:
       - rpl
     attachRawSources:
       - rpl
+    # RPL carries no GTIN for ~10% of packs (verified against the live
+    # register); the floor leaves drift room below the observed ~90%.
+    qualityGates:
+      minPercentPackagesWithGtin: 80
   pl-vet-base:
     jurisdiction: PL
     domain: Veterinary
@@ -56,6 +91,8 @@ artifacts:
       - rpl
     attachRawSources:
       - rpl
+    qualityGates:
+      minPercentPackagesWithGtin: 80
   us-base:
     jurisdiction: US
     domain: Human

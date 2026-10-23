@@ -1,0 +1,25 @@
+country: FR
+sourceId: openmedic
+identityAuthority: openmedic
+authority: Caisse nationale de l'assurance maladie (Assurance Maladie, ameli open data)
+dataset: Open Medic base complète (dépenses de médicaments, interrégimes)
+sourceType: enrichment
+jurisdiction: FR
+updateFrequency: annual
+commercialUse: allowed
+redistribution: allowed
+attributionRequired: true
+credentialsRequired: false
+required: false
+parserSchemaVersion: "0.1.0"
+downloadPage: "https://open-data-assurance-maladie.ameli.fr/medicaments/download.php?Dir_Rep=Open_MEDIC_Base_Complete&Annee=2025"
+terms:
+  url: "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf"
+  datasetUrl: "https://www.data.gouv.fr/datasets/open-medic-base-complete-sur-les-depenses-de-medicaments-interregimes"
+  reviewedAt: "2026-09-28"
+  checksum: "df600a2fd08b887716612ac57fffbbe10c9e678961064c72214cebb89c90cbb6"
+  notes: "Open Medic is declared Licence Ouverte / Open Licence 2.0 (fr-lo) on its data.gouv.fr dataset and ameli page; the etalab PDF is the licence text and its byte checksum is tracked. Attribution: mention « Assurance Maladie – Open Medic » and the edition year. Used for ATC enrichment only (per CIP13); the raw spending ZIP is not redistributed. ANSM removed CIS_ATC_bdpm.txt from the public BDM v4 file set, which is why ATC comes from here."
+releasePolicy:
+  public: true
+  required: false
+  redistributeRaw: false

@@ -3,6 +3,7 @@ import { BagAdapter } from "../src/adapters/ch/bag.js";
 import { RefdataAdapter } from "../src/adapters/ch/refdata.js";
 import { SwissmedicAdapter } from "../src/adapters/ch/swissmedic.js";
 import { BdpmAdapter } from "../src/adapters/fr/bdpm.js";
+import { OpenMedicAdapter } from "../src/adapters/fr/openmedic.js";
 import { RplAdapter } from "../src/adapters/pl/rpl.js";
 import { NdcAdapter } from "../src/adapters/us/ndc.js";
 import { SfdaAdapter } from "../src/adapters/sa/sfda.js";
@@ -15,6 +16,7 @@ const adapters = [
   new RefdataAdapter(),
   new BagAdapter(),
   new BdpmAdapter(),
+  new OpenMedicAdapter(),
   new RplAdapter(),
   new NdcAdapter(),
   new SfdaAdapter(),
@@ -36,7 +38,16 @@ describe("licence flags from source.yaml", () => {
   });
 
   it("discovers every committed source.yaml", () => {
-    expect(listSourceDirs().map((s) => s.sourceId).sort()).toEqual(["bag", "bdpm", "ndc", "refdata", "rpl", "sfda", "swissmedic"]);
+    expect(listSourceDirs().map((s) => s.sourceId).sort()).toEqual([
+      "bag",
+      "bdpm",
+      "ndc",
+      "openmedic",
+      "refdata",
+      "rpl",
+      "sfda",
+      "swissmedic",
+    ]);
   });
 
   it("artifact recipes list sources that have licence descriptors", () => {
@@ -52,6 +63,8 @@ describe("licence flags from source.yaml", () => {
     expect(getRecipe("ch-vet-enriched").requiredSources).toEqual(["swissmedic", "refdata"]);
     expect(getRecipe("ch-vet-enriched").domain).toBe("Veterinary");
     expect(getRecipe("fr-base").requiredSources).toEqual(["bdpm"]);
+    expect(getRecipe("fr-enriched").requiredSources).toEqual(["bdpm", "openmedic"]);
+    expect(getRecipe("fr-enriched").qualityGates?.minPercentProductsWithAtc).toBe(50);
     expect(getRecipe("pl-base").requiredSources).toEqual(["rpl"]);
     expect(getRecipe("pl-base").domain).toBe("Human");
     expect(getRecipe("pl-vet-base").requiredSources).toEqual(["rpl"]);
@@ -65,6 +78,10 @@ describe("licence flags from source.yaml", () => {
     expect(loadSourceDescriptorById("bdpm").commercialUse).toBe("allowed");
     expect(loadSourceDescriptorById("bdpm").redistribution).toBe("allowed");
     expect(loadSourceDescriptorById("bdpm").attributionRequired).toBe(true);
+    expect(loadSourceDescriptorById("openmedic").commercialUse).toBe("allowed");
+    expect(loadSourceDescriptorById("openmedic").redistribution).toBe("allowed");
+    expect(loadSourceDescriptorById("openmedic").attributionRequired).toBe(true);
+    expect(loadSourceDescriptorById("openmedic").releasePolicy?.redistributeRaw).toBe(false);
     expect(loadSourceDescriptorById("rpl").commercialUse).toBe("allowed");
     expect(loadSourceDescriptorById("rpl").redistribution).toBe("allowed");
     expect(loadSourceDescriptorById("rpl").attributionRequired).toBe(true);
@@ -100,7 +117,7 @@ describe("release licensing texts", () => {
           id: "x",
           sourceId: "swissmedic",
           identityAuthority: "swissmedic",
-          retrievedAt: "1970-01-01T00:00:00.000Z",
+          retrievedAt: "2026-08-31T06:00:00.000Z",
           sha256: "abc",
           uri: "file:test",
         },

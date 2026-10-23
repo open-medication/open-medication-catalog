@@ -2,6 +2,7 @@ import { CANONICAL_SCHEMA_VERSION, type Catalogue } from "../canonical/types.js"
 import { assertPackageCodeUniqueWithinAuth } from "./ch/swissmedic.js";
 import { applyRefdata, type RefdataArticle } from "./ch/refdata.js";
 import { applyBag, type FhirResource } from "./ch/bag.js";
+import { applyOpenMedic, type OpenMedicParsed } from "./fr/openmedic.js";
 import type { PartialCatalogue } from "./types.js";
 
 export function emptyCatalogue(artifactId: string, jurisdiction: string, generatorVersion: string): Catalogue {
@@ -54,6 +55,12 @@ export function enrichWithBag(catalogue: Catalogue, resources: FhirResource[], s
   const snap = catalogue.sourceSnapshots.find((s) => s.id === snapshotId);
   if (!snap) throw new Error("BAG snapshot missing");
   applyBag(catalogue, resources, snap);
+}
+
+export function enrichWithOpenMedic(catalogue: Catalogue, parsed: OpenMedicParsed, snapshotId: string): void {
+  const snap = catalogue.sourceSnapshots.find((s) => s.id === snapshotId);
+  if (!snap) throw new Error("Open Medic snapshot missing");
+  applyOpenMedic(catalogue, parsed, snap);
 }
 
 export function sortCatalogue(catalogue: Catalogue): void {
