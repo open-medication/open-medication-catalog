@@ -29,6 +29,10 @@ describe("pins and terms snapshots", () => {
     expect(bdpm).toMatch(/^[a-f0-9]{64}$/);
     const rpl = fs.readFileSync(repoPath("adapters/pl/rpl/terms.snapshot.txt"), "utf8").trim();
     expect(rpl).toMatch(/^[a-f0-9]{64}$/);
+    const ndc = fs.readFileSync(repoPath("adapters/us/ndc/terms.snapshot.txt"), "utf8").trim();
+    expect(ndc).toMatch(/^[a-f0-9]{64}$/);
+    const sfda = fs.readFileSync(repoPath("adapters/sa/sfda/terms.snapshot.txt"), "utf8").trim();
+    expect(sfda).toMatch(/^[a-f0-9]{64}$/);
   });
 });
 

@@ -28,7 +28,12 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchBinaryOnce(url: string, opts: FetchOptions): Promise<Buffer> {
+interface FetchedBinary {
+  buf: Buffer;
+  contentType: string;
+}
+
+async function fetchBinaryOnce(url: string, opts: FetchOptions): Promise<FetchedBinary> {
   const res = await fetch(url, { headers: opts.headers, redirect: "follow" });
   if (!res.ok) {
     throw new HttpStatusError(url, res.status, res.statusText);
@@ -48,10 +53,10 @@ async function fetchBinaryOnce(url: string, opts: FetchOptions): Promise<Buffer>
   if (buf.length > max) {
     throw new Error(`Download exceeded ${max} bytes (${url})`);
   }
-  return buf;
+  return { buf, contentType };
 }
 
-export async function fetchBinary(url: string, opts: FetchOptions = {}): Promise<Buffer> {
+async function fetchWithRetry(url: string, opts: FetchOptions): Promise<FetchedBinary> {
   assertHttpUrl(url);
   const retries = opts.retries ?? 2;
   const delay = opts.retryDelayMs ?? 250;
@@ -67,6 +72,26 @@ export async function fetchBinary(url: string, opts: FetchOptions = {}): Promise
     }
   }
   throw lastErr;
+}
+
+export async function fetchBinary(url: string, opts: FetchOptions = {}): Promise<Buffer> {
+  return (await fetchWithRetry(url, opts)).buf;
+}
+
+/**
+ * Fetch and decode text, honoring the response `charset` label (default
+ * utf-8) so a non-UTF8 CMS page does not mojibake. Strips a leading BOM.
+ */
+export async function fetchText(url: string, opts: FetchOptions = {}): Promise<string> {
+  const { buf, contentType } = await fetchWithRetry(url, opts);
+  const charset = /charset\s*=\s*"?([\w-]+)"?/i.exec(contentType)?.[1] ?? "utf-8";
+  let text: string;
+  try {
+    text = new TextDecoder(charset).decode(buf);
+  } catch {
+    text = buf.toString("utf8");
+  }
+  return text.replace(/^\uFEFF/, "");
 }
 
 export class HttpStatusError extends Error {

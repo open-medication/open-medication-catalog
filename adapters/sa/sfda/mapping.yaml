@@ -1,0 +1,43 @@
+# Human Drug List 4-2026.xlsx column mapping.
+sourceId: sfda
+files:
+  drugs-list:
+    registerNumber: mapped
+    registerYear: retained-as-metadata
+    certificateDate: retained-as-metadata
+    productType: mapped
+    drugType: retained-as-metadata
+    scientificName: mapped
+    tradeName: mapped
+    strength: mapped
+    strengthUnit: mapped
+    doseForm: mapped
+    route: mapped
+    atcCode1: mapped
+    atcCode2: mapped
+    size: mapped
+    sizeUnit: mapped
+    packageType: mapped
+    packageSize: mapped
+    legalStatus: retained-as-metadata
+    productControl: retained-as-metadata
+    distributionSite: retained-as-metadata
+    price: retained-as-metadata
+    pricingDate: retained-as-metadata
+    shelfLife: retained-as-metadata
+    storageConditions: retained-as-metadata
+    storageConditionsArabic: retained-as-metadata
+    marketingCompany: mapped
+    marketingCompanyId: retained-as-metadata
+    marketingCompanyCountry: retained-as-metadata
+    manufacturerName: mapped
+    manufacturerCountry: retained-as-metadata
+    secondManufacturerName: mapped
+    secondManufacturerCountry: retained-as-metadata
+    firstAgent: mapped
+    secondAgent: mapped
+    thirdAgent: mapped
+    marketingStatus: mapped
+    authorizationStatus: mapped
+    descriptionCode: retained-as-metadata
+    gtin: mapped

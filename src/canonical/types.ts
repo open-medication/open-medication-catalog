@@ -85,6 +85,20 @@ export const BDPM_SYSTEMS = {
   collectivites: "https://fhir.openmedicationcatalog.org/CodeSystem/fr-bdpm-agrement-collectivites",
 } as const;
 
+export const SFDA_SYSTEMS = {
+  registerNumber: "https://fhir.openmedicationcatalog.org/sid/sa/sfda/register-number",
+  organization: "https://fhir.openmedicationcatalog.org/sid/sa/sfda/organization",
+  substance: "https://fhir.openmedicationcatalog.org/sid/sa/sfda/substance",
+  doseForm: "https://fhir.openmedicationcatalog.org/CodeSystem/sa-sfda-dose-form",
+  route: "https://fhir.openmedicationcatalog.org/CodeSystem/sa-sfda-route",
+  packageType: "https://fhir.openmedicationcatalog.org/CodeSystem/sa-sfda-package-type",
+  sizeUnit: "https://fhir.openmedicationcatalog.org/CodeSystem/sa-sfda-size-unit",
+  strengthUnit: "https://fhir.openmedicationcatalog.org/CodeSystem/sa-sfda-strength-unit",
+  authorizationStatus: "https://fhir.openmedicationcatalog.org/CodeSystem/sa-sfda-authorization-status",
+  marketingStatus: "https://fhir.openmedicationcatalog.org/CodeSystem/sa-sfda-marketing-status",
+  ingredientRole: "https://fhir.openmedicationcatalog.org/CodeSystem/sa-sfda-ingredient-role",
+} as const;
+
 export const FDA_SYSTEMS = {
   productNdc: "https://fhir.openmedicationcatalog.org/sid/us/fda/product-ndc",
   productId: "https://fhir.openmedicationcatalog.org/sid/us/fda/product-id",

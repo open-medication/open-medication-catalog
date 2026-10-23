@@ -19,7 +19,6 @@ import {
   type Substance,
   medicinalProductDomain,
 } from "../../canonical/types.js";
-import { fhirCode } from "../../fhir/serialize.js";
 import { canonicalId } from "../../identity.js";
 import { repoPath } from "../../paths.js";
 import {
@@ -31,6 +30,11 @@ import {
   sha256,
   writeDeterministicZip,
 } from "../../security.js";
+import { sourceCodedValue } from "../shared/coded.js";
+import { extractInputZip, findFile, prepareExtractDir } from "../shared/files.js";
+import { splitDelimitedList } from "../shared/lists.js";
+import { compactMeta } from "../shared/meta.js";
+import { splitRatioUnit } from "../shared/units.js";
 import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import { SourceNotYetAvailableError } from "../ch/swissmedic.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
@@ -269,7 +273,7 @@ export class NdcAdapter implements Adapter {
         names,
         domain: medicinalProductDomain("Human"),
         doseForm: coded(FDA_SYSTEMS.doseForm, row.DOSAGEFORMNAME),
-        routes: splitList(row.ROUTENAME)
+        routes: splitDelimitedList(row.ROUTENAME, ";")
           .map((route) => coded(FDA_SYSTEMS.route, route))
           .filter((value): value is CodedValue => Boolean(value)),
         regulatoryStatus: category,
@@ -431,17 +435,7 @@ function ref(snapshot: SourceSnapshot, recordKey: string) {
 }
 
 function coded(system: string, value?: string): CodedValue | undefined {
-  const display = value?.trim();
-  if (!display) return undefined;
-  return { system, code: fhirCode(display), display };
-}
-
-function splitList(value?: string): string[] {
-  if (!value) return [];
-  return value
-    .split(";")
-    .map((part) => part.trim())
-    .filter(Boolean);
+  return sourceCodedValue(system, value);
 }
 
 function isNonHuman(productType: string): boolean {
@@ -494,9 +488,9 @@ function buildIngredients(
   productId: string,
   row: Record<string, string>,
 ): { declarationRows: DeclarationRow[]; ingredients: Ingredient[]; substances: Substance[] } {
-  const names = splitList(row.SUBSTANCENAME);
-  const numbers = splitList(row.ACTIVE_NUMERATOR_STRENGTH);
-  const units = splitList(row.ACTIVE_INGRED_UNIT);
+  const names = splitDelimitedList(row.SUBSTANCENAME, ";");
+  const numbers = splitDelimitedList(row.ACTIVE_NUMERATOR_STRENGTH, ";");
+  const units = splitDelimitedList(row.ACTIVE_INGRED_UNIT, ";");
   const aligned = names.length > 0 && names.length === numbers.length && names.length === units.length;
   const declarationRows: DeclarationRow[] = [];
   const ingredients: Ingredient[] = [];
@@ -565,7 +559,7 @@ function buildIngredients(
 function structuredStrength(number: string, unit: string): Strength {
   const text = [number, unit].filter(Boolean).join(" ");
   if (!/^\d+(?:\.\d+)?$/.test(number)) return { text, structured: false };
-  const split = splitFdaUnit(unit);
+  const split = splitRatioUnit(unit);
   if (!split) {
     const numeratorUnit = coded(FDA_SYSTEMS.strengthUnit, unit);
     if (!numeratorUnit) return { text, structured: false };
@@ -579,25 +573,6 @@ function structuredStrength(number: string, unit: string): Strength {
     text,
     structured: true,
   };
-}
-
-function splitFdaUnit(unit: string): { numeratorUnit: string; denominatorValue: string; denominatorUnit: string } | undefined {
-  const match = unit.match(/^([^/]+)\/(\d+(?:\.\d+)?)?(.*)$/);
-  if (!match) return undefined;
-  const numeratorUnit = match[1]!.trim();
-  if (!numeratorUnit) return undefined;
-  const denominatorValue = match[2] && match[2].length > 0 ? match[2] : "1";
-  const denominatorUnit = match[3]!.trim() || "1";
-  return { numeratorUnit, denominatorValue, denominatorUnit };
-}
-
-function compactMeta(values: Record<string, string | undefined>): Record<string, string> | undefined {
-  const out: Record<string, string> = {};
-  for (const [key, value] of Object.entries(values)) {
-    const trimmed = value?.trim();
-    if (trimmed) out[key] = trimmed;
-  }
-  return Object.keys(out).length ? out : undefined;
 }
 
 function parseTsvWithHeader(text: string): {
@@ -641,9 +616,7 @@ function parseTsvWithHeader(text: string): {
 
 async function loadInput(ctx: AdapterContext, work: string): Promise<FetchResult> {
   const input = ctx.inputPath!;
-  const dest = path.join(work, "extracted");
-  fs.rmSync(dest, { recursive: true, force: true });
-  fs.mkdirSync(dest, { recursive: true });
+  const dest = prepareExtractDir(work);
 
   if (fs.statSync(input).isDirectory()) {
     for (const name of NDC_FILES) {
@@ -666,9 +639,7 @@ async function loadInput(ctx: AdapterContext, work: string): Promise<FetchResult
 
   const buf = fs.readFileSync(input);
   if (fileSignatureOk(buf, "zip")) {
-    await extractZip(buf, dest);
-    const archiveCopy = path.join(work, path.basename(input));
-    fs.copyFileSync(input, archiveCopy);
+    const archiveCopy = await extractInputZip(input, work, dest);
     return {
       files: listedNdc(dest),
       rawArchivePath: archiveCopy,
@@ -692,9 +663,3 @@ function extractDir(fetched: FetchResult): string {
   return path.dirname(first);
 }
 
-function findFile(dir: string, name: string): string | undefined {
-  const direct = path.join(dir, name);
-  if (fs.existsSync(direct)) return direct;
-  const found = fs.readdirSync(dir).find((entry) => entry.toLowerCase() === name.toLowerCase());
-  return found ? path.join(dir, found) : undefined;
-}

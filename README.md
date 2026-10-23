@@ -29,10 +29,10 @@ Landing page: [`https://openmedicationcatalog.org`](https://openmedicationcatalo
 | NO | FEST | planned | NLOD | no |
 | CA | DPD | planned | OGL-Canada | no |
 | US | FDA NDC | production (`us-base`) | public domain (US government work) | no |
-| SA | SFDA | planned | review-required | TBD |
+| SA | SFDA | implemented; local `--source sfda` only | review-required | no |
 | ID | BPOM | planned | review-required (reach out to BPOM) | TBD |
 
-Country notes: [Switzerland](docs/countries/ch.md), [France](docs/countries/fr.md), [Poland](docs/countries/pl.md), [United States](docs/countries/us.md).
+Country notes: [Switzerland](docs/countries/ch.md), [France](docs/countries/fr.md), [Poland](docs/countries/pl.md), [United States](docs/countries/us.md), [Saudi Arabia](docs/countries/sa.md).
 
 A **global** database will be the union of national catalogues (`requiredArtifacts` on a future recipe), not a cross-country ontology.
 
@@ -52,11 +52,11 @@ omc build pl-vet-base      # RPL veterinary (weterynaryjny) only
 omc build us-base          # FDA NDC Directory (finished human drugs)
 ```
 
-`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched` / `ch-vet-base` / `ch-vet-enriched` / `fr-base` / `fr-enriched` / `pl-base` / `pl-vet-base` / `us-base`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata. BAG is not used on veterinary recipes.
+`--source` is for **local/experimental** builds and cannot be published as `ch-base` / `ch-enriched` / `ch-vet-base` / `ch-vet-enriched` / `fr-base` / `fr-enriched` / `pl-base` / `pl-vet-base` / `us-base`. Local BAG SL enrichment is `omc build ch-enriched --enable-bag` (or `OMC_ENABLE_BAG=1`); it writes `manifest.experimentalBag: true` and cannot be `--publish`ed. Official `ch-enriched` stays Swissmedic + Refdata. BAG is not used on veterinary recipes. Saudi Arabia has no public recipe. `omc build SA --source sfda` downloads the workbook linked from the CHI formulary page. `--input <file>` still overrides that download. The build cannot be `--publish`ed.
 
 GTIN provenance: `ch-enriched` / `ch-vet-enriched` carry GTINs from the Refdata join (Swissmedic OGD has no GTIN field — `ch-base` / `ch-vet-base` never carry GTINs). Refdata is a voluntary registration database: measured coverage is **79.7%** of HAM packs and **61.8%** of TAM packs (2026-08 snapshot; revoked packs are never registered). `fr-base` / `fr-enriched` use CIP13, `pl-base` / `pl-vet-base` use the RPL `kodGTIN` (RPL has none for ~10% of packs), and `us-base` carries no GTINs (FDA NDC is not a GTIN). Official builds fail if GTIN coverage drops below the per-recipe floor declared in `artifacts.yaml`.
 
-ATC provenance: CH carries Swissmedic `ATC_CODE` (87.5% of product groups), PL carries RPL `kodATC` (~95% of products). ANSM removed `CIS_ATC_bdpm.txt` from the public BDM v4 file set, so `fr-base` has no ATC; `fr-enriched` adds it from Open Medic (Assurance Maladie) — partial by construction (~61% of products, reimbursed city-delivered medicines only; see [docs/countries/fr.md](docs/countries/fr.md)). US has no ATC source in the NDC directory.
+ATC provenance: CH carries Swissmedic `ATC_CODE` (87.5% of product groups), PL carries RPL `kodATC` (~95% of products). ANSM removed `CIS_ATC_bdpm.txt` from the public BDM v4 file set, so `fr-base` has no ATC; `fr-enriched` adds it from Open Medic (Assurance Maladie) — partial by construction (~61% of products, reimbursed city-delivered medicines only; see [docs/countries/fr.md](docs/countries/fr.md)). US has no ATC source in the NDC directory. SA ATC codes come from the SFDA workbook's `AtcCode1`/`AtcCode2` (WHO ATC identifiers only for whole-cell WHO ATC codes; `NA`, prose labels, and `Q`-prefixed ATCvet codes stay metadata).
 
 ```text
 pnpm install
@@ -67,6 +67,7 @@ pnpm omc build fr-enriched --input bdpm=fixtures/fr/bdpm/BDPM_FIXTURE.zip --inpu
 pnpm omc build pl-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09
 pnpm omc build pl-vet-base --input fixtures/pl/rpl/RPL_FIXTURE.zip --month 2026.09
 pnpm omc build us-base --input fixtures/us/ndc/NDC_FIXTURE.zip --month 2026.09
+pnpm omc build SA --source sfda --input fixtures/sa/sfda/drugs-list.xlsx --month 2026.04
 pnpm omc search output/ch-base/release/database/medication.sqlite Metformin
 ```
 

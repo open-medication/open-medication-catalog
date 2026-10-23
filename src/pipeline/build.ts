@@ -17,6 +17,7 @@ import { BdpmAdapter } from "../adapters/fr/bdpm.js";
 import { OpenMedicAdapter, type OpenMedicParsed } from "../adapters/fr/openmedic.js";
 import { RplAdapter } from "../adapters/pl/rpl.js";
 import { NdcAdapter } from "../adapters/us/ndc.js";
+import { SfdaAdapter } from "../adapters/sa/sfda.js";
 import type { Adapter, AdapterContext, FetchResult } from "../adapters/types.js";
 import { assertValidCatalogue } from "../canonical/validate.js";
 import { repoPath } from "../paths.js";
@@ -64,6 +65,7 @@ const adapters: Record<string, Adapter> = {
   openmedic: new OpenMedicAdapter(),
   rpl: new RplAdapter(),
   ndc: new NdcAdapter(),
+  sfda: new SfdaAdapter(),
 };
 
 export async function build(opts: BuildOptions): Promise<BuildResult> {

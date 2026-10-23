@@ -3,6 +3,7 @@ import path from "node:path";
 import type { Catalogue, MappingCoverageReport, ProductPrice, Reimbursement, SourceSnapshot } from "../../canonical/types.js";
 import { repoPath } from "../../paths.js";
 import { extractZip, fetchBinary, sha256 } from "../../security.js";
+import { walkFiles } from "../shared/files.js";
 import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
 
@@ -404,16 +405,6 @@ export function loadFhirResources(files: string[]): FhirResource[] {
     } else if (doc.resourceType) {
       out.push(doc);
     }
-  }
-  return out;
-}
-
-function walkFiles(dir: string): string[] {
-  const out: string[] = [];
-  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-    const p = path.join(dir, ent.name);
-    if (ent.isDirectory()) out.push(...walkFiles(p));
-    else out.push(p);
   }
   return out;
 }

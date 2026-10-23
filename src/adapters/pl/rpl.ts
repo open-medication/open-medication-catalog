@@ -21,12 +21,10 @@ import {
   type SourceSnapshot,
   type Substance,
 } from "../../canonical/types.js";
-import { fhirCode } from "../../fhir/serialize.js";
 import { canonicalId } from "../../identity.js";
 import { repoPath } from "../../paths.js";
 import {
   HttpStatusError,
-  extractZip,
   fetchBinary,
   fileSignatureOk,
   httpExists,
@@ -34,6 +32,10 @@ import {
   writeDeterministicZip,
 } from "../../security.js";
 import { asArray, optionalText, parseXmlFile, text } from "../../xml.js";
+import { sourceCodedValue } from "../shared/coded.js";
+import { extractInputZip, prepareExtractDir } from "../shared/files.js";
+import { compactMeta } from "../shared/meta.js";
+import { createOrganizationUpserter } from "../shared/organizations.js";
 import { loadSourceDescriptor, metadataFromDescriptor, snapshotTerms } from "../descriptor.js";
 import { SourceNotYetAvailableError } from "../ch/swissmedic.js";
 import type { Adapter, AdapterContext, AdapterMetadata, FetchResult, PartialCatalogue } from "../types.js";
@@ -152,6 +154,16 @@ export class RplAdapter implements Adapter {
     const authByKey = new Map<string, Authorization>();
     const substances: Substance[] = [];
     const substanceIds = new Set<string>();
+    const upsertOrg = createOrganizationUpserter({
+      jurisdiction: JURISDICTION,
+      identityAuthority: AUTHORITY,
+      organizationSystem: RPL_SYSTEMS.organization,
+      snapshot,
+      sourceRef: ref,
+      mapKey: (name) => authorityKey([name]),
+      authorityKey: (name) => authorityKey([name]),
+      recordKey: (name) => `${RplXml.marketingAuthorisationHolder}:${name}`,
+    });
 
     for (const row of data.products) {
       const productId = attr(row, RplXml.id);
@@ -160,7 +172,9 @@ export class RplAdapter implements Adapter {
       if (!domain || domain.code !== wanted) continue;
 
       const holderName = attr(row, RplXml.marketingAuthorisationHolder);
-      const holder = holderName ? upsertOrg(orgByKey, organizations, holderName, snapshot) : undefined;
+      const holder = holderName
+        ? upsertOrg(orgByKey, organizations, holderName, "marketing-authorisation-holder")
+        : undefined;
       const maNumber = attr(row, RplXml.authorisationNumber);
       const authKey = maNumber || productId;
       const mpId = canonicalId({
@@ -365,9 +379,7 @@ function ref(snapshot: SourceSnapshot, recordKey: string) {
 }
 
 function coded(system: string, value?: string): CodedValue | undefined {
-  const display = value?.trim();
-  if (!display) return undefined;
-  return { system, code: fhirCode(display), display };
+  return sourceCodedValue(system, value);
 }
 
 function attr(node: Record<string, unknown>, name: string): string | undefined {
@@ -533,35 +545,6 @@ function listedStatus(): CodedValue {
   return coded(RPL_SYSTEMS.regulatoryStatus, RplValue.active)!;
 }
 
-function upsertOrg(
-  orgByKey: Map<string, Organization>,
-  organizations: Organization[],
-  name: string,
-  snapshot: SourceSnapshot,
-): Organization {
-  const orgKey = authorityKey([name]);
-  const existing = orgByKey.get(orgKey);
-  if (existing) return existing;
-  const org: Organization = {
-    id: canonicalId({
-      jurisdiction: JURISDICTION,
-      identityAuthority: AUTHORITY,
-      entityType: "Organization",
-      authorityKey: orgKey,
-    }),
-    jurisdiction: JURISDICTION,
-    identityAuthority: AUTHORITY,
-    authorityKey: orgKey,
-    name,
-    role: "marketing-authorisation-holder",
-    identifiers: [{ system: RPL_SYSTEMS.organization, value: name }],
-    sourceRecords: [ref(snapshot, `${RplXml.marketingAuthorisationHolder}:${name}`)],
-  };
-  orgByKey.set(orgKey, org);
-  organizations.push(org);
-  return org;
-}
-
 function buildComposition(
   snapshot: SourceSnapshot,
   productId: string,
@@ -655,15 +638,6 @@ function packConsentMeta(pack: Record<string, unknown>): Record<string, string |
   };
 }
 
-function compactMeta(values: Record<string, string | undefined>): Record<string, string> | undefined {
-  const out: Record<string, string> = {};
-  for (const [k, v] of Object.entries(values)) {
-    const t = v?.trim();
-    if (t) out[k] = t;
-  }
-  return Object.keys(out).length ? out : undefined;
-}
-
 function findRoot(doc: Record<string, unknown>): Record<string, unknown> {
   const root = doc[RplXml.medicinalProducts];
   if (root && typeof root === "object") {
@@ -696,9 +670,7 @@ function countField(seen: Map<string, number>, name: string): void {
 
 async function loadInput(ctx: AdapterContext, work: string): Promise<FetchResult> {
   const input = ctx.inputPath!;
-  const dest = path.join(work, "extracted");
-  fs.rmSync(dest, { recursive: true, force: true });
-  fs.mkdirSync(dest, { recursive: true });
+  const dest = prepareExtractDir(work);
 
   if (fs.statSync(input).isDirectory()) {
     const found = findOverall(input);
@@ -716,11 +688,9 @@ async function loadInput(ctx: AdapterContext, work: string): Promise<FetchResult
 
   const buf = fs.readFileSync(input);
   if (fileSignatureOk(buf, "zip")) {
-    await extractZip(buf, dest);
+    const archiveCopy = await extractInputZip(input, work, dest);
     const found = findOverall(dest) ?? findOverallNested(dest);
     if (!found) throw new Error(`Missing RPL file after extract: ${RPL_OVERALL_XML}`);
-    const archiveCopy = path.join(work, path.basename(input));
-    fs.copyFileSync(input, archiveCopy);
     return {
       files: [found],
       rawArchivePath: archiveCopy,
